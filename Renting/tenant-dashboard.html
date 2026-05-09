@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tenant Dashboard — RentEase</title>
+  <link rel="stylesheet" href="css/index.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <header class="navbar" id="navbar"></header>
+
+  <div class="dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Menu</div>
+        <nav class="sidebar-nav">
+          <a class="sidebar-link active" onclick="showSection('overview')"><span>📊</span> Overview</a>
+          <a class="sidebar-link" onclick="showSection('bookings')"><span>📋</span> My Bookings</a>
+          <a class="sidebar-link" onclick="showSection('reviews')"><span>⭐</span> My Reviews</a>
+          <a class="sidebar-link" onclick="showSection('profile')"><span>👤</span> Profile</a>
+        </nav>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Actions</div>
+        <nav class="sidebar-nav">
+          <a class="sidebar-link" href="properties.html"><span>🔍</span> Find Property</a>
+          <a class="sidebar-link" onclick="logout()" style="color:var(--danger)"><span>🚪</span> Logout</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dashboard-content">
+      <div id="sectionOverview">
+        <div class="dashboard-header">
+          <h1 id="welcomeMsg">Welcome back!</h1>
+          <p>Here's an overview of your rental activity</p>
+        </div>
+        <div class="grid grid-4 gap-6 mb-8" id="statsGrid"></div>
+        <h2 style="margin-bottom:var(--space-4)">Recent Bookings</h2>
+        <div class="table-wrapper" id="recentBookings"></div>
+      </div>
+
+      <div id="sectionBookings" class="hidden">
+        <div class="dashboard-header">
+          <h1>My Bookings</h1>
+          <p>View and manage all your bookings</p>
+        </div>
+        <div class="table-wrapper" id="allBookings"></div>
+      </div>
+
+      <div id="sectionReviews" class="hidden">
+        <div class="dashboard-header">
+          <h1>My Reviews</h1>
+          <p>Reviews you've written for properties</p>
+        </div>
+        <div class="reviews-list" id="myReviews"></div>
+      </div>
+
+      <div id="sectionProfile" class="hidden">
+        <div class="dashboard-header">
+          <h1>My Profile</h1>
+          <p>Update your personal information</p>
+        </div>
+        <div class="card" style="max-width:600px;padding:var(--space-8)">
+          <form onsubmit="saveProfile(event)">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" id="profName" class="form-input">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" id="profEmail" class="form-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="tel" id="profPhone" class="form-input">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const user = requireAuth('tenant');
+    if (user) {
+      renderNavbar('tenant');
+      document.getElementById('welcomeMsg').textContent = `Welcome back, ${user.name}! 👋`;
+
+      async function initDashboard() {
+        await initData();
+        
+        // Stats
+        const bookings = getTenantBookings(user.id);
+        const reviews = getTenantReviews(user.id);
+        const active = bookings.filter(b => b.status === 'confirmed').length;
+        const pending = bookings.filter(b => b.status === 'pending').length;
+
+        document.getElementById('statsGrid').innerHTML = `
+          <div class="stat-card"><div class="stat-icon green">📋</div><div class="stat-info"><h3>${bookings.length}</h3><p>Total Bookings</p></div></div>
+          <div class="stat-card"><div class="stat-icon blue">✅</div><div class="stat-info"><h3>${active}</h3><p>Active</p></div></div>
+          <div class="stat-card"><div class="stat-card"><div class="stat-icon amber">⏳</div><div class="stat-info"><h3>${pending}</h3><p>Pending</p></div></div>
+          <div class="stat-card"><div class="stat-icon purple">⭐</div><div class="stat-info"><h3>${reviews.length}</h3><p>Reviews</p></div></div>
+        `;
+
+        // Bookings table
+        function renderBookingsTable(list, containerId) {
+          document.getElementById(containerId).innerHTML = list.length === 0
+            ? '<div class="empty-state"><h3>No bookings yet</h3><p>Browse properties to make your first booking!</p><a href="properties.html" class="btn btn-primary">Find Property</a></div>'
+            : `<table class="data-table">
+                <thead><tr><th>Property</th><th>Room</th><th>Check In</th><th>Check Out</th><th>Status</th></tr></thead>
+                <tbody>${list.map(b => {
+                  const room = getRoom(b.Room_idRoom);
+                  const prop = getProperty(room ? room.Property_idProperty : 1);
+                  return `<tr>
+                    <td><a href="property-detail.html?id=${prop ? prop.idProperty : 1}" style="color:var(--primary-light)">${prop ? prop.title : 'Property'}</a></td>
+                    <td>${room ? room.type : 'Room'} — $${room ? room.price : 0}/mo</td>
+                    <td>${formatDate(b.check_in)}</td>
+                    <td>${formatDate(b.check_out)}</td>
+                    <td>${getStatusBadge(b.status)}</td>
+                  </tr>`;
+                }).join('')}</tbody>
+              </table>`;
+        }
+        renderBookingsTable(bookings.slice(0, 5), 'recentBookings');
+        renderBookingsTable(bookings, 'allBookings');
+
+        // Reviews
+        const myReviewsEl = document.getElementById('myReviews');
+        myReviewsEl.innerHTML = reviews.length === 0
+          ? '<div class="empty-state"><h3>No reviews yet</h3><p>Book a property and share your experience!</p></div>'
+          : reviews.map(r => {
+              const prop = getProperty(r.Property_idProperty);
+              return `<div class="review-card">
+                <div class="review-header">
+                  <div class="review-avatar">${user.name.charAt(0)}</div>
+                  <div class="review-meta"><h4>${prop ? prop.title : 'Property'}</h4><span>${prop ? prop.location : 'Location'}</span></div>
+                  <div style="margin-left:auto">${generateStars(r.rating)}</div>
+                </div>
+                <p class="review-body">${r.comment}</p>
+              </div>`;
+            }).join('');
+
+        // Profile
+        document.getElementById('profName').value = user.name;
+        document.getElementById('profEmail').value = user.email;
+        document.getElementById('profPhone').value = user.phone || '';
+      }
+      initDashboard();
+    }
+
+    function showSection(name) {
+      document.querySelectorAll('[id^="section"]').forEach(el => el.classList.add('hidden'));
+      document.getElementById('section' + name.charAt(0).toUpperCase() + name.slice(1)).classList.remove('hidden');
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      event.target.closest('.sidebar-link').classList.add('active');
+    }
+
+    function saveProfile(e) {
+      e.preventDefault();
+      const u = getCurrentUser();
+      u.name = document.getElementById('profName').value;
+      u.email = document.getElementById('profEmail').value;
+      u.phone = document.getElementById('profPhone').value;
+      setCurrentUser(u);
+      showToast('Profile updated successfully!', 'success');
+    }
+  </script>
+</body>
+</html>

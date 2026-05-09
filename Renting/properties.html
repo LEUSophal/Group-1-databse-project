@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Properties — RentEase</title>
+  <link rel="stylesheet" href="css/index.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <header class="navbar" id="navbar"></header>
+
+  <main style="padding-top:calc(var(--nav-height) + var(--space-8));min-height:100vh">
+    <div class="container">
+      <div class="section-header" style="margin-bottom:var(--space-6)">
+        <span class="section-label">Browse</span>
+        <h1>Explore Properties</h1>
+        <p>Find your next home from our curated selection of rental properties</p>
+      </div>
+
+      <div class="filter-bar" id="filterBar">
+        <input type="text" class="form-input" id="searchInput" placeholder="🔍 Search by name or location..." style="max-width:300px" oninput="filterProperties()">
+        <select class="form-input form-select" id="filterLocation" onchange="filterProperties()">
+          <option value="">All Locations</option>
+          <option value="Toul Kork">Toul Kork</option>
+          <option value="BKK1">BKK1</option>
+          <option value="Sen Sok">Sen Sok</option>
+          <option value="Daun Penh">Daun Penh</option>
+          <option value="Chamkar Mon">Chamkar Mon</option>
+          <option value="Chroy Changvar">Chroy Changvar</option>
+        </select>
+        <select class="form-input form-select" id="filterType" onchange="filterProperties()">
+          <option value="">All Room Types</option>
+          <option value="Studio">Studio</option>
+          <option value="Single">Single</option>
+          <option value="Double">Double</option>
+          <option value="Suite">Suite</option>
+        </select>
+        <select class="form-input form-select sort-select" id="sortSelect" onchange="filterProperties()">
+          <option value="default">Sort By</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="rating">Highest Rated</option>
+        </select>
+      </div>
+
+      <p class="search-results-info" id="resultsInfo"></p>
+      <div class="properties-grid" id="propertiesGrid"></div>
+    </div>
+  </main>
+
+  <footer class="footer" id="footer"></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    renderNavbar('properties');
+    renderFooter();
+
+    function filterProperties() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const loc = document.getElementById('filterLocation').value;
+      const type = document.getElementById('filterType').value;
+      const sort = document.getElementById('sortSelect').value;
+      let props = [...MOCK_DATA.properties];
+      if (search) props = props.filter(p => p.title.toLowerCase().includes(search) || p.location.toLowerCase().includes(search));
+      if (loc) props = props.filter(p => p.location.includes(loc));
+      if (type) props = props.filter(p => { const rooms = getPropertyRooms(p.idProperty); return rooms.some(r => r.type === type); });
+      if (sort === 'price-low') props.sort((a, b) => getPropertyMinPrice(a.idProperty) - getPropertyMinPrice(b.idProperty));
+      else if (sort === 'price-high') props.sort((a, b) => getPropertyMinPrice(b.idProperty) - getPropertyMinPrice(a.idProperty));
+      else if (sort === 'rating') props.sort((a, b) => getPropertyAvgRating(b.idProperty) - getPropertyAvgRating(a.idProperty));
+      const grid = document.getElementById('propertiesGrid');
+      const info = document.getElementById('resultsInfo');
+      info.textContent = `Showing ${props.length} propert${props.length !== 1 ? 'ies' : 'y'}`;
+      if (props.length === 0) { grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><h3>No properties found</h3><p>Try adjusting your filters</p></div>`; }
+      else { grid.innerHTML = props.map(p => renderPropertyCard(p)).join(''); }
+    }
+
+    async function initializePage() { await initData(); filterProperties(); }
+    initializePage();
+  </script>
+</body>
+</html>

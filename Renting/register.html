@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — RentEase</title>
+  <link rel="stylesheet" href="css/index.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card animate-scale-in">
+      <a href="index.html" class="nav-logo" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:var(--space-8);font-size:var(--text-2xl);font-family:var(--font-heading);font-weight:800;color:var(--text-primary);text-decoration:none">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="2" y="8" width="12" height="16" rx="2" fill="var(--primary)"/><rect x="18" y="4" width="12" height="20" rx="2" fill="var(--primary)" opacity=".6"/></svg>
+        Rent<span style="color:var(--primary)">Ease</span>
+      </a>
+      <h2>Create Account</h2>
+      <p class="auth-subtitle">Join RentEase as a tenant or landlord</p>
+
+      <div class="role-tabs">
+        <button class="role-tab active" data-role="tenant">🏠 Tenant</button>
+        <button class="role-tab" data-role="landlord">🔑 Landlord</button>
+      </div>
+
+      <form id="registerForm" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label class="form-label" for="regName">Full Name</label>
+          <input type="text" id="regName" class="form-input" placeholder="Enter your full name" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="regEmail">Email</label>
+            <input type="email" id="regEmail" class="form-input" placeholder="you@email.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="regPhone">Phone</label>
+            <input type="tel" id="regPhone" class="form-input" placeholder="012 345 678" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="regPassword">Password</label>
+            <input type="password" id="regPassword" class="form-input" placeholder="Min 6 characters" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="regConfirm">Confirm Password</label>
+            <input type="password" id="regConfirm" class="form-input" placeholder="Repeat password" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;margin-top:var(--space-2)">Create Account</button>
+      </form>
+      <p class="auth-footer">Already have an account? <a href="login.html">Sign in</a></p>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>initRoleTabs();</script>
+</body>
+</html>

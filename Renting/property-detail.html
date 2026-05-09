@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Property Detail — RentEase</title>
+  <link rel="stylesheet" href="css/index.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <header class="navbar" id="navbar"></header>
+
+  <main class="detail-page">
+    <div class="container" id="detailContent">
+      <p style="padding:var(--space-16) 0;text-align:center;color:var(--text-tertiary)">Loading...</p>
+    </div>
+  </main>
+
+  <!-- Booking Modal -->
+  <div class="modal-backdrop" id="bookingModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Book Room</h3>
+        <button class="modal-close" onclick="closeBookingModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="bookingRoomInfo" style="margin-bottom:var(--space-4)"></p>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Check-in Date</label>
+            <input type="date" id="bookCheckIn" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Check-out Date</label>
+            <input type="date" id="bookCheckOut" class="form-input" required>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeBookingModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmBooking()">Confirm Booking</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <button class="lightbox-close">&times;</button>
+    <img id="lightboxImg" src="" alt="Full size image">
+  </div>
+
+  <footer class="footer" id="footer"></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    renderNavbar('properties');
+    renderFooter();
+
+    const params = new URLSearchParams(window.location.search);
+    const propertyId = parseInt(params.get('id')) || 1;
+    let property = null;
+    let selectedRoomId = null;
+
+    async function initPage() {
+      await initData();
+      property = getProperty(propertyId);
+      renderDetail();
+    }
+
+    function renderDetail() {
+      if (!property) {
+        document.getElementById('detailContent').innerHTML = '<div class="empty-state"><h3>Property not found</h3><a href="properties.html" class="btn btn-primary">Back to Properties</a></div>';
+        return;
+      }
+
+      const rooms = getPropertyRooms(propertyId);
+      const reviews = getPropertyReviews(propertyId);
+      const landlord = getLandlord(property.Landlord_idLandlord);
+      const avgRating = getPropertyAvgRating(propertyId);
+      const allImages = [property.image];
+      rooms.forEach(r => getRoomImages(r.idRoom).forEach(img => allImages.push(img.image_url)));
+
+      document.title = `${property.title} — RentEase`;
+
+      document.getElementById('detailContent').innerHTML = `
+        <!-- Gallery -->
+        <div class="detail-gallery">
+          <div class="detail-gallery-main">
+            <img src="${allImages[0]}" alt="${property.title}" onclick="openLightbox('${allImages[0]}')" onerror="this.src='https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=500&fit=crop'">
+          </div>
+          <div class="detail-gallery-side">
+            <img src="${allImages[1] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=250&fit=crop'}" alt="Room view" onclick="openLightbox(this.src)">
+            <img src="${allImages[2] || 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&h=250&fit=crop'}" alt="Room view" onclick="openLightbox(this.src)">
+          </div>
+        </div>
+
+        <div class="detail-info-grid">
+          <!-- Main Content -->
+          <div>
+            <div class="detail-header">
+              <h1>${property.title}</h1>
+              <div class="flex items-center gap-4" style="flex-wrap:wrap">
+                <div class="card-location">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  ${property.location}
+                </div>
+                <div class="card-rating">${generateStars(Math.round(avgRating))} <span style="font-size:var(--text-sm);color:var(--text-tertiary);margin-left:4px">${avgRating} (${reviews.length} reviews)</span></div>
+              </div>
+              <p style="margin-top:var(--space-4)">${property.description}</p>
+            </div>
+
+            <!-- Rooms -->
+            <div class="detail-section">
+              <h2>Available Rooms (${rooms.length})</h2>
+              <div class="rooms-list">
+                ${rooms.map(room => {
+                  const facilities = getRoomFacilities(room.idRoom);
+                  const images = getRoomImages(room.idRoom);
+                  const imgSrc = images.length > 0 ? images[0].image_url : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300&h=200&fit=crop';
+                  return `
+                    <div class="room-card">
+                      <img src="${imgSrc}" alt="${room.type} room" class="room-card-img" onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300&h=200&fit=crop'">
+                      <div class="room-card-info">
+                        <h4>${room.type} Room</h4>
+                        <div class="facilities-grid" style="margin:var(--space-2) 0">
+                          ${facilities.map(f => `<span class="facility-tag">${f.icon} ${f.name}</span>`).join('')}
+                        </div>
+                        <div class="room-card-actions">
+                          <div class="card-price">$${room.price}<span>/mo</span></div>
+                          <div class="flex items-center gap-2">
+                            ${getStatusBadge(room.status)}
+                            ${room.status === 'available' ? `<button class="btn btn-primary btn-sm" onclick="openBookingModal(${room.idRoom})">Book Now</button>` : ''}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- Reviews -->
+            <div class="detail-section">
+              <h2>Reviews (${reviews.length})</h2>
+              <div class="reviews-list">
+                ${reviews.length === 0 ? '<p style="color:var(--text-tertiary)">No reviews yet.</p>' :
+                  reviews.map(r => {
+                    const tenant = getTenant(r.Tenant_idTenant);
+                    return `
+                      <div class="review-card">
+                        <div class="review-header">
+                          <div class="review-avatar">${tenant.full_name.charAt(0)}</div>
+                          <div class="review-meta">
+                            <h4>${tenant.full_name}</h4>
+                            <span>Verified Tenant</span>
+                          </div>
+                          <div style="margin-left:auto">${generateStars(r.rating)}</div>
+                        </div>
+                        <p class="review-body">${r.comment}</p>
+                      </div>
+                    `;
+                  }).join('')
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="detail-sidebar">
+            <div class="booking-card">
+              <h3>Property Info</h3>
+              <div style="display:flex;flex-direction:column;gap:var(--space-4);margin-top:var(--space-4)">
+                <div class="flex justify-between"><span class="text-secondary-color">Landlord</span><strong>${landlord.name}</strong></div>
+                <div class="flex justify-between"><span class="text-secondary-color">Rooms</span><strong>${rooms.length}</strong></div>
+                <div class="flex justify-between"><span class="text-secondary-color">Available</span><strong>${rooms.filter(r=>r.status==='available').length}</strong></div>
+                <div class="flex justify-between"><span class="text-secondary-color">Price From</span><strong class="text-primary-color">$${getPropertyMinPrice(propertyId)}/mo</strong></div>
+                <div class="flex justify-between"><span class="text-secondary-color">Rating</span><strong>${avgRating} ⭐</strong></div>
+              </div>
+              <a href="properties.html" class="btn btn-outline" style="width:100%;margin-top:var(--space-6)">← Back to Properties</a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function openBookingModal(roomId) {
+      const user = getCurrentUser();
+      if (!user) { showToast('Please login to book a room', 'warning'); setTimeout(() => location.href='login.html', 1000); return; }
+      if (user.role !== 'tenant') { showToast('Only tenants can book rooms', 'error'); return; }
+      selectedRoomId = roomId;
+      const room = getRoom(roomId);
+      document.getElementById('bookingRoomInfo').innerHTML = `<strong>${room.type} Room</strong> — <span class="text-primary-color">$${room.price}/month</span>`;
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('bookCheckIn').min = today;
+      document.getElementById('bookCheckIn').value = today;
+      document.getElementById('bookingModal').classList.add('active');
+    }
+
+    function closeBookingModal() {
+      document.getElementById('bookingModal').classList.remove('active');
+      selectedRoomId = null;
+    }
+
+    async function confirmBooking() {
+      const checkIn = document.getElementById('bookCheckIn').value;
+      const checkOut = document.getElementById('bookCheckOut').value;
+      if (!checkIn || !checkOut) { showToast('Please select both dates', 'error'); return; }
+      if (checkOut <= checkIn) { showToast('Check-out must be after check-in', 'error'); return; }
+      const user = getCurrentUser();
+      
+      try {
+        await apiAddBooking({
+          check_in: checkIn, 
+          check_out: checkOut,
+          Tenant_idTenant: user.id,
+          Room_idRoom: selectedRoomId
+        });
+        closeBookingModal();
+        showToast('Booking submitted! Waiting for landlord confirmation.', 'success');
+      } catch (err) {
+        showToast('Failed to submit booking', 'error');
+      }
+    }
+
+    function openLightbox(src) { document.getElementById('lightboxImg').src = src; document.getElementById('lightbox').classList.add('active'); }
+    function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
+
+    initPage();
+  </script>
+</body>
+</html>

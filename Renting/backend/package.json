@@ -1,0 +1,17 @@
+{
+  "name": "renting-backend",
+  "version": "1.0.0",
+  "description": "RentEase backend with Node.js and MySQL",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "init-db": "node init-db.js",
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "mysql2": "^3.11.0"
+  }
+}
