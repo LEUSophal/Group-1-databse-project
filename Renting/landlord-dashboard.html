@@ -229,18 +229,25 @@
       event.target.closest('.sidebar-link')?.classList.add('active');
     }
 
-    function updateBooking(bookingId, newStatus) {
-      const booking = MOCK_DATA.bookings.find(b => b.idBooking === bookingId);
-      if (booking) {
-        booking.status = newStatus;
-        showToast(`Booking ${newStatus}!`, newStatus === 'confirmed' ? 'success' : 'warning');
-        const allBookings = getLandlordBookings(user.id);
-        renderLandlordBookings(allBookings.slice(0, 5), 'recentBookings');
-        renderLandlordBookings(allBookings, 'allBookingsTable');
+    async function updateBooking(bookingId, newStatus) {
+      try {
+        const res = await apiUpdateBooking(bookingId, newStatus);
+        if (res.success) {
+          await initData();
+          showToast(`Booking ${newStatus}!`, newStatus === 'confirmed' ? 'success' : 'warning');
+          const allBookings = getLandlordBookings(user.id);
+          renderLandlordBookings(allBookings.slice(0, 5), 'recentBookings');
+          renderLandlordBookings(allBookings, 'allBookingsTable');
+        } else {
+          showToast('Failed to update booking', 'error');
+        }
+      } catch (err) {
+        showToast('Error updating database', 'error');
+        console.error(err);
       }
     }
 
-    function addProperty(e) {
+    async function addProperty(e) {
       e.preventDefault();
       const title = document.getElementById('propTitle').value;
       const location = document.getElementById('propLocation').value;
@@ -248,36 +255,48 @@
       const roomType = document.getElementById('roomType').value;
       const roomPrice = parseInt(document.getElementById('roomPrice').value) || 200;
 
-      const newPropId = MOCK_DATA.properties.length + 1;
-      MOCK_DATA.properties.push({
-        idProperty: newPropId, title, location, description: desc,
-        Landlord_idLandlord: user.id, Admin_idAdmin: 1,
-        image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&h=400&fit=crop'
-      });
-      MOCK_DATA.rooms.push({
-        idRoom: MOCK_DATA.rooms.length + 1, type: roomType, price: roomPrice,
-        status: 'available', Property_idProperty: newPropId, Admin_idAdmin: 1
-      });
+      try {
+        const propRes = await apiAddProperty({
+          title, location, description: desc,
+          Landlord_idLandlord: user.id, Admin_idAdmin: 1,
+          image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&h=400&fit=crop'
+        });
 
-      showToast('Property added successfully!', 'success');
-      e.target.reset();
-      showSection('properties');
-      // Re-render properties
-      const myProps = getLandlordProperties(user.id);
-      document.getElementById('myProperties').innerHTML = myProps.map(p => {
-        const rooms = getPropertyRooms(p.idProperty);
-        return `<div class="card" style="cursor:pointer">
-          <div class="card-img-wrapper" onclick="location.href='property-detail.html?id=${p.idProperty}'"><img src="${p.image}" alt="${p.title}" class="card-img" onerror="this.src='https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&h=400&fit=crop'"><span class="card-badge badge-info">${rooms.length} rooms</span></div>
-          <div class="card-body">
-            <h3 class="card-title" onclick="location.href='property-detail.html?id=${p.idProperty}'">${p.title}</h3>
-            <div class="card-location">${p.location}</div>
-            <div class="card-meta" style="margin-top:var(--space-3)">
-              <div class="card-price">$${getPropertyMinPrice(p.idProperty)}<span>/mo</span></div>
-              <button class="btn btn-danger btn-sm" onclick="deleteProperty(${p.idProperty}, event)">Delete</button>
-            </div>
-          </div>
-        </div>`;
-      }).join('');
+        if (propRes.success) {
+          await apiAddRoom({
+            type: roomType, price: roomPrice, status: 'available',
+            Property_idProperty: propRes.idProperty, Admin_idAdmin: 1
+          });
+
+          await initData(); // Refresh MOCK_DATA from DB
+
+          showToast('Property added successfully!', 'success');
+          e.target.reset();
+          showSection('properties');
+          
+          // Re-render properties
+          const myProps = getLandlordProperties(user.id);
+          document.getElementById('myProperties').innerHTML = myProps.map(p => {
+            const rooms = getPropertyRooms(p.idProperty);
+            return `<div class="card" style="cursor:pointer">
+              <div class="card-img-wrapper" onclick="location.href='property-detail.html?id=${p.idProperty}'"><img src="${p.image}" alt="${p.title}" class="card-img" onerror="this.src='https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&h=400&fit=crop'"><span class="card-badge badge-info">${rooms.length} rooms</span></div>
+              <div class="card-body">
+                <h3 class="card-title" onclick="location.href='property-detail.html?id=${p.idProperty}'">${p.title}</h3>
+                <div class="card-location">${p.location}</div>
+                <div class="card-meta" style="margin-top:var(--space-3)">
+                  <div class="card-price">$${getPropertyMinPrice(p.idProperty)}<span>/mo</span></div>
+                  <button class="btn btn-danger btn-sm" onclick="deleteProperty(${p.idProperty}, event)">Delete</button>
+                </div>
+              </div>
+            </div>`;
+          }).join('');
+        } else {
+          showToast('Failed to add property', 'error');
+        }
+      } catch (err) {
+        showToast('Error saving to database', 'error');
+        console.error(err);
+      }
     }
 
     async function deleteProperty(id, event) {
