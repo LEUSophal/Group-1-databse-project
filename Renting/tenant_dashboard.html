@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoomNest — Tenant Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/dashboard-dark.css">
+</head>
+<body>
+
+  <div class="dashboard-wrapper">
+    <!-- TOP NAVBAR -->
+    <nav class="top-nav">
+      <a class="logo-wrap" href="index.html" style="margin-bottom: 0;">
+        <div class="logo-icon">RN</div>
+        <span class="logo-text">RoomNest</span>
+      </a>
+      <div class="top-nav-center">
+        <a href="index.html" class="top-nav-link">Home</a>
+        <a href="index.html" class="top-nav-link">Properties</a>
+        <a href="#" class="top-nav-link active">My Dashboard</a>
+      </div>
+      <div class="user-profile">
+        <button class="btn-theme" onclick="toggleTheme()" id="themeToggle">🌓</button>
+        <div class="user-avatar" id="topAvatar">U</div>
+        <span class="user-name" id="topName">User Name</span>
+      </div>
+    </nav>
+
+    <div class="dashboard-main">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="nav-section">
+          <div class="nav-label">Menu</div>
+          <a class="nav-item active" onclick="showPage('overview', this)">
+            <span class="icon">📊</span>
+            <span>Overview</span>
+          </a>
+          <a class="nav-item" onclick="showPage('bookings', this)">
+            <span class="icon">📋</span>
+            <span>My Bookings</span>
+          </a>
+          <a class="nav-item" onclick="showPage('reviews', this)">
+            <span class="icon">⭐</span>
+            <span>My Reviews</span>
+          </a>
+          <a class="nav-item" onclick="showPage('profile', this)">
+            <span class="icon">👤</span>
+            <span>Profile</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-label">Actions</div>
+          <a class="nav-item" href="index.html">
+            <span class="icon">🔍</span>
+            <span>Find Property</span>
+          </a>
+          <a class="nav-item logout-item" onclick="logoutUser()">
+            <span class="icon">🚪</span>
+            <span>Logout</span>
+          </a>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="main-content">
+        <div class="header-top">
+          <div class="welcome-section">
+            <h1 id="welcomeTitle">Welcome back! 👋</h1>
+            <p>Here's an overview of your rental activity</p>
+          </div>
+        </div>
+
+      <!-- OVERVIEW SECTION -->
+      <section id="page-overview" class="page-section active">
+        <div class="stats-grid" id="statsGrid">
+          <!-- Stat cards will be injected here -->
+          <div class="stat-card">
+            <div class="stat-icon-wrap stat-blue">📋</div>
+            <div>
+              <div class="stat-value" id="stat-total">0</div>
+              <div class="stat-label">Total Bookings</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon-wrap stat-green">✅</div>
+            <div>
+              <div class="stat-value" id="stat-active">0</div>
+              <div class="stat-label">Active</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon-wrap stat-amber">⏳</div>
+            <div>
+              <div class="stat-value" id="stat-pending">0</div>
+              <div class="stat-label">Pending</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon-wrap stat-purple">⭐</div>
+            <div>
+              <div class="stat-value" id="stat-reviews">0</div>
+              <div class="stat-label">Reviews</div>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="section-title">Recent Bookings</h2>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>Room</th>
+                <th>Landlord</th>
+                <th>Check In</th>
+                <th>Check Out</th>
+                <th>Status</th>
+                <th>Contact</th>
+              </tr>
+            </thead>
+            <tbody id="recentBookingsList">
+              <!-- Booking rows injected here -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- BOOKINGS SECTION -->
+      <section id="page-bookings" class="page-section">
+        <h2 class="section-title">All My Bookings</h2>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>Room</th>
+                <th>Dates</th>
+                <th>Status</th>
+                <th>Contact Landlord</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="allBookingsList">
+              <!-- All bookings injected here -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- REVIEW MODAL -->
+      <div id="reviewModal" class="modal-overlay">
+        <div class="modal">
+          <h2 style="margin-bottom:10px;">Leave a Review</h2>
+          <p id="reviewPropName" style="color:var(--text-muted); margin-bottom:20px;">Property Name</p>
+          <div class="form-group">
+            <label>Rating (1-5 Stars)</label>
+            <div class="star-rating-input" style="font-size:24px; cursor:pointer; color:#fbbf24; margin-bottom:15px;">
+              <span onclick="setRating(1)">★</span><span onclick="setRating(2)">★</span><span onclick="setRating(3)">★</span><span onclick="setRating(4)">★</span><span onclick="setRating(5)">★</span>
+            </div>
+            <input type="hidden" id="reviewRating" value="5">
+          </div>
+          <div class="form-group">
+            <label>Your Feedback</label>
+            <textarea id="reviewComment" rows="4" style="width:100%; background:var(--dash-bg); border:1px solid var(--border); color:var(--text-main); padding:10px; border-radius:10px; resize:none;" placeholder="Tell us about your experience..."></textarea>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn btn-ghost" style="flex:1" onclick="closeModal('reviewModal')">Cancel</button>
+            <button class="btn btn-primary" style="flex:1" onclick="submitReview()">Submit Review</button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- REVIEWS SECTION -->
+      <section id="page-reviews" class="page-section">
+        <h2 class="section-title">My Reviews</h2>
+        <div id="myReviewsList">
+          <!-- Reviews injected here -->
+        </div>
+      </section>
+
+      <!-- PROFILE SECTION -->
+      <section id="page-profile" class="page-section">
+        <h2 class="section-title">My Profile</h2>
+        <div class="table-card" style="padding: 30px; max-width: 600px;">
+          <!-- Simplified profile form -->
+          <p style="color: var(--text-muted); margin-bottom: 20px;">Manage your account information.</p>
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+             <div>
+               <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Full Name</label>
+               <input type="text" id="inputName" style="width: 100%; background: var(--input-bg); border: 1px solid var(--border); color: var(--input-text); padding: 10px; border-radius: 8px;">
+               <span id="profile-name" style="display:none"></span>
+             </div>
+             <div>
+               <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Email</label>
+               <input type="email" id="inputEmail" readonly style="width: 100%; background: var(--dash-bg); border: 1px solid var(--border); color: var(--text-muted); padding: 10px; border-radius: 8px; cursor: not-allowed;">
+               <span id="profile-email" style="display:none"></span>
+             </div>
+             <div>
+               <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Phone Number</label>
+               <input type="tel" id="inputPhone" style="width: 100%; background: var(--dash-bg); border: 1px solid var(--border); color: var(--text-main); padding: 10px; border-radius: 8px;">
+             </div>
+             <button class="nav-item active" style="border: none; width: fit-content; padding: 10px 20px; color: var(--accent);" onclick="saveProfile()">Save Changes</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- SCRIPTS -->
+  <script src="js/data.js"></script>
+  <script src="js/app-data.js"></script>
+  <script src="js/main-functions.js"></script>
+  <script>
+    window.onerror = function(msg, url, line) {
+      alert("⚠️ Script Error: " + msg + "\nAt: " + url + ":" + line);
+      return false;
+    };
+
+    async function initTenantDashboard() {
+      try {
+        await initData();
+      } catch (e) {
+        alert("❌ Failed to connect to API server. Please make sure your Node.js server is running on port 3000.");
+        return;
+      }
+      const user = getLoggedInUser();
+      
+      // If no user is logged in, redirect to login page
+      if (!user || !user.user_id || user.full_name === 'User Name') {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      if (user.role !== 'tenant') {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // Populate profile info
+      const profName = document.getElementById('profile-name');
+      const profEmail = document.getElementById('profile-email');
+      if (profName) profName.textContent = user.full_name;
+      if (profEmail) profEmail.textContent = user.email;
+      const avatar = document.querySelector('.user-avatar');
+      if (avatar) avatar.textContent = user.full_name.split(' ').map(n=>n[0]).join('').toUpperCase();
+
+      // Populate profile inputs
+      const inName = document.getElementById('inputName');
+      const inEmail = document.getElementById('inputEmail');
+      const inPhone = document.getElementById('inputPhone');
+      if (inName) inName.value = user.full_name;
+      if (inEmail) inEmail.value = user.email;
+      if (inPhone) inPhone.value = user.phone || '';
+
+      // Update Header
+      const welcomeTitle = document.getElementById('welcomeTitle');
+      const topName = document.getElementById('topName');
+      const topAvatar = document.getElementById('topAvatar');
+      
+      if (welcomeTitle) welcomeTitle.textContent = `Welcome back, ${user.full_name}! 👋`;
+      if (topName) topName.textContent = user.full_name;
+      if (topAvatar) topAvatar.textContent = user.full_name.split(' ').map(n=>n[0]).join('').toUpperCase();
+      
+      if (inName) inName.value = user.full_name;
+      if (inEmail) inEmail.value = user.email;
+
+      // Add Diagnostic Button (Temporal)
+      const diagBtn = document.createElement('button');
+      diagBtn.textContent = "🔍 Run Diagnostics";
+      diagBtn.style = "position:fixed; bottom:20px; right:20px; z-index:9999; padding:10px 20px; background:var(--accent); color:white; border:none; border-radius:8px; cursor:pointer;";
+      diagBtn.onclick = () => {
+        alert("--- DIAGNOSTICS ---\nUser ID: " + user.user_id + "\nName: " + user.full_name + "\nRole: " + user.role + "\nAll Bookings Count: " + allBookings.length + "\nFiltered Bookings: " + bookings.length + "\nAPI URL: " + API_URL);
+      };
+      document.body.appendChild(diagBtn);
+
+      // Filter Data
+      const allBookings = getData('bookings');
+      console.log("Logged in User:", user);
+      console.log("All system bookings:", allBookings);
+
+      const bookings = allBookings.filter(b => 
+        String(b.user_id) === String(user.user_id) || 
+        String(b.Tenant_idTenant) === String(user.user_id)
+      );
+      console.log("Found bookings for this user:", bookings);
+      
+      const reviews = getData('reviews').filter(r => String(r.user_id) === String(user.user_id));
+      
+      const confirmed = bookings.filter(b => b.booking_status.toLowerCase() === 'confirmed').length;
+      const pending = bookings.filter(b => b.booking_status.toLowerCase() === 'pending').length;
+      
+      document.getElementById('stat-total').textContent = bookings.length;
+      document.getElementById('stat-active').textContent = confirmed;
+      document.getElementById('stat-pending').textContent = pending;
+      document.getElementById('stat-reviews').textContent = reviews.length;
+
+      // Render Recent Bookings
+      const recentList = document.getElementById('recentBookingsList');
+      const recentData = bookings.slice(0, 5);
+      
+      if (recentData.length === 0) {
+        recentList.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">No bookings found. <a href="index.html" style="color:var(--accent)">Start browsing now</a></td></tr>';
+      } else {
+        recentList.innerHTML = recentData.map(b => {
+          const room = getRoom(b.room_id);
+          const prop = room ? getProperty(room.Property_idProperty || room.property_id) : null;
+          // Try to get landlord ID from multiple possible fields
+          const lId = prop ? (prop.Landlord_idLandlord || prop.user_id || prop.landlord_id || prop.idLandlord) : null;
+          const landlord = lId ? getLandlord(lId) : null;
+          
+          // Format dates
+          const formatDate = (dateStr) => {
+            if (!dateStr) return 'N/A';
+            try {
+              const d = new Date(dateStr);
+              return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            } catch (e) { return dateStr; }
+          };
+
+          return `
+            <tr>
+              <td><span class="prop-link">${prop ? (prop.title || prop.property_name) : 'Unknown Property'}</span></td>
+              <td>${room ? (room.type || room.room_type) : 'Room'} — $${room ? (room.price || room.price_per_month) : 0}/mo</td>
+              <td>${landlord ? (landlord.name || landlord.full_name || landlord.landlord_name || 'Landlord') : 'N/A'}</td>
+              <td>${formatDate(b.move_in_date || b.check_in)}</td>
+              <td>${formatDate(b.move_out_date || b.check_out)}</td>
+              <td><span class="badge badge-${b.booking_status.toLowerCase()}">${b.booking_status.toUpperCase()}</span></td>
+              <td style="color:var(--accent); font-size:13px; font-weight:500;">${landlord ? (landlord.phone || 'N/A') : 'N/A'}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Render All Bookings
+      const allList = document.getElementById('allBookingsList');
+      allList.innerHTML = bookings.length === 0 
+        ? '<tr><td colspan="7" style="text-align:center; padding:40px;">No bookings found.</td></tr>'
+        : bookings.map(b => {
+          const room = getRoom(b.room_id);
+          const prop = room ? getProperty(room.Property_idProperty || room.property_id) : null;
+          const lId = prop ? (prop.Landlord_idLandlord || prop.user_id || prop.landlord_id || prop.idLandlord) : null;
+          const landlord = lId ? getLandlord(lId) : null;
+
+          const formatDate = (dateStr) => {
+            if (!dateStr) return 'N/A';
+            try {
+              const d = new Date(dateStr);
+              return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            } catch (e) { return dateStr; }
+          };
+
+          let action = '';
+          if (b.booking_status && b.booking_status.toLowerCase() === 'confirmed') {
+            const propId = prop ? (prop.idProperty || prop.property_id) : '';
+            const propName = prop ? (prop.title || prop.property_name) : 'Property';
+            action = `<button class="btn btn-ghost btn-sm" onclick="openReviewModal('${propId}', '${propName}')">⭐ Review</button>`;
+          }
+          return `
+            <tr>
+              <td><span class="prop-link">${prop ? (prop.title || prop.property_name) : 'Property'}</span></td>
+              <td>${room ? (room.type || room.room_type) : 'Room'}</td>
+              <td>${landlord ? (landlord.name || landlord.full_name || landlord.landlord_name || 'Landlord') : 'N/A'}</td>
+              <td>${formatDate(b.move_in_date || b.check_in)} — ${formatDate(b.move_out_date || b.check_out)}</td>
+              <td><span class="badge badge-${b.booking_status.toLowerCase()}">${b.booking_status.toUpperCase()}</span></td>
+              <td style="color:var(--accent); font-size:13px; font-weight:500;">${landlord ? (landlord.phone || 'N/A') : 'N/A'}</td>
+              <td>${action}</td>
+            </tr>
+          `;
+        }).join('');
+
+      // Render My Reviews
+      const reviewsList = document.getElementById('myReviewsList');
+      reviewsList.innerHTML = reviews.length === 0
+        ? '<div style="text-align:center; padding:40px; color:var(--text-muted);">You haven\'t written any reviews yet.</div>'
+        : reviews.map(r => {
+          const prop = getProperty(r.Property_idProperty);
+          return `
+            <div class="table-card" style="padding:20px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:flex-start;">
+              <div style="flex:1;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                   <h4 style="font-size:16px;">${prop ? prop.property_name : 'Property'}</h4>
+                   <div style="color:#fbbf24;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+                </div>
+                <p style="color:var(--text-muted); font-size:14px; line-height:1.5;">"${r.comment}"</p>
+              </div>
+            </div>
+          `;
+        }).join('');
+    }
+
+    let currentReviewPropId = null;
+    function openReviewModal(propId, propName) {
+      if (!propId) return;
+      currentReviewPropId = propId;
+      document.getElementById('reviewPropName').textContent = propName;
+      document.getElementById('reviewComment').value = '';
+      setRating(5);
+      document.getElementById('reviewModal').classList.add('open');
+    }
+
+    function setRating(val) {
+      document.getElementById('reviewRating').value = val;
+      const stars = document.querySelectorAll('.star-rating-input span');
+      stars.forEach((s, i) => {
+        if (i < val) {
+          s.style.color = '#fbbf24';
+          s.style.opacity = '1';
+        } else {
+          s.style.color = '#94a3b8';
+          s.style.opacity = '0.3';
+        }
+      });
+    }
+
+    async function saveProfile() {
+      const user = getLoggedInUser();
+      const name = document.getElementById('inputName').value.trim();
+      const email = document.getElementById('inputEmail').value.trim();
+      const phone = document.getElementById('inputPhone').value.trim();
+
+      if (!name) {
+        showToast("⚠️ Name is required.");
+        return;
+      }
+
+      try {
+        const res = await apiUpdateProfile('tenant', user.user_id, {
+          full_name: name,
+          email: email,
+          phone: phone
+        });
+
+        if (res.success) {
+          // Update local session info
+          user.full_name = name;
+          user.email = email;
+          user.phone = phone;
+          localStorage.setItem('loggedInUser', JSON.stringify(user));
+          
+          showToast("✅ Profile updated and saved to database!");
+          await initTenantDashboard();
+        } else {
+          showToast("❌ Failed to update profile in database.");
+        }
+      } catch (err) {
+        showToast("❌ Server error while saving profile.");
+      }
+    }
+
+    async function submitReview() {
+      const user = getLoggedInUser();
+      const rating = document.getElementById('reviewRating').value;
+      const comment = document.getElementById('reviewComment').value.trim();
+
+      if (!currentReviewPropId) return;
+      if (!comment) {
+        showToast("⚠️ Please write a comment.");
+        return;
+      }
+
+      try {
+        const res = await apiAddReview({
+          rating: Number(rating),
+          comment: comment,
+          Tenant_idTenant: user.user_id,
+          Property_idProperty: currentReviewPropId
+        });
+
+        if (res.success) {
+          showToast("🎉 Review submitted! Thank you.");
+          document.getElementById('reviewModal').classList.remove('open');
+          await initTenantDashboard(); // Refresh
+        } else {
+          showToast("❌ Failed to submit review.");
+        }
+      } catch (err) {
+        showToast("❌ Server error.");
+      }
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    function showPage(id, el) {
+      document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-' + id).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      if (el) el.classList.add('active');
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', initTenantDashboard);
+  </script>
+</body>
+</html>

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoomNest — Landlord Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/dashboard-dark.css">
+  <style>
+    /* Additional Landlord-specific styles */
+    .btn {
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+    .btn:hover { opacity: 0.9; transform: scale(1.02); }
+    
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--card-bg);
+      padding: 32px;
+      border-radius: 24px;
+      width: 100%;
+      max-width: 500px;
+      border: 1px solid var(--border);
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--input-text);
+      padding: 12px;
+      border-radius: 12px;
+      outline: none;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-wrapper">
+    <!-- TOP NAVBAR -->
+    <nav class="top-nav">
+      <a class="logo-wrap" href="index.html" style="margin-bottom: 0;">
+        <div class="logo-icon">RN</div>
+        <span class="logo-text">RoomNest</span>
+      </a>
+      <div class="top-nav-center">
+        <a href="index.html" class="top-nav-link">Home</a>
+        <a href="index.html" class="top-nav-link">Properties</a>
+        <a href="#" class="top-nav-link active">My Dashboard</a>
+      </div>
+      <div class="user-profile">
+        <button class="btn-theme" onclick="toggleTheme()" id="themeToggle">🌓</button>
+        <div class="user-avatar" id="topAvatar">L</div>
+        <span class="user-name" id="topName">Landlord Name</span>
+      </div>
+    </nav>
+
+    <div class="dashboard-main">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="nav-section">
+          <div class="nav-label">Menu</div>
+          <a class="nav-item active" onclick="showPage('overview', this)">
+            <span class="icon">📊</span>
+            <span>Overview</span>
+          </a>
+          <a class="nav-item" onclick="showPage('properties', this)">
+            <span class="icon">🏢</span>
+            <span>My Properties</span>
+          </a>
+          <a class="nav-item" onclick="showPage('rooms', this)">
+            <span class="icon">🛏</span>
+            <span>My Rooms</span>
+          </a>
+          <a class="nav-item" onclick="showPage('bookings', this)">
+            <span class="icon">📅</span>
+            <span>Bookings</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-label">Management</div>
+          <a class="nav-item" onclick="openModal('addPropertyModal')">
+            <span class="icon">＋</span>
+            <span>Add Property</span>
+          </a>
+          <a class="nav-item" onclick="openModal('addRoomModal')">
+            <span class="icon">＋</span>
+            <span>Add Room</span>
+          </a>
+          <a class="nav-item logout-item" onclick="logoutUser()">
+            <span class="icon">🚪</span>
+            <span>Logout</span>
+          </a>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="main-content">
+        <div class="header-top">
+          <div class="welcome-section">
+            <h1 id="welcomeTitle">Landlord Portal 👋</h1>
+            <p>Manage your properties and rental income</p>
+          </div>
+        </div>
+
+      <!-- OVERVIEW SECTION -->
+      <section id="page-overview" class="page-section active">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon-wrap stat-blue">🏢</div>
+            <div>
+              <div class="stat-value" id="stat-props">0</div>
+              <div class="stat-label">Properties</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon-wrap stat-green">🛏</div>
+            <div>
+              <div class="stat-value" id="stat-rooms">0</div>
+              <div class="stat-label">Total Rooms</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon-wrap stat-amber">📅</div>
+            <div>
+              <div class="stat-value" id="stat-pending">0</div>
+              <div class="stat-label">Pending Bookings</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon-wrap stat-purple">💰</div>
+            <div>
+              <div class="stat-value" id="stat-revenue">$0</div>
+              <div class="stat-label">Monthly Revenue</div>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="section-title">Recent Booking Requests</h2>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Tenant</th>
+                <th>Phone</th>
+                <th>Room</th>
+                <th>Dates</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="recentBookingsList">
+              <!-- Booking requests injected here -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- PROPERTIES SECTION -->
+      <section id="page-properties" class="page-section">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+           <h2 class="section-title" style="margin-bottom:0;">My Properties</h2>
+           <button class="btn btn-primary" onclick="openModal('addPropertyModal')">＋ Add Property</button>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>Type</th>
+                <th>Address</th>
+                <th>Rooms</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="myPropertiesList">
+              <!-- Properties injected here -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ROOMS SECTION -->
+      <section id="page-rooms" class="page-section">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+           <h2 class="section-title" style="margin-bottom:0;">My Rooms</h2>
+           <button class="btn btn-primary" onclick="openModal('addRoomModal')">＋ Add Room</button>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Room Title</th>
+                <th>Property</th>
+                <th>Price/mo</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="myRoomsList">
+              <!-- Rooms injected here -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODALS -->
+  <div class="modal-overlay" id="addPropertyModal">
+    <div class="modal">
+      <h2 style="margin-bottom:20px;">Add New Property</h2>
+      <div class="form-group">
+        <label>Property Name</label>
+        <input type="text" id="pName" placeholder="e.g. Sunrise Garden Residence">
+      </div>
+      <div class="form-group">
+        <label>Property Type</label>
+        <select id="pType">
+          <option value="Apartment Building">Apartment Building</option>
+          <option value="Guesthouse">Guesthouse</option>
+          <option value="Condo">Condo</option>
+          <option value="Villa">Villa</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" id="pAddr" placeholder="e.g. Toul Kork, Phnom Penh">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="pDesc" placeholder="Brief description..." rows="3"></textarea>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-ghost" style="flex:1;" onclick="closeModal('addPropertyModal')">Cancel</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="addProperty()">Add Property</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="addRoomModal">
+    <div class="modal" style="max-width: 600px;">
+      <h2 style="margin-bottom:20px;">Add New Room</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Select Property</label>
+          <select id="pSelect"></select>
+        </div>
+        <div class="form-group">
+          <label>Room Type</label>
+          <select id="rType">
+            <option value="Studio">Studio</option>
+            <option value="Single">Single Room</option>
+            <option value="Double">Double Room</option>
+            <option value="Apartment">Apartment</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Price per Month ($)</label>
+          <input type="number" id="rPrice" placeholder="250">
+        </div>
+        <div class="form-group">
+          <label>Room Size (m²)</label>
+          <input type="number" id="rSize" placeholder="32">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Capacity (Persons)</label>
+          <input type="number" id="rCap" placeholder="2">
+        </div>
+        <div class="form-group">
+          <label>Facilities (Comma separated)</label>
+          <input type="text" id="rFac" placeholder="WiFi, AC, Kitchen...">
+        </div>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-ghost" style="flex:1;" onclick="closeModal('addRoomModal')">Cancel</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="addRoom()">Add Room</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- SCRIPTS -->
+  <script src="js/data.js"></script>
+  <script src="js/app-data.js"></script>
+  <script src="js/main-functions.js"></script>
+  <script>
+    async function initLandlordDashboard() {
+      await initData();
+      const user = getLoggedInUser();
+      if (!user || user.role !== 'landlord') {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      document.getElementById('topName').textContent = user.full_name || user.name;
+      document.getElementById('topAvatar').textContent = (user.full_name || user.name).split(' ').map(n=>n[0]).join('').toUpperCase();
+
+      const properties = getData('properties').filter(p => String(p.user_id) === String(user.user_id));
+      const rooms = getData('rooms').filter(r => properties.some(p => String(p.property_id) === String(r.property_id)));
+      const bookings = getData('bookings').filter(b => rooms.some(r => String(r.room_id) === String(b.room_id)));
+      
+      const pending = bookings.filter(b => b.status === 'pending').length;
+      const revenue = rooms.filter(r => r.availability_status === 'Booked').reduce((acc, r) => acc + Number(r.price_per_month), 0);
+
+      document.getElementById('stat-props').textContent = properties.length;
+      document.getElementById('stat-rooms').textContent = rooms.length;
+      document.getElementById('stat-pending').textContent = pending;
+      document.getElementById('stat-revenue').textContent = `$${revenue}`;
+
+      // Property Select in Modal
+      const pSelect = document.getElementById('pSelect');
+      if(pSelect) pSelect.innerHTML = properties.map(p => `<option value="${p.property_id}">${p.property_name}</option>`).join('');
+
+      // Render Lists
+      renderProperties(properties);
+      renderRooms(rooms);
+      renderBookings(bookings);
+    }
+
+    function renderProperties(list) {
+      const el = document.getElementById('myPropertiesList');
+      if(!el) return;
+      el.innerHTML = list.length === 0 ? '<tr><td colspan="5" style="text-align:center; padding:20px;">No properties found.</td></tr>' : 
+        list.map(p => `
+          <tr>
+            <td><span class="prop-link">${p.property_name}</span></td>
+            <td>${p.property_type || 'Apartment'}</td>
+            <td>${p.address}</td>
+            <td>${p.total_rooms || 0}</td>
+            <td><span class="badge badge-confirmed">ACTIVE</span></td>
+          </tr>
+        `).join('');
+    }
+
+    function renderRooms(list) {
+      const el = document.getElementById('myRoomsList');
+      if(!el) return;
+      el.innerHTML = list.length === 0 ? '<tr><td colspan="4" style="text-align:center; padding:20px;">No rooms found.</td></tr>' : 
+        list.map(r => `
+          <tr>
+            <td><span class="prop-link">${r.room_title}</span></td>
+            <td>${(getProperty(r.property_id) || {}).property_name || 'Unknown'}</td>
+            <td>$${r.price_per_month}</td>
+            <td><span class="badge badge-${r.availability_status === 'Available' ? 'confirmed' : 'cancelled'}">${r.availability_status.toUpperCase()}</span></td>
+          </tr>
+        `).join('');
+    }
+
+    function renderBookings(list) {
+      const el = document.getElementById('recentBookingsList');
+      if(!el) return;
+      el.innerHTML = list.length === 0 ? '<tr><td colspan="6" style="text-align:center; padding:20px;">No booking requests.</td></tr>' : 
+        list.slice(0, 5).map(b => {
+          const room = getRoom(b.room_id);
+          const tenant = (getData('tenants').find(t => String(t.idTenant) === String(b.user_id))) || {full_name: 'Tenant', phone: 'N/A'};
+          
+          let actions = '';
+          if (b.booking_status === 'Pending') {
+            actions = `
+              <button class="btn btn-primary btn-sm" style="padding:4px 8px; font-size:11px;" onclick="acceptBooking('${b.booking_id}')">Accept</button>
+              <button class="btn btn-ghost btn-sm" style="padding:4px 8px; font-size:11px; color:#f87171;" onclick="rejectBooking('${b.booking_id}')">Reject</button>
+            `;
+          } else {
+            actions = `<button class="btn btn-ghost btn-sm" style="padding:4px 8px; font-size:11px; opacity:0.6;" onclick="deleteBooking('${b.booking_id}')">Delete</button>`;
+          }
+
+          return `
+            <tr>
+              <td>${tenant.full_name}</td>
+              <td style="color:var(--accent); font-size:13px; font-weight:500;">${tenant.phone || 'N/A'}</td>
+              <td>${room ? (room.type || room.room_type) : 'Room'}</td>
+              <td>${b.move_in_date || b.check_in} — ${b.move_out_date || b.check_out}</td>
+              <td><span class="badge badge-${b.booking_status.toLowerCase()}">${b.booking_status.toUpperCase()}</span></td>
+              <td><div style="display:flex; gap:5px;">${actions}</div></td>
+            </tr>
+          `;
+        }).join('');
+    }
+
+    async function acceptBooking(id) {
+      if (!confirm("Are you sure you want to ACCEPT this booking?")) return;
+      try {
+        const res = await apiUpdateBooking(id, 'confirmed');
+        if (res.success) {
+          showToast("✅ Booking accepted!");
+          await initLandlordDashboard(); // Refresh
+        } else {
+          showToast("❌ Failed to update booking.");
+        }
+      } catch (err) {
+        showToast("❌ Server error.");
+      }
+    }
+
+    async function rejectBooking(id) {
+      if (!confirm("Are you sure you want to REJECT this booking?")) return;
+      try {
+        const res = await apiUpdateBooking(id, 'cancelled');
+        if (res.success) {
+          showToast("❌ Booking rejected.");
+          await initLandlordDashboard(); // Refresh
+        } else {
+          showToast("❌ Failed to update booking.");
+        }
+      } catch (err) {
+        showToast("❌ Server error.");
+      }
+    }
+
+    async function deleteBooking(id) {
+      if (!confirm("Permanently DELETE this booking record?")) return;
+      try {
+        const res = await apiDeleteBooking(id);
+        if (res.success) {
+          showToast("🗑️ Booking record deleted.");
+          await initLandlordDashboard(); // Refresh
+        } else {
+          showToast("❌ Failed to delete booking.");
+        }
+      } catch (err) {
+        showToast("❌ Server error.");
+      }
+    }
+
+    function showPage(id, el) {
+      document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-' + id).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      if (el) el.classList.add('active');
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', initLandlordDashboard);
+  </script>
+</body>
+</html>

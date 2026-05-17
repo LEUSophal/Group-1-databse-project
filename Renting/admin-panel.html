@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoomNest — Admin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/admin-panel.css">
+</head>
+
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-mark">RN</div>
+    <span class="sb-brand">RoomNest</span>
+    <span class="sb-role-tag">Admin</span>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Overview</div>
+    <a class="sb-item active" onclick="showPage('dashboard',this)"><span class="icon">📊</span>Dashboard</a>
+    <a class="sb-item" onclick="showPage('users',this)"><span class="icon">👥</span>User Management <span class="sb-badge blue">24</span></a>
+    <a class="sb-item" onclick="showPage('properties',this)"><span class="icon">🏢</span>Properties <span class="sb-badge amber">2</span></a>
+    <a class="sb-item" onclick="showPage('rooms',this)"><span class="icon">🛏</span>Rooms</a>
+    <div class="sb-section">Manage</div>
+    <a class="sb-item" onclick="showPage('bookings',this)"><span class="icon">📅</span>Bookings</a>
+    <a class="sb-item" onclick="showPage('reviews',this)"><span class="icon">⭐</span>Reviews <span class="sb-badge red">1</span></a>
+    <div class="sb-section">System</div>
+    <a class="sb-item" onclick="showPage('adminlog',this)"><span class="icon">📋</span>Admin Log <span class="sb-badge blue">12</span></a>
+    <a class="sb-item" onclick="showPage('system',this)"><span class="icon">⚙️</span>System Health</a>
+    <a class="sb-item" href="index.html"><span class="icon">🌐</span>Back to Site</a>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="sb-av">SA</div>
+      <div>
+        <div class="sb-uname">Sokha Admin</div>
+        <div class="sb-urole">Super Admin</div>
+      </div>
+      <button class="sb-logout" onclick="logoutUser()">Exit</button>
+    </div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="pageTitle">Dashboard</div>
+    <div class="topbar-right">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search users, properties…" oninput="globalSearch(this.value)">
+      </div>
+      <button onclick="toggleTheme()" id="themeToggle" style="width:34px;height:34px;border-radius:var(--radius);background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;" title="Toggle Theme">🌓</button>
+      <div class="notif-btn" onclick="showToast('🔔 3 pending property approvals')">🔔<div class="notif-dot"></div></div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div id="page-dashboard" class="page active">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-glow" style="background:var(--blue);"></div>
+          <div class="stat-top"><div class="stat-label">Total Users</div><div class="stat-icon ic-blue">👥</div></div>
+          <div class="stat-num" style="color:var(--blue);">24</div>
+          <div class="stat-change up">↑ 3 this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-glow" style="background:var(--green);"></div>
+          <div class="stat-top"><div class="stat-label">Properties</div><div class="stat-icon ic-green">🏢</div></div>
+          <div class="stat-num" style="color:var(--green);">9</div>
+          <div class="stat-change">2 pending approval</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-glow" style="background:var(--amber);"></div>
+          <div class="stat-top"><div class="stat-label">Total Bookings</div><div class="stat-icon ic-amber">📅</div></div>
+          <div class="stat-num" style="color:var(--amber);">47</div>
+          <div class="stat-change up">↑ 8 this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-glow" style="background:var(--red);"></div>
+          <div class="stat-top"><div class="stat-label">Flagged Reviews</div><div class="stat-icon ic-red">⚠️</div></div>
+          <div class="stat-num" style="color:var(--red);">1</div>
+          <div class="stat-change down">Needs review</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- Recent actions table -->
+        <div>
+          <div class="sec-hdr"><h2>Recent User Registrations</h2><button class="btn btn-ghost btn-sm" onclick="showPage('users',null)">View all →</button></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>User</th><th>Role</th><th>Registered</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div style="display:flex;align-items:center;"><div class="td-avatar" style="background:linear-gradient(135deg,#388BFD,#79C0FF);">SR</div><div><div class="td-bold">Sophea Rith</div><div class="td-muted">sophea@email.com</div></div></div></td>
+                  <td><span class="badge badge-blue">Tenant</span></td>
+                  <td><span class="td-muted">May 8, 2025</span></td>
+                  <td><span class="badge badge-green">Active</span></td>
+                  <td><button class="btn btn-ghost btn-sm" onclick="openViewUser('Sophea Rith','Tenant','sophea@email.com','Active')">View</button></td>
+                </tr>
+                <tr>
+                  <td><div style="display:flex;align-items:center;"><div class="td-avatar" style="background:linear-gradient(135deg,#3FB950,#7EE787);">KL</div><div><div class="td-bold">Kosal Ly</div><div class="td-muted">kosal@email.com</div></div></div></td>
+                  <td><span class="badge badge-green">Landlord</span></td>
+                  <td><span class="td-muted">May 3, 2025</span></td>
+                  <td><span class="badge badge-green">Active</span></td>
+                  <td><button class="btn btn-ghost btn-sm" onclick="openViewUser('Kosal Ly','Landlord','kosal@email.com','Active')">View</button></td>
+                </tr>
+                <tr>
+                  <td><div style="display:flex;align-items:center;"><div class="td-avatar" style="background:linear-gradient(135deg,#D29922,#F0B429);">PC</div><div><div class="td-bold">Pisey Chan</div><div class="td-muted">pisey@email.com</div></div></div></td>
+                  <td><span class="badge badge-blue">Tenant</span></td>
+                  <td><span class="td-muted">Apr 29, 2025</span></td>
+                  <td><span class="badge badge-green">Active</span></td>
+                  <td><button class="btn btn-ghost btn-sm" onclick="openViewUser('Pisey Chan','Tenant','pisey@email.com','Active')">View</button></td>
+                </tr>
+                <tr>
+                  <td><div style="display:flex;align-items:center;"><div class="td-avatar" style="background:linear-gradient(135deg,#F85149,#FF9D7A);">RP</div><div><div class="td-bold">Rina Pich</div><div class="td-muted">rina@email.com</div></div></div></td>
+                  <td><span class="badge badge-blue">Tenant</span></td>
+                  <td><span class="td-muted">Apr 20, 2025</span></td>
+                  <td><span class="badge badge-red">Blocked</span></td>
+                  <td><button class="btn btn-ghost btn-sm" onclick="openViewUser('Rina Pich','Tenant','rina@email.com','Blocked')">View</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="sec-hdr"><h2>Properties Awaiting Approval</h2><button class="btn btn-ghost btn-sm" onclick="showPage('properties',null)">View all →</button></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Property</th><th>Landlord</th><th>Type</th><th>Submitted</th><th>Actions</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div class="td-bold">Mekong Riverside Inn</div><div class="td-muted">Battambang</div></td>
+                  <td>Dara Meas</td>
+                  <td>Guesthouse</td>
+                  <td><span class="td-muted">May 9, 2025</span></td>
+                  <td><div style="display:flex;gap:5px;">
+                    <button class="btn btn-success btn-sm" onclick="approveProperty(this,'Mekong Riverside Inn')">✓ Approve</button>
+                    <button class="btn btn-danger btn-sm" onclick="rejectProperty(this,'Mekong Riverside Inn')">✕ Reject</button>
+                  </div></td>
+                </tr>
+                <tr>
+                  <td><div class="td-bold">Central Park Residences</div><div class="td-muted">Phnom Penh</div></td>
+                  <td>Vanna Sok</td>
+                  <td>Apartment</td>
+                  <td><span class="td-muted">May 7, 2025</span></td>
+                  <td><div style="display:flex;gap:5px;">
+                    <button class="btn btn-success btn-sm" onclick="approveProperty(this,'Central Park Residences')">✓ Approve</button>
+                    <button class="btn btn-danger btn-sm" onclick="rejectProperty(this,'Central Park Residences')">✕ Reject</button>
+                  </div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <!-- System stats -->
+          <div class="card">
+            <div class="card-title">Platform Overview</div>
+            <div class="mini-stat"><span class="mini-stat-label">Active Tenants</span><span class="mini-stat-val">18</span></div>
+            <div class="mini-stat"><span class="mini-stat-label">Active Landlords</span><span class="mini-stat-val">6</span></div>
+            <div class="mini-stat"><span class="mini-stat-label">Rooms Listed</span><span class="mini-stat-val">34</span></div>
+            <div class="mini-stat"><span class="mini-stat-label">Rooms Occupied</span><span class="mini-stat-val">22</span></div>
+            <div class="mini-stat"><span class="mini-stat-label">Occupancy Rate</span><span class="mini-stat-val" style="color:var(--green);">64.7%</span></div>
+            <div class="mini-stat"><span class="mini-stat-label">Avg. Room Price</span><span class="mini-stat-val">$218/mo</span></div>
+            <div class="mini-stat"><span class="mini-stat-label">Avg. Review Score</span><span class="mini-stat-val" style="color:var(--amber);">★ 4.7</span></div>
+          </div>
+
+          <!-- User role breakdown -->
+          <div class="card">
+            <div class="card-title">User Role Breakdown</div>
+            <div class="prog-wrap">
+              <div class="prog-label"><span>Tenants</span><span style="color:var(--blue);">18 (75%)</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:75%;background:var(--blue);"></div></div>
+            </div>
+            <div class="prog-wrap">
+              <div class="prog-label"><span>Landlords</span><span style="color:var(--green);">6 (25%)</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:25%;background:var(--green);"></div></div>
+            </div>
+            <div class="prog-wrap" style="margin-bottom:0;">
+              <div class="prog-label"><span>Admins</span><span style="color:var(--red);">1 (4%)</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:4%;background:var(--red);"></div></div>
+            </div>
+          </div>
+
+          <!-- Recent Admin Log -->
+          <div class="card">
+            <div class="card-title">Latest Admin Actions <button class="btn btn-ghost btn-sm" onclick="showPage('adminlog',null)">Log →</button></div>
+            <div class="log-item"><div class="log-dot" style="background:var(--red);"></div><div class="log-body"><div class="log-text"><span class="log-tag delete">DELETE</span>Removed spam review #R-44</div><div class="log-meta"><span>Sokha Admin</span><span>1h ago</span></div></div></div>
+            <div class="log-item"><div class="log-dot" style="background:var(--green);"></div><div class="log-body"><div class="log-text"><span class="log-tag approve">APPROVE</span>Property "Urban Loft Complex"</div><div class="log-meta"><span>Sokha Admin</span><span>3h ago</span></div></div></div>
+            <div class="log-item"><div class="log-dot" style="background:var(--purple);"></div><div class="log-body"><div class="log-text"><span class="log-tag block">BLOCK</span>User Rina Pich (policy violation)</div><div class="log-meta"><span>Sokha Admin</span><span>Yesterday</span></div></div></div>
+            <div class="log-item"><div class="log-dot" style="background:var(--amber);"></div><div class="log-body"><div class="log-text"><span class="log-tag update">UPDATE</span>Booking #B-31 status → Cancelled</div><div class="log-meta"><span>Sokha Admin</span><span>2 days ago</span></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ USERS ══ -->
+    <div id="page-users" class="page">
+      <div class="sec-hdr">
+        <div><h2>User Management</h2><div class="sec-hdr-sub">US-10 — Block, delete, update users and roles</div></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost btn-sm" onclick="exportData('users')">⬇ Export</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('addUserModal')">＋ Add User</button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input type="text" placeholder="🔍  Search by name or email…" oninput="filterTable('usersTable',this.value)">
+        <select onchange="showToast('Filter applied')">
+          <option value="">All Roles</option>
+          <option>Tenant</option>
+          <option>Landlord</option>
+          <option>Admin</option>
+        </select>
+        <select onchange="showToast('Filter applied')">
+          <option value="">All Status</option>
+          <option>Active</option>
+          <option>Blocked</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table id="usersTable">
+          <thead><tr><th>#</th><th>User</th><th>Phone</th><th>Role</th><th>Registered</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td><span class="td-muted">001</span></td><td><div style="display:flex;align-items:center;"><div class="td-avatar" style="background:linear-gradient(135deg,#388BFD,#79C0FF);">SR</div><div><div class="td-bold">Sophea Rith</div><div class="td-muted">sophea@email.com</div></div></div></td><td><span class="td-muted">+855 12 001 001</span></td><td><span class="badge badge-blue">Tenant</span></td><td><span class="td-muted">May 8, 2025</span></td><td><span class="badge badge-green">Active</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="openViewUser('Sophea Rith','Tenant','sophea@email.com','Active')">View</button><button class="btn btn-ghost btn-sm" onclick="openEditUser('Sophea Rith','Tenant','Active')">Edit</button><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('user','Sophea Rith')">🗑</button></div></td></tr>
+            <tr><td><span class="td-muted">002</span></td><td><div style="display:flex;align-items:center;"><div class="td-avatar" style="background:linear-gradient(135deg,#3FB950,#7EE787);">KL</div><div><div class="td-bold">Kosal Ly</div><div class="td-muted">kosal@email.com</div></div></div></td><td><span class="td-muted">+855 12 345 678</span></td><td><span class="badge badge-green">Landlord</span></td><td><span class="td-muted">May 3, 2025</span></td><td><span class="badge badge-green">Active</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="openViewUser('Kosal Ly','Landlord','kosal@email.com','Active')">View</button><button class="btn btn-ghost btn-sm" onclick="openEditUser('Kosal Ly','Landlord','Active')">Edit</button><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('user','Kosal Ly')">🗑</button></div></td></tr>
+            <tr><td><span class="td-muted">003</span></td><td><div style="display:flex;align-items:center;"><div class="td-avatar" style="background:linear-gradient(135deg,#D29922,#F0B429);">PC</div><div><div class="td-bold">Pisey Chan</div><div class="td-muted">pisey@email.com</div></div></div></td><td><span class="td-muted">+855 77 200 300</span></td><td><span class="badge badge-blue">Tenant</span></td><td><span class="td-muted">Apr 29, 2025</span></td><td><span class="badge badge-green">Active</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="openViewUser('Pisey Chan','Tenant','pisey@email.com','Active')">View</button><button class="btn btn-ghost btn-sm" onclick="openEditUser('Pisey Chan','Tenant','Active')">Edit</button><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('user','Pisey Chan')">🗑</button></div></td></tr>
+            <tr><td><span class="td-muted">004</span></td><td><div style="display:flex;align-items:center;"><div class="td-avatar" style="background:linear-gradient(135deg,#D29922,#F0B429);">DM</div><div><div class="td-bold">Dara Meas</div><div class="td-muted">dara@email.com</div></div></div></td><td><span class="td-muted">+855 12 400 400</span></td><td><span class="badge badge-green">Landlord</span></td><td><span class="td-muted">Mar 12, 2025</span></td><td><span class="badge badge-green">Active</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="openViewUser('Dara Meas','Landlord','dara@email.com','Active')">View</button><button class="btn btn-ghost btn-sm" onclick="openEditUser('Dara Meas','Landlord','Active')">Edit</button><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('user','Dara Meas')">🗑</button></div></td></tr>
+            <tr><td><span class="td-muted">005</span></td><td><div style="display:flex;align-items:center;"><div class="td-avatar" style="background:linear-gradient(135deg,#F85149,#FF9D7A);">RP</div><div><div class="td-bold">Rina Pich</div><div class="td-muted">rina@email.com</div></div></div></td><td><span class="td-muted">+855 96 500 500</span></td><td><span class="badge badge-blue">Tenant</span></td><td><span class="td-muted">Apr 20, 2025</span></td><td><span class="badge badge-red">Blocked</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="openViewUser('Rina Pich','Tenant','rina@email.com','Blocked')">View</button><button class="btn btn-amber btn-sm" onclick="unblockUser(this,'Rina Pich')">Unblock</button><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('user','Rina Pich')">🗑</button></div></td></tr>
+            <tr><td><span class="td-muted">006</span></td><td><div style="display:flex;align-items:center;"><div class="td-avatar" style="background:linear-gradient(135deg,#BC8CFF,#D2A8FF);">VS</div><div><div class="td-bold">Vanna Sok</div><div class="td-muted">vanna@email.com</div></div></div></td><td><span class="td-muted">+855 11 600 600</span></td><td><span class="badge badge-green">Landlord</span></td><td><span class="td-muted">Feb 18, 2025</span></td><td><span class="badge badge-green">Active</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="openViewUser('Vanna Sok','Landlord','vanna@email.com','Active')">View</button><button class="btn btn-ghost btn-sm" onclick="openEditUser('Vanna Sok','Landlord','Active')">Edit</button><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('user','Vanna Sok')">🗑</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:var(--text3);">Showing 6 of 24 users</span>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm">← Prev</button>
+          <button class="btn btn-primary btn-sm">1</button>
+          <button class="btn btn-ghost btn-sm">2</button>
+          <button class="btn btn-ghost btn-sm">3</button>
+          <button class="btn btn-ghost btn-sm">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PROPERTIES ══ -->
+    <div id="page-properties" class="page">
+      <div class="sec-hdr">
+        <div><h2>Property Management</h2><div class="sec-hdr-sub">US-10 — Approve, reject, or delete properties</div></div>
+        <button class="btn btn-ghost btn-sm" onclick="exportData('properties')">⬇ Export</button>
+      </div>
+      <div class="filter-bar">
+        <input type="text" placeholder="🔍  Search properties…" oninput="filterTable('propsTable',this.value)">
+        <select onchange="showToast('Filter applied')">
+          <option>All Status</option>
+          <option>Active</option>
+          <option>Under Review</option>
+          <option>Rejected</option>
+        </select>
+        <select onchange="showToast('Filter applied')">
+          <option>All Types</option>
+          <option>Apartment</option>
+          <option>Guesthouse</option>
+          <option>Condo</option>
+          <option>House</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table id="propsTable">
+          <thead><tr><th>#</th><th>Property</th><th>Landlord</th><th>Type</th><th>Rooms</th><th>Location</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td><span class="td-muted">P-01</span></td><td><div class="td-bold">Riverside Heights</div><div class="td-muted">Added Jan 2025</div></td><td>Kosal Ly</td><td>Apartment</td><td>3</td><td>Siem Reap</td><td><span class="badge badge-green">Active</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="showToast('📋 Viewing Riverside Heights details')">View</button><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('property','Riverside Heights')">🗑</button></div></td></tr>
+            <tr><td><span class="td-muted">P-02</span></td><td><div class="td-bold">The Green Quarter</div><div class="td-muted">Added Feb 2025</div></td><td>Kosal Ly</td><td>Guesthouse</td><td>2</td><td>Phnom Penh</td><td><span class="badge badge-green">Active</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="showToast('📋 Viewing property')">View</button><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('property','The Green Quarter')">🗑</button></div></td></tr>
+            <tr><td><span class="td-muted">P-03</span></td><td><div class="td-bold">Urban Loft Complex</div><div class="td-muted">Added Mar 2025</div></td><td>Kosal Ly</td><td>Condo</td><td>1</td><td>Phnom Penh</td><td><span class="badge badge-green">Active</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="showToast('📋 Viewing property')">View</button><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('property','Urban Loft Complex')">🗑</button></div></td></tr>
+            <tr><td><span class="td-muted">P-04</span></td><td><div class="td-bold">Mekong Riverside Inn</div><div class="td-muted">Added May 9, 2025</div></td><td>Dara Meas</td><td>Guesthouse</td><td>5</td><td>Battambang</td><td><span class="badge badge-amber">Under Review</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-success btn-sm" onclick="approveProperty(this,'Mekong Riverside Inn')">✓ Approve</button><button class="btn btn-danger btn-sm" onclick="rejectProperty(this,'Mekong Riverside Inn')">✕ Reject</button></div></td></tr>
+            <tr><td><span class="td-muted">P-05</span></td><td><div class="td-bold">Central Park Residences</div><div class="td-muted">Added May 7, 2025</div></td><td>Vanna Sok</td><td>Apartment</td><td>8</td><td>Phnom Penh</td><td><span class="badge badge-amber">Under Review</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-success btn-sm" onclick="approveProperty(this,'Central Park Residences')">✓ Approve</button><button class="btn btn-danger btn-sm" onclick="rejectProperty(this,'Central Park Residences')">✕ Reject</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ ROOMS ══ -->
+    <div id="page-rooms" class="page">
+      <div class="sec-hdr">
+        <div><h2>Room Management</h2><div class="sec-hdr-sub">US-10 — View, update status, or delete rooms</div></div>
+        <button class="btn btn-ghost btn-sm" onclick="exportData('rooms')">⬇ Export</button>
+      </div>
+      <div class="filter-bar">
+        <input type="text" placeholder="🔍  Search rooms…" oninput="filterTable('roomsTable',this.value)">
+        <select onchange="showToast('Filter applied')"><option>All Types</option><option>Studio</option><option>Single</option><option>Double</option><option>Shared</option><option>Apartment</option></select>
+        <select onchange="showToast('Filter applied')"><option>All Status</option><option>Available</option><option>Booked</option><option>Maintenance</option></select>
+      </div>
+      <div class="table-wrap">
+        <table id="roomsTable">
+          <thead><tr><th>#</th><th>Room</th><th>Property</th><th>Type</th><th>Price/mo</th><th>Size</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td><span class="td-muted">R-01</span></td><td class="td-bold">Riverside Studio</td><td><span class="td-muted">Riverside Heights</span></td><td>Studio</td><td>$280</td><td>32 m²</td><td><span class="badge badge-green">Available</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="showToast('📋 Room details')">View</button><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('room','Riverside Studio')">🗑</button></div></td></tr>
+            <tr><td><span class="td-muted">R-02</span></td><td class="td-bold">Garden View Single</td><td><span class="td-muted">The Green Quarter</span></td><td>Single</td><td>$150</td><td>20 m²</td><td><span class="badge badge-green">Available</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="showToast('📋 Room details')">View</button><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('room','Garden View Single')">🗑</button></div></td></tr>
+            <tr><td><span class="td-muted">R-03</span></td><td class="td-bold">Sunset Double Room</td><td><span class="td-muted">The Green Quarter</span></td><td>Double</td><td>$210</td><td>28 m²</td><td><span class="badge badge-red">Booked</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="showToast('📋 Room details')">View</button><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('room','Sunset Double Room')">🗑</button></div></td></tr>
+            <tr><td><span class="td-muted">R-04</span></td><td class="td-bold">Urban Loft Apartment</td><td><span class="td-muted">Urban Loft Complex</span></td><td>Apartment</td><td>$450</td><td>48 m²</td><td><span class="badge badge-green">Available</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="showToast('📋 Room details')">View</button><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('room','Urban Loft Apartment')">🗑</button></div></td></tr>
+            <tr><td><span class="td-muted">R-05</span></td><td class="td-bold">Lakeside Shared Room</td><td><span class="td-muted">Riverside Heights</span></td><td>Shared</td><td>$80</td><td>18 m²</td><td><span class="badge badge-green">Available</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="showToast('📋 Room details')">View</button><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('room','Lakeside Shared Room')">🗑</button></div></td></tr>
+            <tr><td><span class="td-muted">R-06</span></td><td class="td-bold">Blossom Garden Studio</td><td><span class="td-muted">The Green Quarter</span></td><td>Studio</td><td>$190</td><td>25 m²</td><td><span class="badge badge-amber">Maintenance</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="showToast('📋 Room details')">View</button><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('room','Blossom Garden Studio')">🗑</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ BOOKINGS ══ -->
+    <div id="page-bookings" class="page">
+      <div class="sec-hdr">
+        <div><h2>Booking Management</h2><div class="sec-hdr-sub">US-10 — View all bookings, update or cancel</div></div>
+        <button class="btn btn-ghost btn-sm" onclick="exportData('bookings')">⬇ Export CSV</button>
+      </div>
+      <div class="filter-bar">
+        <input type="text" placeholder="🔍  Search tenant, room…" oninput="filterTable('bookingsTable',this.value)">
+        <select onchange="showToast('Filter applied')"><option>All Status</option><option>Pending</option><option>Confirmed</option><option>Completed</option><option>Cancelled</option></select>
+        <select onchange="showToast('Filter applied')"><option>All Properties</option><option>Riverside Heights</option><option>The Green Quarter</option><option>Urban Loft Complex</option></select>
+      </div>
+      <div class="table-wrap">
+        <table id="bookingsTable">
+          <thead><tr><th>ID</th><th>Tenant</th><th>Room</th><th>Move-in</th><th>Move-out</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td><span class="td-muted">#B-47</span></td><td><div class="td-bold">Sophea Rith</div><div class="td-muted">sophea@email.com</div></td><td>Riverside Studio</td><td>Jun 1, 2025</td><td>Aug 31, 2025</td><td class="td-bold">$840</td><td><span class="badge badge-amber" id="bk47-status">Pending</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-success btn-sm" onclick="adminConfirmBooking('bk47-status')">Confirm</button><button class="btn btn-danger btn-sm" onclick="adminCancelBooking('bk47-status')">Cancel</button></div></td></tr>
+            <tr><td><span class="td-muted">#B-46</span></td><td><div class="td-bold">Pisey Chan</div><div class="td-muted">pisey@email.com</div></td><td>Urban Loft</td><td>May 15, 2025</td><td>Jun 15, 2025</td><td class="td-bold">$450</td><td><span class="badge badge-amber" id="bk46-status">Pending</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-success btn-sm" onclick="adminConfirmBooking('bk46-status')">Confirm</button><button class="btn btn-danger btn-sm" onclick="adminCancelBooking('bk46-status')">Cancel</button></div></td></tr>
+            <tr><td><span class="td-muted">#B-44</span></td><td><div class="td-bold">Dara Meas</div><div class="td-muted">dara@email.com</div></td><td>Garden Room</td><td>Jul 1, 2025</td><td>Dec 31, 2025</td><td class="td-bold">$900</td><td><span class="badge badge-green">Confirmed</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="showToast('📋 Booking details')">View</button><button class="btn btn-danger btn-sm" onclick="showToast('❌ Booking cancelled by admin')">Cancel</button></div></td></tr>
+            <tr><td><span class="td-muted">#B-38</span></td><td><div class="td-bold">Vanna Sok</div><div class="td-muted">vanna@email.com</div></td><td>Sunset Double</td><td>Apr 1, 2025</td><td>Jul 1, 2025</td><td class="td-bold">$630</td><td><span class="badge badge-green">Confirmed</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="showToast('📋 Booking details')">View</button><button class="btn btn-danger btn-sm" onclick="showToast('❌ Booking cancelled by admin')">Cancel</button></div></td></tr>
+            <tr><td><span class="td-muted">#B-31</span></td><td><div class="td-bold">Kosal Noun</div><div class="td-muted">kosal.n@email.com</div></td><td>Blossom Studio</td><td>Jan 1, 2025</td><td>Mar 31, 2025</td><td class="td-bold">$570</td><td><span class="badge badge-blue">Completed</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="showToast('📋 Booking details')">View</button><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('booking','#B-31')">🗑</button></div></td></tr>
+            <tr><td><span class="td-muted">#B-22</span></td><td><div class="td-bold">Rina Pich</div><div class="td-muted">rina@email.com</div></td><td>Lakeside Shared</td><td>Feb 1, 2025</td><td>Feb 28, 2025</td><td class="td-bold">$80</td><td><span class="badge badge-red">Cancelled</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm" onclick="showToast('📋 Booking details')">View</button><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('booking','#B-22')">🗑</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ REVIEWS ══ -->
+    <div id="page-reviews" class="page">
+      <div class="sec-hdr">
+        <div><h2>Review Moderation</h2><div class="sec-hdr-sub">US-10 — Remove inappropriate reviews</div></div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-size:12px;color:var(--text3);">Avg: <strong style="color:var(--amber);">★ 4.7</strong> · 5 reviews</span>
+          <select style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text);background:var(--surface2);outline:none;" onchange="showToast('Filter applied')">
+            <option>All Reviews</option>
+            <option>Flagged</option>
+            <option>5 Stars</option>
+            <option>4 Stars</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Flagged review -->
+      <div class="review-card" style="border-color:var(--red-dim);background:rgba(248,81,73,.04);">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span class="badge badge-red">⚠ FLAGGED</span><span style="font-size:11px;color:var(--text3);">Reported by landlord for inappropriate content</span></div>
+        <div class="rc-header">
+          <div><div class="rc-name">Anonymous User</div><div class="rc-prop">Riverside Studio · Riverside Heights</div></div>
+          <div class="rc-stars">★☆☆☆☆</div>
+        </div>
+        <div class="rc-text">"[Content removed for moderation — original contained inappropriate language and false accusations against the landlord.]"</div>
+        <div class="rc-actions">
+          <button class="btn btn-danger btn-sm" onclick="confirmDelete('review','Flagged Review #R-44')">🗑 Delete Review</button>
+          <button class="btn btn-ghost btn-sm" onclick="dismissFlag()">Dismiss Flag</button>
+          <button class="btn btn-ghost btn-sm" onclick="showToast('📨 Warning sent to user')">Warn User</button>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;">
+        <div class="review-card">
+          <div class="rc-header"><div><div class="rc-name">Sophea Rith</div><div class="rc-prop">Riverside Studio · Riverside Heights</div></div><div style="text-align:right;"><div class="rc-stars">★★★★★</div><div style="font-size:10px;color:var(--text3);margin-top:2px;">May 2, 2025</div></div></div>
+          <div class="rc-text">"Amazing studio with great view. Landlord was very responsive."</div>
+          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('review','Review by Sophea')">🗑</button><button class="btn btn-amber btn-sm" onclick="showToast('🚩 Review flagged for moderation')">🚩 Flag</button></div>
+        </div>
+        <div class="review-card">
+          <div class="rc-header"><div><div class="rc-name">Dara Meas</div><div class="rc-prop">Garden View Room · The Green Quarter</div></div><div style="text-align:right;"><div class="rc-stars">★★★★☆</div><div style="font-size:10px;color:var(--text3);margin-top:2px;">Apr 18, 2025</div></div></div>
+          <div class="rc-text">"Clean and comfortable. Minor WiFi issue during peak hours."</div>
+          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('review','Review by Dara')">🗑</button><button class="btn btn-amber btn-sm" onclick="showToast('🚩 Review flagged')">🚩 Flag</button></div>
+        </div>
+        <div class="review-card">
+          <div class="rc-header"><div><div class="rc-name">Kosal Noun</div><div class="rc-prop">Blossom Studio · The Green Quarter</div></div><div style="text-align:right;"><div class="rc-stars">★★★★★</div><div style="font-size:10px;color:var(--text3);margin-top:2px;">Mar 5, 2025</div></div></div>
+          <div class="rc-text">"Loved the balcony and quiet neighborhood. Would rent again!"</div>
+          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('review','Review by Kosal')">🗑</button><button class="btn btn-amber btn-sm" onclick="showToast('🚩 Review flagged')">🚩 Flag</button></div>
+        </div>
+        <div class="review-card">
+          <div class="rc-header"><div><div class="rc-name">Vanna Sok</div><div class="rc-prop">Sunset Double · The Green Quarter</div></div><div style="text-align:right;"><div class="rc-stars">★★★★★</div><div style="font-size:10px;color:var(--text3);margin-top:2px;">Mar 1, 2025</div></div></div>
+          <div class="rc-text">"Spacious, well-lit room. The landlord goes above and beyond."</div>
+          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('review','Review by Vanna')">🗑</button><button class="btn btn-amber btn-sm" onclick="showToast('🚩 Review flagged')">🚩 Flag</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADMIN LOG ══ -->
+    <div id="page-adminlog" class="page">
+      <div class="sec-hdr">
+        <div><h2>Admin Action Log</h2><div class="sec-hdr-sub">US-11 — All admin actions are recorded here (Admin_Log table)</div></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost btn-sm" onclick="exportData('admin log')">⬇ Export</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmClearLog()">🗑 Clear Old Logs</button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" placeholder="🔍  Search by action, table, or admin…" oninput="filterTable('logTable',this.value)">
+        <select onchange="showToast('Filter applied')">
+          <option>All Actions</option>
+          <option>DELETE</option>
+          <option>UPDATE</option>
+          <option>BLOCK</option>
+          <option>CREATE</option>
+          <option>APPROVE</option>
+          <option>REJECT</option>
+        </select>
+        <select onchange="showToast('Filter applied')">
+          <option>All Tables</option>
+          <option>User</option>
+          <option>Property</option>
+          <option>Room</option>
+          <option>Booking</option>
+          <option>Review</option>
+        </select>
+        <input type="date" style="color:var(--text3);">
+      </div>
+
+      <div class="table-wrap">
+        <table id="logTable">
+          <thead><tr><th>Log ID</th><th>Action</th><th>Target Table</th><th>Target ID</th><th>Reason</th><th>Admin</th><th>Date & Time</th></tr></thead>
+          <tbody id="logTableBody">
+            <tr><td><span class="td-muted">#L-012</span></td><td><span class="log-tag delete">DELETE</span></td><td>Review</td><td>R-44</td><td>Inappropriate content, false claims</td><td>Sokha Admin</td><td><span class="td-muted">May 10, 2025 · 09:14</span></td></tr>
+            <tr><td><span class="td-muted">#L-011</span></td><td><span class="log-tag approve">APPROVE</span></td><td>Property</td><td>P-03</td><td>All documents verified, compliant</td><td>Sokha Admin</td><td><span class="td-muted">May 10, 2025 · 07:02</span></td></tr>
+            <tr><td><span class="td-muted">#L-010</span></td><td><span class="log-tag block">BLOCK</span></td><td>User</td><td>U-005</td><td>Policy violation — repeated spam</td><td>Sokha Admin</td><td><span class="td-muted">May 9, 2025 · 16:45</span></td></tr>
+            <tr><td><span class="td-muted">#L-009</span></td><td><span class="log-tag update">UPDATE</span></td><td>Booking</td><td>B-31</td><td>Admin override — tenant request</td><td>Sokha Admin</td><td><span class="td-muted">May 8, 2025 · 11:30</span></td></tr>
+            <tr><td><span class="td-muted">#L-008</span></td><td><span class="log-tag delete">DELETE</span></td><td>Room</td><td>R-09</td><td>Duplicate listing by landlord</td><td>Sokha Admin</td><td><span class="td-muted">May 7, 2025 · 14:20</span></td></tr>
+            <tr><td><span class="td-muted">#L-007</span></td><td><span class="log-tag create">CREATE</span></td><td>User</td><td>U-024</td><td>New admin account created</td><td>Sokha Admin</td><td><span class="td-muted">May 6, 2025 · 09:00</span></td></tr>
+            <tr><td><span class="td-muted">#L-006</span></td><td><span class="log-tag update">UPDATE</span></td><td>Property</td><td>P-01</td><td>Corrected address typo</td><td>Sokha Admin</td><td><span class="td-muted">May 5, 2025 · 10:15</span></td></tr>
+            <tr><td><span class="td-muted">#L-005</span></td><td><span class="log-tag delete">DELETE</span></td><td>Review</td><td>R-30</td><td>Off-topic, unrelated to property</td><td>Sokha Admin</td><td><span class="td-muted">May 4, 2025 · 08:30</span></td></tr>
+            <tr><td><span class="td-muted">#L-004</span></td><td><span class="log-tag approve">APPROVE</span></td><td>Property</td><td>P-02</td><td>Inspection passed</td><td>Sokha Admin</td><td><span class="td-muted">May 2, 2025 · 15:00</span></td></tr>
+            <tr><td><span class="td-muted">#L-003</span></td><td><span class="log-tag update">UPDATE</span></td><td>User</td><td>U-002</td><td>Role changed: Tenant → Landlord</td><td>Sokha Admin</td><td><span class="td-muted">Apr 30, 2025 · 12:00</span></td></tr>
+            <tr><td><span class="td-muted">#L-002</span></td><td><span class="log-tag block">BLOCK</span></td><td>User</td><td>U-011</td><td>Fraudulent property listing</td><td>Sokha Admin</td><td><span class="td-muted">Apr 28, 2025 · 09:45</span></td></tr>
+            <tr><td><span class="td-muted">#L-001</span></td><td><span class="log-tag create">CREATE</span></td><td>User</td><td>U-001</td><td>System initialized — first admin</td><td>System</td><td><span class="td-muted">Jan 1, 2025 · 00:00</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:var(--text3);">12 records total — all actions stored in Admin_Log table</span>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm">← Prev</button>
+          <button class="btn btn-primary btn-sm">1</button>
+          <button class="btn btn-ghost btn-sm">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SYSTEM ══ -->
+    <div id="page-system" class="page">
+      <div class="sec-hdr"><h2>System Health & Settings</h2></div>
+      <div class="health-grid">
+        <div class="health-card"><div class="health-label">Database Status</div><div class="health-val" style="color:var(--green);">● Online</div><div class="health-sub">MySQL · Last ping: 1s ago</div></div>
+        <div class="health-card"><div class="health-label">Server Uptime</div><div class="health-val">99.97%</div><div class="health-sub">30-day average</div></div>
+        <div class="health-card"><div class="health-label">Total Storage Used</div><div class="health-val">1.2 GB</div><div class="health-sub">of 10 GB · 12% used</div></div>
+        <div class="health-card"><div class="health-label">Active Sessions</div><div class="health-val" style="color:var(--blue);">7</div><div class="health-sub">Current logged-in users</div></div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Table Record Counts</div>
+          <div class="mini-stat"><span class="mini-stat-label">User</span><span class="mini-stat-val">24 rows</span></div>
+          <div class="mini-stat"><span class="mini-stat-label">Role</span><span class="mini-stat-val">3 rows</span></div>
+          <div class="mini-stat"><span class="mini-stat-label">User_Role</span><span class="mini-stat-val">25 rows</span></div>
+          <div class="mini-stat"><span class="mini-stat-label">Property</span><span class="mini-stat-val">9 rows</span></div>
+          <div class="mini-stat"><span class="mini-stat-label">Room</span><span class="mini-stat-val">34 rows</span></div>
+          <div class="mini-stat"><span class="mini-stat-label">Room_Image</span><span class="mini-stat-val">97 rows</span></div>
+          <div class="mini-stat"><span class="mini-stat-label">Facility</span><span class="mini-stat-val">12 rows</span></div>
+          <div class="mini-stat"><span class="mini-stat-label">Room_Facility</span><span class="mini-stat-val">148 rows</span></div>
+          <div class="mini-stat"><span class="mini-stat-label">Booking</span><span class="mini-stat-val">47 rows</span></div>
+          <div class="mini-stat"><span class="mini-stat-label">Review</span><span class="mini-stat-val">5 rows</span></div>
+          <div class="mini-stat"><span class="mini-stat-label">Admin_Log</span><span class="mini-stat-val">12 rows</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">System Settings</div>
+          <div class="form-group"><label>Site Name</label><input type="text" value="RoomNest"></div>
+          <div class="form-group"><label>Support Email</label><input type="email" value="admin@roomnest.com"></div>
+          <div class="form-group"><label>Max Images per Room</label><input type="number" value="8"></div>
+          <div class="form-group"><label>Platform Fee (%)</label><input type="number" value="5"></div>
+          <div class="form-group"><label>Default Booking Status</label>
+            <select style="background:var(--surface2);color:var(--text);"><option>Pending</option><option>Auto-Confirm</option></select>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:4px;">
+            <button class="btn btn-primary" onclick="showToast('✅ Settings saved!')">Save Settings</button>
+            <button class="btn btn-ghost" onclick="showToast('🔄 Cache cleared!')">Clear Cache</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ══ USER VIEW MODAL ══ -->
+<div class="modal-overlay" id="viewUserModal" onclick="if(event.target===this)closeModal('viewUserModal')">
+  <div class="modal" style="width:420px;">
+    <button class="modal-close" onclick="closeModal('viewUserModal')">✕</button>
+    <h2 id="vu-name">User Name</h2>
+    <p class="modal-sub" id="vu-email">email@example.com</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;">ROLE</div><span class="badge badge-blue" id="vu-role">Tenant</span></div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;">STATUS</div><span class="badge badge-green" id="vu-status">Active</span></div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;">BOOKINGS</div><span style="font-size:14px;font-weight:700;">3</span></div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;">REVIEWS</div><span style="font-size:14px;font-weight:700;">2</span></div>
+    </div>
+    <div class="form-group"><label>Change Role</label>
+      <select style="background:var(--surface2);color:var(--text);"><option>Tenant</option><option>Landlord</option><option>Admin</option></select>
+    </div>
+    <div class="form-group"><label>Change Status</label>
+      <select id="vu-status-change" style="background:var(--surface2);color:var(--text);"><option>Active</option><option>Blocked</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="blockUserFromModal()">Block User</button>
+      <button class="btn btn-primary" onclick="saveUserChanges()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EDIT USER MODAL ══ -->
+<div class="modal-overlay" id="editUserModal" onclick="if(event.target===this)closeModal('editUserModal')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('editUserModal')">✕</button>
+    <h2>Edit User</h2>
+    <p class="modal-sub" id="eu-sub">Editing user account</p>
+    <div class="form-group"><label>Full Name</label><input type="text" id="eu-name"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="eu-email"></div>
+    <div class="form-group"><label>Phone Number</label><input type="tel" id="eu-phone" placeholder="+855…"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Role</label>
+        <select id="eu-role" style="background:var(--surface2);color:var(--text);"><option>Tenant</option><option>Landlord</option><option>Admin</option></select>
+      </div>
+      <div class="form-group"><label>Status</label>
+        <select id="eu-status" style="background:var(--surface2);color:var(--text);"><option>Active</option><option>Blocked</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label>Reason for change (logged to Admin_Log)</label><textarea placeholder="e.g. Role updated per user request…" id="eu-reason"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('editUserModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditUser()">Save & Log Action</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADD USER MODAL ══ -->
+<div class="modal-overlay" id="addUserModal" onclick="if(event.target===this)closeModal('addUserModal')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('addUserModal')">✕</button>
+    <h2>Add User</h2>
+    <p class="modal-sub">Create a new user account directly</p>
+    <div class="form-group"><label>Full Name *</label><input type="text" placeholder="e.g. Sokha Lim" id="nu-name"></div>
+    <div class="form-group"><label>Email *</label><input type="email" placeholder="user@email.com"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Phone</label><input type="tel" placeholder="+855 12 000 000"></div>
+      <div class="form-group"><label>Password *</label><input type="password" placeholder="Min. 8 chars"></div>
+    </div>
+    <div class="form-group"><label>Role *</label>
+      <select style="background:var(--surface2);color:var(--text);"><option>Tenant</option><option>Landlord</option><option>Admin</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('addUserModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addUser()">Create User</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CONFIRM DIALOG ══ -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon" id="confirmIcon">⚠️</div>
+    <div class="confirm-title" id="confirmTitle">Confirm Action</div>
+    <div class="confirm-msg" id="confirmMsg">Are you sure you want to proceed?</div>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirmBtn" onclick="executeConfirm()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/app-data.js"></script>
+<script src="js/main-functions.js"></script>
+<script src="js/admin-panel.js"></script>
+</body>
+</html>

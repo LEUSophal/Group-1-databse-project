@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoomNest — Find Your Perfect Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/index.css">
+</head>
+
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#"><div class="logo-dot"></div>RoomNest</a>
+  <div class="nav-links">
+    <a href="#rooms">Browse Rooms</a>
+    <a href="#properties">Properties</a>
+    <a href="#how">How It Works</a>
+    <a href="#reviews">Reviews</a>
+  </div>
+  <div class="nav-right" id="navRight">
+    <button class="btn" onclick="toggleSiteTheme()" id="siteThemeToggle" style="padding:6px 10px;font-size:16px;cursor:pointer;border:1.5px solid var(--border);border-radius:8px;background:transparent;" title="Toggle Dark/Light Mode">🌓</button>
+    <button class="btn btn-ghost" onclick="window.location.href='login.html'">Log in</button>
+    <button class="btn btn-primary" onclick="window.location.href='login.html?tab=register'">Get Started</button>
+  </div>
+</nav>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const userStr = localStorage.getItem('loggedInUser');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      const dashUrl = user.role === 'landlord' ? 'landlord-dashboard.html' : 'tenant_dashboard.html';
+      const navRight = document.getElementById('navRight');
+      if (navRight) {
+        navRight.innerHTML = `
+          <button class="btn btn-ghost" onclick="window.location.href='${dashUrl}'">My Dashboard</button>
+          <button class="btn btn-primary" onclick="logoutUser()">Logout</button>
+        `;
+      }
+    }
+  });
+</script>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-text">
+    <div class="hero-badge">🏘️ &nbsp;Online Room Renting System</div>
+    <h1>Find Your <span>Perfect Room</span> to Call Home</h1>
+    <p class="hero-sub">Search, explore, and book rooms from verified landlords. Whether you're a student, professional, or family — we have the right room for you.</p>
+    <div class="hero-actions">
+      <button class="btn btn-dark btn-lg" onclick="document.getElementById('rooms').scrollIntoView({behavior:'smooth'})">Browse Rooms</button>
+      <button class="btn btn-ghost btn-lg" onclick="window.location.href='login.html?tab=register'">List Your Property →</button>
+    </div>
+    <div class="hero-stats">
+      <div><div class="stat-num">1,200+</div><div class="stat-lbl">Rooms available</div></div>
+      <div><div class="stat-num">340+</div><div class="stat-lbl">Properties</div></div>
+      <div><div class="stat-num">98%</div><div class="stat-lbl">Happy tenants</div></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hv-main">
+      <div class="hv-img"><div class="hv-img-overlay"></div></div>
+      <div class="hv-body">
+        <div class="hv-tag">✓ Available</div>
+        <div class="hv-title">Studio at Riverside Heights</div>
+        <div class="hv-addr">📍 123 Riverside Drive, Siem Reap</div>
+        <div class="hv-meta"><span>🛏 1 Bed</span><span>🚿 Private Bath</span><span>📐 32 m²</span></div>
+        <div class="hv-foot">
+          <div class="hv-price">$280 <small>/ month</small></div>
+          <button class="hv-book" onclick="openRoomDetails('R-01')">Book Now</button>
+        </div>
+      </div>
+    </div>
+    <div class="float-card fc1">
+      <div class="fc-lbl">Rooms booked today</div>
+      <div class="fc-val">12 🏠</div>
+      <div class="fc-sub">Across 8 properties</div>
+    </div>
+    <div class="float-card fc2">
+      <div class="fc-lbl">Average Rating</div>
+      <div class="fc-val">4.8</div>
+      <div class="fc-stars">★★★★★</div>
+    </div>
+  </div>
+</div>
+
+<div class="search-wrap">
+
+  <div class="search-box">
+
+    <div class="search-label">
+      🔍 &nbsp;Find your room
+    </div>
+
+    <div class="search-grid">
+
+      <div class="sf">
+        <label>Location / Address</label>
+
+        <input
+          type="text"
+          id="searchLocation"
+          placeholder="e.g. Siem Reap, Phnom Penh...">
+      </div>
+
+      <div class="sf">
+        <label>Room Type</label>
+
+        <select id="searchType">
+          <option value="">All Types</option>
+          <option value="Studio">Studio</option>
+          <option value="Single">Single Room</option>
+          <option value="Double">Double Room</option>
+          <option value="Apartment">Apartment</option>
+        </select>
+      </div>
+
+      <div class="sf">
+        <label>Max Price</label>
+
+        <select id="searchPrice">
+          <option value="">Any Price</option>
+          <option value="100">$100</option>
+          <option value="200">$200</option>
+          <option value="300">$300</option>
+          <option value="500">$500</option>
+        </select>
+      </div>
+
+      <div class="sf">
+        <label>Capacity</label>
+
+        <select id="searchCapacity">
+          <option value="">Any</option>
+          <option value="1">1 person</option>
+          <option value="2">2 persons</option>
+          <option value="3">3+ persons</option>
+        </select>
+      </div>
+
+      <button
+        class="search-btn"
+        onclick="searchRooms()">
+
+        Search
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<section id="rooms">
+
+  <div class="sec-header">
+    <div>
+      <div class="sec-eyebrow">Available Rooms</div>
+      <div class="sec-title">Browse Rooms Near You</div>
+    </div>
+
+    <a class="view-all" href="#">
+      View all rooms →
+    </a>
+  </div>
+
+  <div id="roomResults" class="rooms-grid"></div>
+
+</section>
+
+<!-- HOW IT WORKS -->
+<div class="how-section" id="how">
+  <div class="sec-eyebrow">How It Works</div>
+  <div class="sec-title">Simple Steps to Your New Home</div>
+  <div class="sec-sub">From search to move-in, we make renting easy and transparent.</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-n">01</div>
+      <div class="step-icon">🔍</div>
+      <h3>Search & Filter</h3>
+      <p>Filter by location, price range, room type, and capacity to find options that match your needs.</p>
+    </div>
+    <div class="step">
+      <div class="step-n">02</div>
+      <div class="step-icon">👁️</div>
+      <h3>View Details</h3>
+      <p>Explore room photos, facilities, size, and pricing. Read reviews from previous tenants.</p>
+    </div>
+    <div class="step">
+      <div class="step-n">03</div>
+      <div class="step-icon">📅</div>
+      <h3>Book Your Room</h3>
+      <p>Select your move-in and move-out dates and submit your booking request to the landlord.</p>
+    </div>
+    <div class="step">
+      <div class="step-n">04</div>
+      <div class="step-icon">🏠</div>
+      <h3>Move In</h3>
+      <p>Once confirmed, move in on your chosen date and leave a review after your stay.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PROPERTIES -->
+<section id="properties">
+  <div class="sec-header">
+    <div>
+      <div class="sec-eyebrow">Featured Properties</div>
+      <div class="sec-title">Verified Properties</div>
+    </div>
+  </div>
+  <div id="propertiesGrid" class="props-grid">
+    <!-- Dynamically rendered -->
+  </div>
+</section>
+
+<!-- PROPERTY DETAIL PAGE -->
+<div class="prop-detail-page" id="propDetail">
+  <div class="rdp-nav">
+    <button class="rdp-back" onclick="closePropDetail()">← Back to Properties</button>
+    <span style="font-size:14px;color:var(--slate);">Property Details &nbsp;/&nbsp; Room Listings</span>
+  </div>
+  <div class="pdp-body">
+    <!-- Property Header -->
+    <div class="pdp-header">
+      <div class="pdp-icon" id="pdpIcon">🏢</div>
+      <div class="pdp-info">
+        <div class="pdp-type" id="pdpType">Apartment Building</div>
+        <h1 class="pdp-name" id="pdpName">Property Name</h1>
+        <div class="pdp-addr" id="pdpAddr">📍 Address</div>
+        <div class="pdp-stats">
+          <div class="pdp-stat">
+            <span class="pdp-stat-val" id="pdpRoomCount">0</span>
+            <span class="pdp-stat-label">Total Rooms</span>
+          </div>
+          <div class="pdp-stat">
+            <span class="pdp-stat-val" id="pdpAvailable">0</span>
+            <span class="pdp-stat-label">Available</span>
+          </div>
+          <div class="pdp-stat">
+            <span class="pdp-stat-val" id="pdpRating">—</span>
+            <span class="pdp-stat-label">Rating</span>
+          </div>
+          <div class="pdp-stat">
+            <span class="pdp-stat-val" id="pdpMinPrice">$0</span>
+            <span class="pdp-stat-label">From / mo</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Landlord Info -->
+    <div class="pdp-landlord" id="pdpLandlord">
+      <span>👤</span>
+      <span id="pdpLandlordName">Landlord</span>
+      <span style="margin-left:20px;">📞</span>
+      <span id="pdpLandlordPhone">N/A</span>
+    </div>
+
+    <!-- Description -->
+    <div id="pdpDescWrap" style="margin-bottom:32px;">
+      <div class="rdp-section-title">About This Property</div>
+      <p class="rdp-desc" id="pdpDesc">No description available.</p>
+    </div>
+
+    <!-- Rooms Grid -->
+    <div class="rdp-section-title">Rooms in This Property</div>
+    <div id="pdpRoomsList" class="pdp-rooms-grid">
+      <!-- Room cards injected here -->
+    </div>
+  </div>
+</div>
+
+<!-- ROLES -->
+<section style="background:var(--card-bg);border-radius:28px;margin:0 0 0 0;padding:80px 40px;">
+  <div class="sec-header" style="margin-bottom:36px;">
+    <div>
+      <div class="sec-eyebrow">Who It's For</div>
+      <div class="sec-title">Built for Everyone</div>
+    </div>
+  </div>
+  <div class="roles-grid">
+    <div class="role-card">
+      <div class="role-emoji">🙋</div>
+      <div class="role-name">Tenants</div>
+      <div class="role-desc">Find and book your perfect room. Access all listings, compare prices and facilities, and manage your bookings in one place.</div>
+      <ul class="role-list">
+        <li>Search rooms by location & price</li>
+        <li>View room photos & facilities</li>
+        <li>Book with move-in / move-out dates</li>
+        <li>Track booking status</li>
+        <li>Leave reviews after your stay</li>
+      </ul>
+      <button class="role-cta" onclick="window.location.href='login.html?tab=register'">Register as Tenant</button>
+    </div>
+    <div class="role-card">
+      <div class="role-emoji">🏠</div>
+      <div class="role-name">Landlords</div>
+      <div class="role-desc">List your property and rooms, manage bookings from tenants, and grow your rental business effortlessly.</div>
+      <ul class="role-list">
+        <li>Add and manage properties</li>
+        <li>Upload room photos & assign facilities</li>
+        <li>Confirm or cancel bookings</li>
+        <li>Track rental income</li>
+        <li>Respond to tenant reviews</li>
+      </ul>
+      <button class="role-cta" onclick="window.location.href='login.html?tab=register'">Register as Landlord</button>
+    </div>
+    <div class="role-card">
+      <div class="role-emoji">🛡️</div>
+      <div class="role-name">Admins</div>
+      <div class="role-desc">Keep the platform safe and trustworthy. Manage all users, properties, bookings, and reviews with full audit logging.</div>
+      <ul class="role-list">
+        <li>Manage users, properties & bookings</li>
+        <li>Moderate reviews</li>
+        <li>Block or deactivate accounts</li>
+        <li>View full admin action logs</li>
+        <li>Ensure platform integrity</li>
+      </ul>
+      <button class="role-cta" onclick="showToast('Contact your system administrator')">Admin Access</button>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section id="reviews">
+  <div class="sec-header">
+    <div>
+      <div class="sec-eyebrow">Tenant Reviews</div>
+      <div class="sec-title">What Tenants Say</div>
+    </div>
+  </div>
+  <div class="reviews-grid" id="recentReviewsContainer">
+    <div class="rev-card">
+      <div class="rev-stars">★★★★★</div>
+      <p class="rev-text">"Found an amazing studio within my budget. The booking process was super smooth, and the landlord was very responsive. Highly recommend RoomNest!"</p>
+      <div class="rev-auth">
+        <div class="rev-av av-b">SR</div>
+        <div><div class="rev-name">Sophea Rith</div><div class="rev-sub">Tenant · Siem Reap</div></div>
+      </div>
+    </div>
+    <div class="rev-card">
+      <div class="rev-stars">★★★★★</div>
+      <p class="rev-text">"As a student moving to Phnom Penh, I was nervous. RoomNest made it so easy — I could filter by price and see exactly what facilities each room had."</p>
+      <div class="rev-auth">
+        <div class="rev-av av-g">DM</div>
+        <div><div class="rev-name">Dara Meas</div><div class="rev-sub">Tenant · Phnom Penh</div></div>
+      </div>
+    </div>
+    <div class="rev-card">
+      <div class="rev-stars">★★★★☆</div>
+      <p class="rev-text">"Great platform for landlords too! I listed my property and got my first booking within 3 days. The booking management dashboard is very clear."</p>
+      <div class="rev-auth">
+        <div class="rev-av av-o">KL</div>
+        <div><div class="rev-name">Kosal Ly</div><div class="rev-sub">Landlord · Battambang</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-block">
+  <h2>Ready to Find Your Room?</h2>
+  <p>Join thousands of tenants and landlords already using RoomNest to simplify room renting.</p>
+  <div class="cta-btns">
+    <button class="btn btn-dark btn-lg" onclick="window.location.href='login.html?tab=register'">Create Free Account</button>
+    <button class="btn btn-ghost btn-lg" onclick="document.getElementById('rooms').scrollIntoView({behavior:'smooth'})">Browse Rooms</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a class="logo" href="#"><div class="logo-dot"></div>RoomNest</a>
+      <p>Online Room Renting System — connecting tenants and landlords across Cambodia.</p>
+    </div>
+    <div class="ft-col">
+      <h4>For Tenants</h4>
+      <a href="#">Browse Rooms</a>
+      <a href="#">Search Properties</a>
+      <a href="#" onclick="openModal('login');return false;">My Bookings</a>
+      <a href="#">Write a Review</a>
+    </div>
+    <div class="ft-col">
+      <h4>For Landlords</h4>
+      <a href="#">Add Property</a>
+      <a href="#">Manage Rooms</a>
+      <a href="#">Booking Requests</a>
+      <a href="#">Upload Images</a>
+    </div>
+    <div class="ft-col">
+      <h4>System</h4>
+      <a href="admin-panel.html">Admin Dashboard</a>
+      <a href="#">User Management</a>
+      <a href="#">Admin Log</a>
+      <a href="#">Help & Support</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 RoomNest — Online Room Renting System</p>
+    <div class="ft-badge">v1.0 · Academic Project</div>
+  </div>
+</footer>
+
+<!-- AUTH MODAL -->
+<div class="overlay" id="authModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="tabs">
+      <button class="tab-btn" id="tabLogin" onclick="switchTab('login')">Log In</button>
+      <button class="tab-btn" id="tabRegister" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="panelLogin">
+      <h2>Welcome back</h2>
+      <p class="modal-sub">Log in to access your account</p>
+      <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
+      <div class="form-group"><label>Login As</label><select id="loginRole"><option value="tenant">Tenant</option><option value="landlord">Landlord</option><option value="admin">Admin</option></select></div>
+      <div class="modal-footer">
+        <button class="btn btn-primary btn-lg" onclick="doLogin()">Log In</button>
+      </div>
+      <p class="modal-switch">Don't have an account? <a onclick="switchTab('register')">Register here</a></p>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="panelRegister" style="display:none">
+      <h2>Create account</h2>
+      <p class="modal-sub">Join as a tenant or landlord</p>
+      <div class="form-group"><label>Full Name</label><input type="text" id="regName" placeholder="Your full name"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="your@email.com"></div>
+      <div class="form-group"><label>Phone Number</label><input type="tel" id="regPhone" placeholder="+855 ..."></div>
+      <div class="form-row">
+        <div class="form-group"><label>Password</label><input type="password" id="regPassword" placeholder="••••••••"></div>
+        <div class="form-group"><label>Confirm Password</label><input type="password" id="regConfirm" placeholder="••••••••"></div>
+      </div>
+      <div class="form-group">
+        <label>Join as</label>
+        <select id="regRole">
+          <option value="tenant">Tenant</option>
+          <option value="landlord">Landlord</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary btn-lg" onclick="doRegister()">Create Account</button>
+      </div>
+      <p class="modal-switch">Already have an account? <a onclick="switchTab('login')">Log in</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ROOM DETAIL PAGE -->
+<div class="room-detail-page" id="roomDetail">
+  <div class="rdp-nav">
+    <button class="rdp-back" onclick="closeRoomDetail()">← Back to Rooms</button>
+    <span style="font-size:14px;color:var(--slate);">Listing Details &nbsp;/&nbsp; Room Information</span>
+  </div>
+  <div class="rdp-body">
+    <div class="rdp-gallery">🛏</div>
+    <div class="rdp-grid">
+      <div class="rdp-info">
+        <div class="rdp-tag status-available">✓ Available</div>
+        <h1 class="rdp-title">Sunrise Garden Residence - Single</h1>
+        <div class="rdp-prop">📍 Toul Kork, Phnom Penh</div>
+        <div class="landlord-card">
+          <div class="landlord-info-item">
+            <span class="landlord-icon">👤</span>
+            <span id="rdpLandlordName">Chea Bora</span>
+          </div>
+          <div class="landlord-info-item">
+            <span class="landlord-icon color-pink">📞</span>
+            <span id="rdpLandlordPhone">012999888</span>
+          </div>
+        </div>
+        <div class="rdp-meta-grid">
+          <div class="rdp-meta-box"><div class="v">Studio</div><div class="k">Room Type</div></div>
+          <div class="rdp-meta-box"><div class="v">32 m²</div><div class="k">Room Size</div></div>
+          <div class="rdp-meta-box"><div class="v">2</div><div class="k">Capacity</div></div>
+          <div class="rdp-meta-box"><div class="v">4.8 ⭐</div><div class="k">Rating</div></div>
+        </div>
+        <div class="rdp-section-title">Description</div>
+        <p class="rdp-desc">Modern living in the heart of Toul Kork with rooftop garden and 24/7 security.</p>
+        <div class="rdp-section-title">Facilities</div>
+        <div class="rdp-facilities">
+          <span class="rdp-fac">📶 WiFi</span>
+          <span class="rdp-fac">❄️ Air Conditioning</span>
+          <span class="rdp-fac">🍳 Kitchen</span>
+          <span class="rdp-fac">🚿 Private Bathroom</span>
+          <span class="rdp-fac">🅿️ Parking</span>
+          <span class="rdp-fac">🔒 Security</span>
+        </div>
+        <div class="rdp-section-title">Property Reviews</div>
+        <div id="propertyReviewsContainer"></div>
+      </div>
+      <div class="book-box">
+        <div class="book-price">$280 <small>/ month</small></div>
+        <div class="book-rating"><span>★★★★★</span> 5.0 · 12 reviews</div>
+        <div class="date-inputs">
+          <div><label>Move-in Date</label><input type="date" id="moveIn" onchange="calcTotal()"></div>
+          <div><label>Move-out Date</label><input type="date" id="moveOut" onchange="calcTotal()"></div>
+        </div>
+        <div class="book-total"><span>Monthly rent</span><span>$280</span></div>
+        <div class="book-total" id="totalLine" style="display:none"><span>Duration</span><span id="durText">—</span></div>
+        <div class="book-total final"><span>Total</span><span id="totalAmt">$280</span></div>
+        <button class="book-now-btn" onclick="doBooking()">Book This Room</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- BOOKING MODAL -->
+<div
+  id="bookingModal"
+  class="overlay"
+  style="display:none;">
+
+  <div class="modal">
+
+    <button
+      class="modal-close"
+      onclick="closeBookingModal()">
+
+      ✕
+    </button>
+
+    <h2>Book Room</h2>
+
+    <p class="modal-sub">
+      Choose your booking dates.
+    </p>
+
+    <div class="form-group">
+      <label>Move-in Date</label>
+
+      <input
+        type="date"
+        id="moveInDate">
+    </div>
+
+    <div class="form-group">
+      <label>Move-out Date</label>
+
+      <input
+        type="date"
+        id="moveOutDate">
+    </div>
+
+    <div class="modal-footer">
+
+      <button
+        class="btn btn-primary btn-lg"
+        onclick="confirmBooking()">
+
+        Confirm Booking
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/app-data.js"></script>
+<script src="js/main-functions.js"></script>
+<script src="js/index.js"></script>
+
+<script>
+window.onload = async function() { await initData(); 
+  searchRooms();
+  renderRecentReviews();
+  renderProperties();
+  applySiteTheme();
+};
+</script>
+
+</body>
+</html>
