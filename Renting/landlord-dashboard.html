@@ -192,6 +192,7 @@
                 <th>Address</th>
                 <th>Rooms</th>
                 <th>Status</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody id="myPropertiesList">
@@ -215,10 +216,35 @@
                 <th>Property</th>
                 <th>Price/mo</th>
                 <th>Status</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody id="myRoomsList">
               <!-- Rooms injected here -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- BOOKINGS SECTION -->
+      <section id="page-bookings" class="page-section">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+          <h2 class="section-title" style="margin-bottom:0;">Booking Management</h2>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Tenant</th>
+                <th>Phone</th>
+                <th>Room</th>
+                <th>Dates</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="allBookingsList">
+              <!-- All bookings injected here -->
             </tbody>
           </table>
         </div>
@@ -304,6 +330,92 @@
     </div>
   </div>
 
+  <!-- EDIT PROPERTY MODAL -->
+  <div class="modal-overlay" id="editPropertyModal">
+    <div class="modal">
+      <h2 style="margin-bottom:6px;">Edit Property</h2>
+      <p id="editPropSub" style="color:var(--text-muted); font-size:13px; margin-bottom:20px;"></p>
+      <input type="hidden" id="editPropId">
+      <div class="form-group">
+        <label>Property Name</label>
+        <input type="text" id="editPropName" placeholder="Property name">
+      </div>
+      <div class="form-group">
+        <label>Property Type</label>
+        <select id="editPropType">
+          <option value="Apartment Building">Apartment Building</option>
+          <option value="Guesthouse">Guesthouse</option>
+          <option value="Condo">Condo</option>
+          <option value="Villa">Villa</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" id="editPropAddr" placeholder="Address">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="editPropDesc" rows="3" placeholder="Brief description..."></textarea>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-ghost" style="flex:1;" onclick="closeModal('editPropertyModal')">Cancel</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="saveEditProperty()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT ROOM MODAL -->
+  <div class="modal-overlay" id="editRoomModal">
+    <div class="modal" style="max-width:600px;">
+      <h2 style="margin-bottom:6px;">Edit Room</h2>
+      <p id="editRoomSub" style="color:var(--text-muted); font-size:13px; margin-bottom:20px;"></p>
+      <input type="hidden" id="editRoomId">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Room Type</label>
+          <select id="editRoomType">
+            <option value="Studio">Studio</option>
+            <option value="Single">Single Room</option>
+            <option value="Double">Double Room</option>
+            <option value="Apartment">Apartment</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="editRoomStatus">
+            <option value="available">Available</option>
+            <option value="booked">Booked</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Price per Month ($)</label>
+          <input type="number" id="editRoomPrice" placeholder="250">
+        </div>
+        <div class="form-group">
+          <label>Room Size (m²)</label>
+          <input type="number" id="editRoomSize" placeholder="32">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Capacity (Persons)</label>
+          <input type="number" id="editRoomCap" placeholder="2">
+        </div>
+        <div class="form-group">
+          <label>Facilities (comma-separated)</label>
+          <input type="text" id="editRoomFac" placeholder="WiFi, AC, Kitchen...">
+        </div>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-ghost" style="flex:1;" onclick="closeModal('editRoomModal')">Cancel</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="saveEditRoom()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <!-- SCRIPTS -->
@@ -326,7 +438,7 @@
       const rooms = getData('rooms').filter(r => properties.some(p => String(p.property_id) === String(r.property_id)));
       const bookings = getData('bookings').filter(b => rooms.some(r => String(r.room_id) === String(b.room_id)));
       
-      const pending = bookings.filter(b => b.status === 'pending').length;
+      const pending = bookings.filter(b => b.booking_status === 'Pending').length;
       const revenue = rooms.filter(r => r.availability_status === 'Booked').reduce((acc, r) => acc + Number(r.price_per_month), 0);
 
       document.getElementById('stat-props').textContent = properties.length;
@@ -342,12 +454,13 @@
       renderProperties(properties);
       renderRooms(rooms);
       renderBookings(bookings);
+      renderAllBookings(bookings);
     }
 
     function renderProperties(list) {
       const el = document.getElementById('myPropertiesList');
       if(!el) return;
-      el.innerHTML = list.length === 0 ? '<tr><td colspan="5" style="text-align:center; padding:20px;">No properties found.</td></tr>' : 
+      el.innerHTML = list.length === 0 ? '<tr><td colspan="6" style="text-align:center; padding:20px;">No properties found.</td></tr>' :
         list.map(p => `
           <tr>
             <td><span class="prop-link">${p.property_name}</span></td>
@@ -355,6 +468,10 @@
             <td>${p.address}</td>
             <td>${p.total_rooms || 0}</td>
             <td><span class="badge badge-confirmed">ACTIVE</span></td>
+            <td><div style="display:flex;gap:5px;">
+              <button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;" onclick="openEditPropertyModal('${p.property_id}')">✏️ Edit</button>
+              <button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;color:#f87171;" onclick="deletePropertyById('${p.property_id}')">🗑</button>
+            </div></td>
           </tr>
         `).join('');
     }
@@ -362,13 +479,17 @@
     function renderRooms(list) {
       const el = document.getElementById('myRoomsList');
       if(!el) return;
-      el.innerHTML = list.length === 0 ? '<tr><td colspan="4" style="text-align:center; padding:20px;">No rooms found.</td></tr>' : 
+      el.innerHTML = list.length === 0 ? '<tr><td colspan="5" style="text-align:center; padding:20px;">No rooms found.</td></tr>' :
         list.map(r => `
           <tr>
             <td><span class="prop-link">${r.room_title}</span></td>
             <td>${(getProperty(r.property_id) || {}).property_name || 'Unknown'}</td>
             <td>$${r.price_per_month}</td>
-            <td><span class="badge badge-${r.availability_status === 'Available' ? 'confirmed' : 'cancelled'}">${r.availability_status.toUpperCase()}</span></td>
+            <td><span class="badge badge-${r.availability_status === 'Available' ? 'confirmed' : r.availability_status === 'Maintenance' ? 'pending' : 'cancelled'}">${r.availability_status.toUpperCase()}</span></td>
+            <td><div style="display:flex;gap:5px;">
+              <button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;" onclick="openEditRoomModal('${r.room_id}')">✏️ Edit</button>
+              <button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;color:#f87171;" onclick="deleteRoomById('${r.room_id}')">🗑</button>
+            </div></td>
           </tr>
         `).join('');
     }
@@ -396,7 +517,7 @@
               <td>${tenant.full_name}</td>
               <td style="color:var(--accent); font-size:13px; font-weight:500;">${tenant.phone || 'N/A'}</td>
               <td>${room ? (room.type || room.room_type) : 'Room'}</td>
-              <td>${b.move_in_date || b.check_in} — ${b.move_out_date || b.check_out}</td>
+              <td>${formatDate(b.check_in || b.move_in_date)} — ${formatDate(b.check_out || b.move_out_date)}</td>
               <td><span class="badge badge-${b.booking_status.toLowerCase()}">${b.booking_status.toUpperCase()}</span></td>
               <td><div style="display:flex; gap:5px;">${actions}</div></td>
             </tr>
@@ -466,7 +587,117 @@
       setTimeout(() => t.classList.remove('show'), 3000);
     }
 
+    function renderAllBookings(list) {
+      const el = document.getElementById('allBookingsList');
+      if(!el) return;
+      el.innerHTML = list.length === 0 ? '<tr><td colspan="6" style="text-align:center; padding:20px;">No booking requests.</td></tr>' :
+        list.map(b => {
+          const room = getRoom(b.room_id);
+          const tenant = (getData('tenants').find(t => String(t.idTenant) === String(b.user_id))) || {full_name: 'Tenant', phone: 'N/A'};
+          let actions = '';
+          if (b.booking_status === 'Pending') {
+            actions = `<button class="btn btn-primary btn-sm" style="padding:4px 8px;font-size:11px;" onclick="acceptBooking('${b.booking_id}')">Accept</button>
+              <button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;color:#f87171;" onclick="rejectBooking('${b.booking_id}')">Reject</button>`;
+          } else {
+            actions = `<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;opacity:0.6;" onclick="deleteBooking('${b.booking_id}')">Delete</button>`;
+          }
+          return `<tr>
+            <td>${tenant.full_name}</td>
+            <td style="color:var(--accent);font-size:13px;font-weight:500;">${tenant.phone || 'N/A'}</td>
+            <td>${room ? (room.type || room.room_type) : 'Room'}</td>
+            <td>${formatDate(b.check_in)} — ${formatDate(b.check_out)}</td>
+            <td><span class="badge badge-${b.booking_status.toLowerCase()}">${b.booking_status.toUpperCase()}</span></td>
+            <td><div style="display:flex;gap:5px;">${actions}</div></td>
+          </tr>`;
+        }).join('');
+    }
+
+    function openEditPropertyModal(propertyId) {
+      const p = getData('properties').find(x => String(x.property_id) === String(propertyId));
+      if (!p) return;
+      document.getElementById('editPropId').value = p.property_id;
+      document.getElementById('editPropSub').textContent = 'Editing: ' + p.property_name;
+      document.getElementById('editPropName').value = p.property_name;
+      document.getElementById('editPropType').value = p.property_type || 'Apartment Building';
+      document.getElementById('editPropAddr').value = p.address;
+      document.getElementById('editPropDesc').value = p.description || '';
+      openModal('editPropertyModal');
+    }
+
+    async function saveEditProperty() {
+      const id = document.getElementById('editPropId').value;
+      const title = document.getElementById('editPropName').value.trim();
+      const location = document.getElementById('editPropAddr').value.trim();
+      const property_type = document.getElementById('editPropType').value;
+      const description = document.getElementById('editPropDesc').value.trim();
+      if (!title || !location) { showToast('⚠️ Name and address are required.'); return; }
+      try {
+        const res = await apiUpdateProperty(id, { title, location, property_type, description });
+        if (res.success) {
+          showToast('✅ Property updated!');
+          closeModal('editPropertyModal');
+          await initLandlordDashboard();
+        } else { showToast('❌ Failed to update property.'); }
+      } catch(err) { showToast('❌ Server error.'); }
+    }
+
+    function openEditRoomModal(roomId) {
+      const r = getData('rooms').find(x => String(x.room_id) === String(roomId));
+      if (!r) return;
+      document.getElementById('editRoomId').value = r.room_id;
+      document.getElementById('editRoomSub').textContent = 'Editing: ' + r.room_title;
+      document.getElementById('editRoomType').value = r.room_type || 'Studio';
+      document.getElementById('editRoomStatus').value = r.availability_status === 'Available' ? 'available' : (r.availability_status === 'Booked' ? 'booked' : 'maintenance');
+      document.getElementById('editRoomPrice').value = r.price_per_month;
+      document.getElementById('editRoomSize').value = r.size || '';
+      document.getElementById('editRoomCap').value = r.capacity || '';
+      document.getElementById('editRoomFac').value = r.facilities || '';
+      openModal('editRoomModal');
+    }
+
+    async function saveEditRoom() {
+      const id = document.getElementById('editRoomId').value;
+      const type = document.getElementById('editRoomType').value;
+      const status = document.getElementById('editRoomStatus').value;
+      const price = document.getElementById('editRoomPrice').value;
+      const size = document.getElementById('editRoomSize').value;
+      const capacity = document.getElementById('editRoomCap').value;
+      const facilities = document.getElementById('editRoomFac').value.trim();
+      if (!price || !size || !capacity) { showToast('⚠️ Price, size, and capacity are required.'); return; }
+      try {
+        const res = await apiUpdateRoom(id, { type, status, price: Number(price), size: Number(size), capacity: Number(capacity), facilities });
+        if (res.success) {
+          showToast('✅ Room updated!');
+          closeModal('editRoomModal');
+          await initLandlordDashboard();
+        } else { showToast('❌ Failed to update room.'); }
+      } catch(err) { showToast('❌ Server error.'); }
+    }
+
+    async function deletePropertyById(id) {
+      if (!confirm('Delete this property? All rooms and bookings will also be deleted.')) return;
+      try {
+        const res = await apiDeleteProperty(id);
+        if (res.success) { showToast('🗑️ Property deleted.'); await initLandlordDashboard(); }
+        else { showToast('❌ Failed to delete property.'); }
+      } catch(err) { showToast('❌ Server error.'); }
+    }
+
+    async function deleteRoomById(id) {
+      if (!confirm('Delete this room? Associated bookings will also be deleted.')) return;
+      try {
+        const res = await apiDeleteRoom(id);
+        if (res.success) { showToast('🗑️ Room deleted.'); await initLandlordDashboard(); }
+        else { showToast('❌ Failed to delete room.'); }
+      } catch(err) { showToast('❌ Server error.'); }
+    }
+
     document.addEventListener('DOMContentLoaded', initLandlordDashboard);
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+      }
+    });
   </script>
 </body>
 </html>

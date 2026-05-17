@@ -22,7 +22,7 @@ function getData(key) {
         capacity: Number(r.capacity) || 1,
         size: Number(r.size) || 0,
         facilities: r.facilities || "",
-        availability_status: normalizedStatus === "available" ? "Available" : "Booked",
+        availability_status: normalizedStatus === "available" ? "Available" : (normalizedStatus === "maintenance" ? "Maintenance" : "Booked"),
         description: prop.description || "",
         property_type: prop.property_type || "",
         rating: Number(getPropertyAvgRating(r.Property_idProperty) || 0)
@@ -56,7 +56,7 @@ function getData(key) {
         room_id: String(rid),
         check_in: b.check_in,
         check_out: b.check_out,
-        booking_status: b.status || "Pending"
+        booking_status: (b.status || 'pending').charAt(0).toUpperCase() + (b.status || 'pending').slice(1)
       };
     });
   }

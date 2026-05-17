@@ -219,10 +219,6 @@
   <script src="js/app-data.js"></script>
   <script src="js/main-functions.js"></script>
   <script>
-    window.onerror = function(msg, url, line) {
-      alert("⚠️ Script Error: " + msg + "\nAt: " + url + ":" + line);
-      return false;
-    };
 
     async function initTenantDashboard() {
       try {
@@ -272,14 +268,6 @@
       if (inName) inName.value = user.full_name;
       if (inEmail) inEmail.value = user.email;
 
-      // Add Diagnostic Button (Temporal)
-      const diagBtn = document.createElement('button');
-      diagBtn.textContent = "🔍 Run Diagnostics";
-      diagBtn.style = "position:fixed; bottom:20px; right:20px; z-index:9999; padding:10px 20px; background:var(--accent); color:white; border:none; border-radius:8px; cursor:pointer;";
-      diagBtn.onclick = () => {
-        alert("--- DIAGNOSTICS ---\nUser ID: " + user.user_id + "\nName: " + user.full_name + "\nRole: " + user.role + "\nAll Bookings Count: " + allBookings.length + "\nFiltered Bookings: " + bookings.length + "\nAPI URL: " + API_URL);
-      };
-      document.body.appendChild(diagBtn);
 
       // Filter Data
       const allBookings = getData('bookings');
@@ -381,12 +369,12 @@
       reviewsList.innerHTML = reviews.length === 0
         ? '<div style="text-align:center; padding:40px; color:var(--text-muted);">You haven\'t written any reviews yet.</div>'
         : reviews.map(r => {
-          const prop = getProperty(r.Property_idProperty);
+          const prop = getProperty(r.property_id);
           return `
             <div class="table-card" style="padding:20px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:flex-start;">
               <div style="flex:1;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                   <h4 style="font-size:16px;">${prop ? prop.property_name : 'Property'}</h4>
+                   <h4 style="font-size:16px;">${prop ? (prop.title || prop.property_name) : 'Property'}</h4>
                    <div style="color:#fbbf24;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
                 </div>
                 <p style="color:var(--text-muted); font-size:14px; line-height:1.5;">"${r.comment}"</p>

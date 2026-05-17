@@ -125,6 +125,15 @@ async function apiDeleteProperty(id) {
   return res.json();
 }
 
+async function apiUpdateProperty(id, data) {
+  const res = await fetch(`${API_URL}/properties/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  return res.json();
+}
+
 async function apiAddBooking(booking) {
   const res = await fetch(`${API_URL}/bookings`, {
     method: 'POST',
