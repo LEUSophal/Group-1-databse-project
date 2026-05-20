@@ -29,6 +29,15 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   const { check_in, check_out, Tenant_idTenant, Room_idRoom } = req.body;
   try {
+    // Guard: ensure room is still available before booking
+    const [roomRows] = await pool.execute('SELECT status FROM Room WHERE idRoom = ?', [Room_idRoom]);
+    if (roomRows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Room not found' });
+    }
+    if (roomRows[0].status !== 'available') {
+      return res.status(409).json({ success: false, message: 'This room is not available for booking' });
+    }
+
     const [result] = await pool.execute(
       'INSERT INTO Booking (check_in, check_out, status, Tenant_idTenant, Room_idRoom, Admin_idAdmin) VALUES (?, ?, ?, ?, ?, 1)',
       [check_in, check_out, 'pending', Tenant_idTenant, Room_idRoom]

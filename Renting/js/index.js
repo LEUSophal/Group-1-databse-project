@@ -186,8 +186,8 @@ function openPropDetail(propId) {
             <div class="pdp-room-footer">
               <div class="pdp-room-price">$${r.price || 0} <small>/ mo</small></div>
               ${isAvailable 
-                ? '<button class="pdp-room-book" onclick="event.stopPropagation();">View & Book</button>' 
-                : '<button class="pdp-room-book" disabled>Not Available</button>'}
+                ? '<button class="pdp-room-book" onclick="event.stopPropagation(); openRoomFromProp(\'' + roomId + '\')">View &amp; Book</button>' 
+                : '<button class="pdp-room-book pdp-room-book-disabled" disabled>Not Available</button>'}
             </div>
           </div>
         </div>
@@ -243,10 +243,39 @@ function openRoomFromProp(roomId) {
     const titleEl = detail.querySelector('.rdp-title');
     const propEl = detail.querySelector('.rdp-prop');
     const priceEl = detail.querySelector('.book-price');
+    const badgeEl = detail.querySelector('.rdp-tag');
+    const bookBtn = detail.querySelector('.book-now-btn');
+    const isAvailable = (room.status || '').toLowerCase() === 'available';
     
     if (titleEl) titleEl.textContent = prop.title ? `${prop.title} — ${roomType}` : roomType;
     if (propEl) propEl.innerHTML = `🏢 ${prop.title || 'Property'} &nbsp;·&nbsp; 📍 ${prop.location || 'Unknown'}`;
     if (priceEl) priceEl.innerHTML = `$${room.price || 0} <small>/ month</small>`;
+
+    // Fix Bug 1: update the status badge
+    if (badgeEl) {
+      badgeEl.textContent = isAvailable ? '✓ Available' : '✕ Booked';
+      badgeEl.classList.toggle('status-available', isAvailable);
+      badgeEl.classList.toggle('status-booked', !isAvailable);
+    }
+
+    // Fix Bug 3: disable/red the book button
+    if (bookBtn) {
+      if (isAvailable) {
+        bookBtn.disabled = false;
+        bookBtn.textContent = 'Book This Room';
+        bookBtn.style.background = '';
+        bookBtn.style.cursor = '';
+        bookBtn.style.opacity = '';
+        bookBtn.onclick = function() { doBooking(); };
+      } else {
+        bookBtn.disabled = true;
+        bookBtn.textContent = 'Room Not Available';
+        bookBtn.style.background = 'linear-gradient(135deg, #dc2626, #b91c1c)';
+        bookBtn.style.cursor = 'not-allowed';
+        bookBtn.style.opacity = '0.85';
+        bookBtn.onclick = null;
+      }
+    }
 
     detail.dataset.currentRoomPrice = room.price || 0;
     detail.dataset.currentRoomId = roomId;

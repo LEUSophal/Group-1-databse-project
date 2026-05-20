@@ -7,13 +7,33 @@ router.post('/login', async (req, res) => {
   const { email, password, role } = req.body;
   console.log(`Login attempt: ${email} as ${role}`);
   try {
+    if (role === 'admin') {
+      // Admin login: query the Admin table
+      const [rows] = await pool.execute(
+        'SELECT * FROM Admin WHERE email = ? AND password = ? ORDER BY idAdmin ASC',
+        [email, password]
+      );
+      console.log(`Admin query result for ${email}:`, rows.length, 'rows found');
+      if (rows.length > 0) {
+        const user = rows[0];
+        user.role = 'admin';
+        // Normalise id field so frontend can use user_id consistently
+        user.idTenant = undefined;
+        user.idLandlord = undefined;
+        return res.json({ success: true, user });
+      } else {
+        return res.json({ success: false, message: 'Invalid admin email or password' });
+      }
+    }
+
+    // Tenant / Landlord login
     const table = role === 'landlord' ? 'Landlord' : 'Tenant';
     const idField = role === 'landlord' ? 'idLandlord' : 'idTenant';
     const [rows] = await pool.execute(
       `SELECT * FROM ${table} WHERE email = ? AND password = ? ORDER BY ${idField} ASC`,
       [email, password]
     );
-    console.log(`Query result for ${email}:`, rows.length, "rows found");
+    console.log(`Query result for ${email}:`, rows.length, 'rows found');
     if (rows.length > 0) {
       const user = rows[0];
       user.role = role;
@@ -22,7 +42,7 @@ router.post('/login', async (req, res) => {
       res.json({ success: false, message: 'Invalid email or password' });
     }
   } catch (err) {
-    console.error("Login error:", err);
+    console.error('Login error:', err);
     res.status(500).json({ error: err.message });
   }
 });

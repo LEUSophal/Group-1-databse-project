@@ -64,8 +64,11 @@ async function registerUser() {
   const phone = phoneInput ? phoneInput.value.trim() : "";
 
   let role = "tenant";
-  if (roleInput) role = roleInput.value;
-  else if (typeof selectedRole !== "undefined") role = selectedRole;
+  if (roleInput) {
+    role = roleInput.value;
+  } else if (typeof selectedRole !== "undefined" && selectedRole) {
+    role = selectedRole;
+  }
 
   if (!fullName || !email || !password) {
     if (typeof showToast === "function") showToast("Please fill all required fields.");
@@ -220,11 +223,32 @@ function openRoomDetails(roomId) {
   document.getElementById("totalAmt").textContent = `$${room.price || room.price_per_month}`;
 
   const availabilityBadge = modal.querySelector(".rdp-tag");
+  const bookBtn = modal.querySelector(".book-now-btn");
+  let isAvailable = true;
   if (availabilityBadge) {
-    const isAvailable = String(room.status || room.availability_status || "available").toLowerCase().includes("available");
-    availabilityBadge.textContent = isAvailable ? "✓ Available" : "Booked";
+    isAvailable = String(room.status || room.availability_status || "available").toLowerCase().includes("available");
+    availabilityBadge.textContent = isAvailable ? "✓ Available" : "✕ Booked";
     availabilityBadge.classList.toggle("status-available", isAvailable);
     availabilityBadge.classList.toggle("status-booked", !isAvailable);
+  }
+
+  // Update Book button based on availability
+  if (bookBtn) {
+    if (isAvailable) {
+      bookBtn.disabled = false;
+      bookBtn.textContent = "Book This Room";
+      bookBtn.style.background = "";
+      bookBtn.style.cursor = "";
+      bookBtn.style.opacity = "";
+      bookBtn.onclick = function() { doBooking(); };
+    } else {
+      bookBtn.disabled = true;
+      bookBtn.textContent = "Room Not Available";
+      bookBtn.style.background = "linear-gradient(135deg, #dc2626, #b91c1c)";
+      bookBtn.style.cursor = "not-allowed";
+      bookBtn.style.opacity = "0.85";
+      bookBtn.onclick = null;
+    }
   }
 
   const stats = modal.querySelectorAll(".rdp-meta-box .v");
