@@ -166,11 +166,11 @@ async function apiLogin(email, password, role) {
   return res.json();
 }
 
-async function apiRegister(name, email, phone, password, role) {
+async function apiRegister(name, email, phone, password, role, gender) {
   const res = await fetch(`${API_URL}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, phone, password, role })
+    body: JSON.stringify({ name, email, phone, password, role, gender })
   });
   return res.json();
 }
@@ -211,5 +211,18 @@ async function apiAddReview(review) {
 
 async function apiDeleteReview(id) {
   const res = await fetch(`${API_URL}/reviews/${id}`, { method: 'DELETE' });
+  return res.json();
+}
+
+async function apiUploadImages(files) {
+  if (!files || files.length === 0) return { success: true, urls: [] };
+  const formData = new FormData();
+  for (let i = 0; i < files.length; i++) {
+    formData.append('images', files[i]);
+  }
+  const res = await fetch(`${API_URL}/upload`, {
+    method: 'POST',
+    body: formData // Note: Content-Type is NOT set, fetch will set it automatically with the boundary
+  });
   return res.json();
 }

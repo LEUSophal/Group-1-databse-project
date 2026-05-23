@@ -56,6 +56,13 @@
 </head>
 <body>
 
+  <!-- PAGE LOADER -->
+  <div id="pageLoader">
+    <div class="loader-logo">🏠 RoomNest</div>
+    <div class="spinner-ring"></div>
+    <div class="loader-text">Loading your dashboard...</div>
+  </div>
+
   <div class="dashboard-wrapper">
     <!-- TOP NAVBAR -->
     <nav class="top-nav">
@@ -107,6 +114,10 @@
           <a class="nav-item" onclick="openModal('addRoomModal')">
             <span class="icon">＋</span>
             <span>Add Room</span>
+          </a>
+          <a class="nav-item" onclick="showPage('profile', this)">
+            <span class="icon">👤</span>
+            <span>Profile</span>
           </a>
           <a class="nav-item logout-item" onclick="logoutUser()">
             <span class="icon">🚪</span>
@@ -196,7 +207,9 @@
               </tr>
             </thead>
             <tbody id="myPropertiesList">
-              <!-- Properties injected here -->
+              <!-- skeleton while loading -->
+              <tr class="skeleton-row"><td><div class="skeleton-bar medium"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar long"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar badge"></div></td><td><div class="skeleton-bar short"></div></td></tr>
+              <tr class="skeleton-row"><td><div class="skeleton-bar long"></div></td><td><div class="skeleton-bar medium"></div></td><td><div class="skeleton-bar medium"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar badge"></div></td><td><div class="skeleton-bar short"></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -220,7 +233,10 @@
               </tr>
             </thead>
             <tbody id="myRoomsList">
-              <!-- Rooms injected here -->
+              <!-- skeleton while loading -->
+              <tr class="skeleton-row"><td><div class="skeleton-bar medium"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar badge"></div></td><td><div class="skeleton-bar short"></div></td></tr>
+              <tr class="skeleton-row"><td><div class="skeleton-bar long"></div></td><td><div class="skeleton-bar medium"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar badge"></div></td><td><div class="skeleton-bar short"></div></td></tr>
+              <tr class="skeleton-row"><td><div class="skeleton-bar medium"></div></td><td><div class="skeleton-bar long"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar badge"></div></td><td><div class="skeleton-bar short"></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -247,6 +263,44 @@
               <!-- All bookings injected here -->
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- PROFILE SECTION -->
+      <section id="page-profile" class="page-section">
+        <h2 class="section-title">My Profile</h2>
+        <div class="table-card" style="padding: 30px; max-width: 600px;">
+           <p style="color: var(--text-muted); margin-bottom: 20px;">Manage your account information.</p>
+           <div style="display: flex; flex-direction: column; gap: 15px;">
+              <div style="display: flex; align-items: center; gap: 15px;">
+                <img id="profile-img-preview" src='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cbd5e1"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>' style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); background-color: #f1f5f9;">
+                <div>
+                  <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Profile Picture</label>
+                  <input type="file" id="inputProfileImg" accept="image/*" style="font-size: 14px;">
+                </div>
+              </div>
+              <div>
+                <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Full Name</label>
+                <input type="text" id="inputName" style="width: 100%; background: var(--input-bg); border: 1px solid var(--border); color: var(--input-text); padding: 10px; border-radius: 8px;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Email</label>
+                <input type="email" id="inputEmail" readonly style="width: 100%; background: var(--dash-bg); border: 1px solid var(--border); color: var(--text-muted); padding: 10px; border-radius: 8px; cursor: not-allowed;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Phone Number</label>
+                <input type="tel" id="inputPhone" style="width: 100%; background: var(--dash-bg); border: 1px solid var(--border); color: var(--text-main); padding: 10px; border-radius: 8px;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Gender</label>
+                <select id="inputGender" style="width: 100%; background: var(--dash-bg); border: 1px solid var(--border); color: var(--text-main); padding: 10px; border-radius: 8px;">
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <button class="nav-item active" style="border: none; width: fit-content; padding: 10px 20px; color: var(--accent);" onclick="saveProfile()">Save Changes</button>
+           </div>
         </div>
       </section>
 
@@ -277,6 +331,10 @@
       <div class="form-group">
         <label>Description</label>
         <textarea id="pDesc" placeholder="Brief description..." rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Property Images (Max 2)</label>
+        <input type="file" id="addPropImages" accept="image/*" multiple>
       </div>
       <div style="display:flex; gap:10px;">
         <button class="btn btn-ghost" style="flex:1;" onclick="closeModal('addPropertyModal')">Cancel</button>
@@ -323,6 +381,10 @@
           <input type="text" id="rFac" placeholder="WiFi, AC, Kitchen...">
         </div>
       </div>
+      <div class="form-group">
+        <label>Room Images (Max 5)</label>
+        <input type="file" id="addRoomImages" accept="image/*" multiple>
+      </div>
       <div style="display:flex; gap:10px;">
         <button class="btn btn-ghost" style="flex:1;" onclick="closeModal('addRoomModal')">Cancel</button>
         <button class="btn btn-primary" style="flex:1;" onclick="addRoom()">Add Room</button>
@@ -356,6 +418,11 @@
       <div class="form-group">
         <label>Description</label>
         <textarea id="editPropDesc" rows="3" placeholder="Brief description..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Update Images (Max 2)</label>
+        <input type="file" id="editPropImages" accept="image/*" multiple>
+        <small style="color:var(--text-muted);display:block;margin-top:5px;">Leave empty to keep existing images.</small>
       </div>
       <div style="display:flex; gap:10px;">
         <button class="btn btn-ghost" style="flex:1;" onclick="closeModal('editPropertyModal')">Cancel</button>
@@ -409,6 +476,11 @@
           <input type="text" id="editRoomFac" placeholder="WiFi, AC, Kitchen...">
         </div>
       </div>
+      <div class="form-group">
+        <label>Update Images (Max 5)</label>
+        <input type="file" id="editRoomImages" accept="image/*" multiple>
+        <small style="color:var(--text-muted);display:block;margin-top:5px;">Leave empty to keep existing images.</small>
+      </div>
       <div style="display:flex; gap:10px;">
         <button class="btn btn-ghost" style="flex:1;" onclick="closeModal('editRoomModal')">Cancel</button>
         <button class="btn btn-primary" style="flex:1;" onclick="saveEditRoom()">Save Changes</button>
@@ -424,6 +496,10 @@
   <script src="js/main-functions.js"></script>
   <script>
     async function initLandlordDashboard() {
+      // Show loader immediately
+      const loader = document.getElementById('pageLoader');
+      if (loader) loader.classList.remove('hidden');
+
       await initData();
       const user = getLoggedInUser();
       if (!user || user.role !== 'landlord') {
@@ -432,7 +508,26 @@
       }
 
       document.getElementById('topName').textContent = user.full_name || user.name;
-      document.getElementById('topAvatar').textContent = (user.full_name || user.name).split(' ').map(n=>n[0]).join('').toUpperCase();
+      const avatar = document.getElementById('topAvatar');
+      if (avatar) {
+        if (user.profile_image) {
+          avatar.innerHTML = `<img src="http://localhost:3000${user.profile_image}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+        } else {
+          avatar.textContent = (user.full_name || user.name).split(' ').map(n=>n[0]).join('').toUpperCase();
+        }
+      }
+
+      // Populate profile page
+      const inName = document.getElementById('inputName');
+      if (inName) {
+        inName.value = user.name || user.full_name || '';
+        document.getElementById('inputEmail').value = user.email || '';
+        document.getElementById('inputPhone').value = user.phone || '';
+        document.getElementById('inputGender').value = user.gender || 'Male';
+        if (user.profile_image) {
+          document.getElementById('profile-img-preview').src = 'http://localhost:3000' + user.profile_image;
+        }
+      }
 
       const properties = getData('properties').filter(p => String(p.user_id) === String(user.user_id));
       const rooms = getData('rooms').filter(r => properties.some(p => String(p.property_id) === String(r.property_id)));
@@ -455,6 +550,9 @@
       renderRooms(rooms);
       renderBookings(bookings);
       renderAllBookings(bookings);
+
+      // Hide loader once all data is rendered
+      if (loader) loader.classList.add('hidden');
     }
 
     function renderProperties(list) {
@@ -463,7 +561,12 @@
       el.innerHTML = list.length === 0 ? '<tr><td colspan="6" style="text-align:center; padding:20px;">No properties found.</td></tr>' :
         list.map(p => `
           <tr>
-            <td><span class="prop-link">${p.property_name}</span></td>
+            <td>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <img src="${p.image ? 'http://localhost:3000' + p.image : 'assets/default-property.png'}" style="width:40px; height:40px; border-radius:6px; object-fit:cover; background:#f1f5f9;">
+                <span class="prop-link">${p.property_name}</span>
+              </div>
+            </td>
             <td>${p.property_type || 'Apartment'}</td>
             <td>${p.address}</td>
             <td>${p.total_rooms || 0}</td>
@@ -482,7 +585,12 @@
       el.innerHTML = list.length === 0 ? '<tr><td colspan="5" style="text-align:center; padding:20px;">No rooms found.</td></tr>' :
         list.map(r => `
           <tr>
-            <td><span class="prop-link">${r.room_title}</span></td>
+            <td>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <img src="${r.images ? 'http://localhost:3000' + JSON.parse(r.images)[0] : 'assets/default-room.png'}" onerror="this.src='assets/default-room.png'" style="width:40px; height:40px; border-radius:6px; object-fit:cover; background:#f1f5f9;">
+                <span class="prop-link">${r.room_title}</span>
+              </div>
+            </td>
             <td>${(getProperty(r.property_id) || {}).property_name || 'Unknown'}</td>
             <td>$${r.price_per_month}</td>
             <td><span class="badge badge-${r.availability_status === 'Available' ? 'confirmed' : r.availability_status === 'Maintenance' ? 'pending' : 'cancelled'}">${r.availability_status.toUpperCase()}</span></td>
@@ -587,6 +695,45 @@
       setTimeout(() => t.classList.remove('show'), 3000);
     }
 
+    async function saveProfile() {
+      const u = getLoggedInUser();
+      if(!u) return;
+      const nm = document.getElementById('inputName').value;
+      const ph = document.getElementById('inputPhone').value;
+      const gd = document.getElementById('inputGender').value;
+      const imgInput = document.getElementById('inputProfileImg');
+      
+      let profile_image = u.profile_image || null;
+
+      try {
+        if (imgInput.files.length > 0) {
+          const uploadRes = await apiUploadImages(imgInput.files);
+          if (uploadRes.success && uploadRes.urls.length > 0) {
+            profile_image = uploadRes.urls[0];
+          } else {
+            showToast("⚠️ Image upload failed.");
+            return;
+          }
+        }
+
+        const data = { name: nm, email: u.email, phone: ph, profile_image, gender: gd };
+        const res = await apiUpdateProfile("landlord", u.user_id, data);
+        if (res.success) {
+          u.name = nm;
+          u.phone = ph;
+          u.gender = gd;
+          u.profile_image = profile_image;
+          localStorage.setItem('loggedInUser', JSON.stringify(u));
+          showToast("✅ Profile updated!");
+          initLandlordDashboard();
+        } else {
+          showToast("❌ Failed to update profile.");
+        }
+      } catch (err) {
+        showToast("❌ Server error.");
+      }
+    }
+
     function renderAllBookings(list) {
       const el = document.getElementById('allBookingsList');
       if(!el) return;
@@ -612,27 +759,80 @@
         }).join('');
     }
 
+    // Store original values when modal opens so we know what changed
+    let _editPropOriginal = {};
+    let _editRoomOriginal = {};
+
     function openEditPropertyModal(propertyId) {
       const p = getData('properties').find(x => String(x.property_id) === String(propertyId));
       if (!p) return;
+
+      // Store originals for change-detection on save
+      _editPropOriginal = {
+        id:            p.property_id,
+        title:         p.property_name  || '',
+        location:      p.address        || '',
+        property_type: p.property_type  || 'Apartment Building',
+        description:   p.description    || ''
+      };
+
       document.getElementById('editPropId').value = p.property_id;
       document.getElementById('editPropSub').textContent = 'Editing: ' + p.property_name;
-      document.getElementById('editPropName').value = p.property_name;
-      document.getElementById('editPropType').value = p.property_type || 'Apartment Building';
-      document.getElementById('editPropAddr').value = p.address;
-      document.getElementById('editPropDesc').value = p.description || '';
+
+      // Pre-fill with current values so the user sees them
+      document.getElementById('editPropName').value         = p.property_name  || '';
+      document.getElementById('editPropType').value         = p.property_type  || 'Apartment Building';
+      document.getElementById('editPropAddr').value         = p.address        || '';
+      document.getElementById('editPropDesc').value         = p.description    || '';
+
+      // Show placeholders as hints
+      document.getElementById('editPropName').placeholder  = p.property_name  || 'Property name';
+      document.getElementById('editPropAddr').placeholder  = p.address        || 'Address';
+      document.getElementById('editPropDesc').placeholder  = p.description    || 'Description...';
+
       openModal('editPropertyModal');
     }
 
     async function saveEditProperty() {
       const id = document.getElementById('editPropId').value;
-      const title = document.getElementById('editPropName').value.trim();
-      const location = document.getElementById('editPropAddr').value.trim();
+      const title         = document.getElementById('editPropName').value.trim();
+      const location      = document.getElementById('editPropAddr').value.trim();
       const property_type = document.getElementById('editPropType').value;
-      const description = document.getElementById('editPropDesc').value.trim();
-      if (!title || !location) { showToast('⚠️ Name and address are required.'); return; }
+      const description   = document.getElementById('editPropDesc').value.trim();
+      const imgInput      = document.getElementById('editPropImages');
+
+      // Build payload: only send fields that actually changed; send null for unchanged so COALESCE keeps DB value
+      const payload = {};
+      if (title         !== _editPropOriginal.title)         payload.title         = title         || null;
+      if (location      !== _editPropOriginal.location)      payload.location      = location      || null;
+      if (property_type !== _editPropOriginal.property_type) payload.property_type = property_type || null;
+      if (description   !== _editPropOriginal.description)   payload.description   = description   || null;
+
+      // Handle images
+      if (imgInput && imgInput.files.length > 0) {
+        const uploadRes = await apiUploadImages(imgInput.files);
+        if (uploadRes.success && uploadRes.urls.length > 0) {
+          payload.image = uploadRes.urls[0];
+          if (uploadRes.urls.length > 1) payload.image2 = uploadRes.urls[1];
+          else payload.image2 = null; // Clear second image if only 1 uploaded
+        } else {
+          showToast('⚠️ Image upload failed.');
+          return;
+        }
+      }
+
+      if (Object.keys(payload).length === 0) {
+        showToast('ℹ️ No changes detected.');
+        closeModal('editPropertyModal');
+        return;
+      }
+
+      // Validate: if title or location were changed, they must not be empty
+      if ('title'    in payload && !payload.title)    { showToast('⚠️ Property name cannot be empty.'); return; }
+      if ('location' in payload && !payload.location) { showToast('⚠️ Address cannot be empty.'); return; }
+
       try {
-        const res = await apiUpdateProperty(id, { title, location, property_type, description });
+        const res = await apiUpdateProperty(id, payload);
         if (res.success) {
           showToast('✅ Property updated!');
           closeModal('editPropertyModal');
@@ -644,34 +844,97 @@
     function openEditRoomModal(roomId) {
       const r = getData('rooms').find(x => String(x.room_id) === String(roomId));
       if (!r) return;
-      document.getElementById('editRoomId').value = r.room_id;
-      document.getElementById('editRoomSub').textContent = 'Editing: ' + r.room_title;
-      document.getElementById('editRoomType').value = r.room_type || 'Studio';
-      document.getElementById('editRoomStatus').value = r.availability_status === 'Available' ? 'available' : (r.availability_status === 'Booked' ? 'booked' : 'maintenance');
-      document.getElementById('editRoomPrice').value = r.price_per_month;
-      document.getElementById('editRoomSize').value = r.size || '';
-      document.getElementById('editRoomCap').value = r.capacity || '';
-      document.getElementById('editRoomFac').value = r.facilities || '';
+
+      const currentStatus = r.availability_status === 'Available' ? 'available'
+                          : r.availability_status === 'Booked'    ? 'booked'
+                          : 'maintenance';
+
+      // Store originals for change-detection on save
+      _editRoomOriginal = {
+        id:         r.room_id,
+        type:       r.room_type              || 'Studio',
+        status:     currentStatus,
+        price:      String(r.price_per_month || ''),
+        size:       String(r.size            || ''),
+        capacity:   String(r.capacity        || ''),
+        facilities: r.facilities             || ''
+      };
+
+      document.getElementById('editRoomId').value           = r.room_id;
+      document.getElementById('editRoomSub').textContent    = 'Editing: ' + r.room_title;
+      document.getElementById('editRoomType').value         = r.room_type || 'Studio';
+      document.getElementById('editRoomStatus').value       = currentStatus;
+      document.getElementById('editRoomPrice').value        = r.price_per_month || '';
+      document.getElementById('editRoomSize').value         = r.size            || '';
+      document.getElementById('editRoomCap').value          = r.capacity        || '';
+      document.getElementById('editRoomFac').value          = r.facilities      || '';
+
+      // Show placeholders as hints
+      document.getElementById('editRoomPrice').placeholder  = r.price_per_month ? '$' + r.price_per_month : '250';
+      document.getElementById('editRoomSize').placeholder   = r.size            ? r.size + ' m²'          : '32';
+      document.getElementById('editRoomCap').placeholder    = r.capacity        ? r.capacity + ' person'  : '2';
+      document.getElementById('editRoomFac').placeholder    = r.facilities      || 'WiFi, AC, Kitchen...';
+
       openModal('editRoomModal');
     }
 
     async function saveEditRoom() {
-      const id = document.getElementById('editRoomId').value;
-      const type = document.getElementById('editRoomType').value;
-      const status = document.getElementById('editRoomStatus').value;
-      const price = document.getElementById('editRoomPrice').value;
-      const size = document.getElementById('editRoomSize').value;
-      const capacity = document.getElementById('editRoomCap').value;
+      const id        = document.getElementById('editRoomId').value;
+      const type      = document.getElementById('editRoomType').value;
+      const status    = document.getElementById('editRoomStatus').value;
+      const price     = document.getElementById('editRoomPrice').value.trim();
+      const size      = document.getElementById('editRoomSize').value.trim();
+      const capacity  = document.getElementById('editRoomCap').value.trim();
       const facilities = document.getElementById('editRoomFac').value.trim();
-      if (!price || !size || !capacity) { showToast('⚠️ Price, size, and capacity are required.'); return; }
+      const imgInput   = document.getElementById('editRoomImages');
+
+      if (!id) { showToast('\u26a0\ufe0f Room ID missing. Please close and reopen.'); return; }
+
+      // Validate numeric fields
+      if (price    && Number(price)    <= 0) { showToast('\u26a0\ufe0f Price must be a positive number.'); return; }
+      if (size     && Number(size)     <= 0) { showToast('\u26a0\ufe0f Size must be a positive number.'); return; }
+      if (capacity && Number(capacity) <= 0) { showToast('\u26a0\ufe0f Capacity must be at least 1.'); return; }
+
+      // Handle images
+      let images = null;
+      if (imgInput && imgInput.files.length > 0) {
+        const uploadRes = await apiUploadImages(imgInput.files);
+        if (uploadRes.success && uploadRes.urls.length > 0) {
+          images = JSON.stringify(uploadRes.urls);
+        } else {
+          showToast('⚠️ Image upload failed.');
+          return;
+        }
+      }
+
+      // Always send all fields — backend COALESCE keeps old value for nulls
+      const payload = {
+        type:       type       || null,
+        status:     status     || null,
+        price:      price      ? Number(price)    : null,
+        size:       size       ? Number(size)     : null,
+        capacity:   capacity   ? Number(capacity) : null,
+        facilities: facilities || null
+      };
+
+      if (images) payload.images = images;
+
+      console.log('Saving room', id, payload);
+
       try {
-        const res = await apiUpdateRoom(id, { type, status, price: Number(price), size: Number(size), capacity: Number(capacity), facilities });
+        const res = await apiUpdateRoom(id, payload);
+        console.log('Update response:', res);
         if (res.success) {
-          showToast('✅ Room updated!');
+          showToast('\u2705 Room updated!');
           closeModal('editRoomModal');
           await initLandlordDashboard();
-        } else { showToast('❌ Failed to update room.'); }
-      } catch(err) { showToast('❌ Server error.'); }
+        } else {
+          showToast('\u274c ' + (res.error || res.message || 'Failed to update room.'));
+        }
+      } catch(err) {
+        console.error('saveEditRoom error:', err);
+        showToast('\u274c Server error: ' + err.message);
+      }
     }
 
     async function deletePropertyById(id) {

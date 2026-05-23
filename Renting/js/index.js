@@ -88,10 +88,13 @@ function renderProperties() {
     const rating = getPropertyAvgRating(propId);
     const icon = getPropIcon(p.property_type);
     const grad = propGradients[i % propGradients.length];
-
+    
     return `
       <div class="prop-card" onclick="openPropDetail('${propId}')">
-        <div class="prop-img" style="background:${grad}">${icon}</div>
+        <div class="prop-img" style="position:relative; background:${grad}; overflow:hidden;">
+          <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:40px; opacity:${p.image ? '0' : '1'}; transition:opacity 0.2s;">${icon}</div>
+          ${p.image ? `<img src="${getImageUrl(p.image)}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'; this.previousElementSibling.style.opacity='1';">` : ''}
+        </div>
         <div class="prop-body">
           <div class="prop-type">${p.property_type || 'Property'}</div>
           <div class="prop-name">${p.title || 'Unnamed Property'}</div>
@@ -123,8 +126,14 @@ function openPropDetail(propId) {
   const icon = getPropIcon(p.property_type);
 
   // Fill header
-  document.getElementById('pdpIcon').textContent = icon;
-  document.getElementById('pdpIcon').style.background = grad;
+  const pdpIconEl = document.getElementById('pdpIcon');
+  pdpIconEl.style.position = 'relative';
+  pdpIconEl.style.background = grad;
+  pdpIconEl.style.overflow = 'hidden';
+  pdpIconEl.innerHTML = `
+    <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:32px; opacity:${p.image ? '0' : '1'}; transition:opacity 0.2s;">${icon}</div>
+    ${p.image ? `<img src="${getImageUrl(p.image)}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'; this.previousElementSibling.style.opacity='1';">` : ''}
+  `;
   document.getElementById('pdpType').textContent = p.property_type || 'Property';
   document.getElementById('pdpName').textContent = p.title || 'Unnamed';
   document.getElementById('pdpAddr').textContent = '📍 ' + (p.location || 'Unknown');
@@ -169,11 +178,25 @@ function openPropDetail(propId) {
       const roomId = r.idRoom || r.room_id;
       const isAvailable = status === 'available';
 
+      let bgUrl = '';
+      if (r.images) {
+        try {
+          const parsed = JSON.parse(r.images);
+          if (parsed && parsed.length > 0) bgUrl = getImageUrl(parsed[0]);
+        } catch(e) {}
+      }
+      if (!bgUrl && p.image) {
+        bgUrl = getImageUrl(p.image);
+      }
+
       return `
         <div class="pdp-room-card" onclick="openRoomFromProp('${roomId}')">
-          <div class="pdp-room-img" style="background:${rGrad}">
-            <span style="font-size:40px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.2))">${roomIcon}</span>
-            <span class="pdp-room-status ${status}">${statusLabel === 'Available' ? '✓ Available' : statusLabel === 'Booked' ? '✕ Booked' : '⚠ ' + statusLabel}</span>
+          <div class="pdp-room-img" style="position:relative; background:${rGrad}; overflow:hidden;">
+            <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; opacity:${bgUrl ? '0' : '1'}; transition:opacity 0.2s;">
+              <span style="font-size:40px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.2))">${roomIcon}</span>
+            </div>
+            ${bgUrl ? `<img src="${bgUrl}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'; this.previousElementSibling.style.opacity='1';">` : ''}
+            <span class="pdp-room-status ${status}" style="position:absolute; top:10px; right:10px; z-index:2;">${statusLabel === 'Available' ? '✓ Available' : statusLabel === 'Booked' ? '✕ Booked' : '⚠ ' + statusLabel}</span>
           </div>
           <div class="pdp-room-body">
             <div class="pdp-room-type">${roomType}</div>

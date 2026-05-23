@@ -55,34 +55,34 @@
       <button class="btn btn-ghost btn-lg" onclick="window.location.href='login.html?tab=register'">List Your Property →</button>
     </div>
     <div class="hero-stats">
-      <div><div class="stat-num">1,200+</div><div class="stat-lbl">Rooms available</div></div>
-      <div><div class="stat-num">340+</div><div class="stat-lbl">Properties</div></div>
-      <div><div class="stat-num">98%</div><div class="stat-lbl">Happy tenants</div></div>
+      <div><div class="stat-num" id="statRooms">—</div><div class="stat-lbl">Rooms available</div></div>
+      <div><div class="stat-num" id="statProperties">—</div><div class="stat-lbl">Properties</div></div>
+      <div><div class="stat-num" id="statTenants">—</div><div class="stat-lbl">Registered tenants</div></div>
     </div>
   </div>
   <div class="hero-visual">
     <div class="hv-main">
       <div class="hv-img"><div class="hv-img-overlay"></div></div>
       <div class="hv-body">
-        <div class="hv-tag">✓ Available</div>
-        <div class="hv-title">Studio at Riverside Heights</div>
-        <div class="hv-addr">📍 123 Riverside Drive, Siem Reap</div>
-        <div class="hv-meta"><span>🛏 1 Bed</span><span>🚿 Private Bath</span><span>📐 32 m²</span></div>
+        <div class="hv-tag" id="heroRoomTag">✓ Available</div>
+        <div class="hv-title" id="heroRoomTitle">Loading...</div>
+        <div class="hv-addr" id="heroRoomAddr">📍 —</div>
+        <div class="hv-meta" id="heroRoomMeta"><span>🛏 —</span><span>📐 — m²</span><span>👥 —</span></div>
         <div class="hv-foot">
-          <div class="hv-price">$280 <small>/ month</small></div>
+          <div class="hv-price" id="heroRoomPrice">$— <small>/ month</small></div>
           <button class="hv-book" onclick="document.getElementById('rooms').scrollIntoView({behavior:'smooth'})">Browse Rooms</button>
         </div>
       </div>
     </div>
     <div class="float-card fc1">
-      <div class="fc-lbl">Rooms booked today</div>
-      <div class="fc-val">12 🏠</div>
-      <div class="fc-sub">Across 8 properties</div>
+      <div class="fc-lbl">Available rooms</div>
+      <div class="fc-val" id="fcAvailableRooms">— 🏠</div>
+      <div class="fc-sub" id="fcPropertyCount">Across — properties</div>
     </div>
     <div class="float-card fc2">
       <div class="fc-lbl">Average Rating</div>
-      <div class="fc-val">4.8</div>
-      <div class="fc-stars">★★★★★</div>
+      <div class="fc-val" id="fcAvgRating">—</div>
+      <div class="fc-stars" id="fcStars">★★★★★</div>
     </div>
   </div>
 </div>
@@ -573,12 +573,71 @@
 <script src="js/index.js"></script>
 
 <script>
-window.onload = async function() { await initData(); 
+window.onload = async function() {
+  await initData();
   searchRooms();
   renderRecentReviews();
   renderProperties();
   applySiteTheme();
+  updateHeroWithRealData();
 };
+
+function updateHeroWithRealData() {
+  const rooms = MOCK_DATA.rooms || [];
+  const properties = MOCK_DATA.properties || [];
+  const tenants = MOCK_DATA.tenants || [];
+  const reviews = MOCK_DATA.reviews || [];
+
+  // --- Hero Stats ---
+  const availableRooms = rooms.filter(r => (r.status || '').toLowerCase() === 'available');
+  const statRoomsEl = document.getElementById('statRooms');
+  const statPropsEl = document.getElementById('statProperties');
+  const statTenantsEl = document.getElementById('statTenants');
+  if (statRoomsEl) statRoomsEl.textContent = availableRooms.length > 0 ? availableRooms.length + '+' : rooms.length + '+';
+  if (statPropsEl) statPropsEl.textContent = properties.length > 0 ? properties.length + '+' : '0';
+  if (statTenantsEl) statTenantsEl.textContent = tenants.length > 0 ? tenants.length + '+' : '0';
+
+  // --- Floating Cards ---
+  const fcAvail = document.getElementById('fcAvailableRooms');
+  const fcProps = document.getElementById('fcPropertyCount');
+  if (fcAvail) fcAvail.textContent = availableRooms.length + ' 🏠';
+  if (fcProps) fcProps.textContent = 'Across ' + properties.length + ' propert' + (properties.length === 1 ? 'y' : 'ies');
+
+  // --- Average Rating Floating Card ---
+  const fcRating = document.getElementById('fcAvgRating');
+  const fcStars = document.getElementById('fcStars');
+  if (reviews.length > 0) {
+    const avg = (reviews.reduce((s, r) => s + Number(r.rating), 0) / reviews.length).toFixed(1);
+    if (fcRating) fcRating.textContent = avg;
+    if (fcStars) {
+      const full = Math.round(avg);
+      fcStars.textContent = '★'.repeat(full) + '☆'.repeat(5 - full);
+    }
+  } else {
+    if (fcRating) fcRating.textContent = '—';
+    if (fcStars) fcStars.textContent = '—';
+  }
+
+  // --- Hero Card: show first available room ---
+  const featuredRoom = availableRooms.length > 0 ? availableRooms[0] : rooms[0];
+  if (featuredRoom) {
+    const prop = getProperty(featuredRoom.Property_idProperty) || {};
+    const isAvail = (featuredRoom.status || '').toLowerCase() === 'available';
+    const tagEl = document.getElementById('heroRoomTag');
+    const titleEl = document.getElementById('heroRoomTitle');
+    const addrEl = document.getElementById('heroRoomAddr');
+    const metaEl = document.getElementById('heroRoomMeta');
+    const priceEl = document.getElementById('heroRoomPrice');
+    if (tagEl) { tagEl.textContent = isAvail ? '✓ Available' : 'Booked'; tagEl.style.color = isAvail ? '#22c55e' : '#ef4444'; }
+    if (titleEl) titleEl.textContent = prop.title ? prop.title + ' — ' + (featuredRoom.type || 'Room') : (featuredRoom.type || 'Room');
+    if (addrEl) addrEl.textContent = '📍 ' + (prop.location || 'Cambodia');
+    if (metaEl) metaEl.innerHTML = '<span>🛏 ' + (featuredRoom.type || 'Room') + '</span><span>📐 ' + (featuredRoom.size || '—') + ' m²</span><span>👥 ' + (featuredRoom.capacity || 1) + ' person</span>';
+    if (priceEl) priceEl.innerHTML = '$' + (featuredRoom.price || 0) + ' <small>/ month</small>';
+  } else {
+    const titleEl = document.getElementById('heroRoomTitle');
+    if (titleEl) titleEl.textContent = 'No rooms listed yet';
+  }
+}
 </script>
 
 </body>

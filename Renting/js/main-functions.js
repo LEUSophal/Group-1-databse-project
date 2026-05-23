@@ -62,6 +62,8 @@ async function registerUser() {
   const password = passInput.value;
   const confirm = confirmInput ? confirmInput.value : password;
   const phone = phoneInput ? phoneInput.value.trim() : "";
+  const genderInput = document.getElementById("regGender");
+  const gender = genderInput ? genderInput.value : null;
 
   let role = "tenant";
   if (roleInput) {
@@ -81,7 +83,7 @@ async function registerUser() {
   }
 
   try {
-    const res = await apiRegister(fullName, email, phone, password, role);
+    const res = await apiRegister(fullName, email, phone, password, role, gender);
     if (res.success) {
       if (typeof showSuccess === "function") {
         showSuccess(role, true);
@@ -136,6 +138,12 @@ function getFacilityIcon(label) {
   return map[cleaned] || "✨";
 }
 
+function getImageUrl(path) {
+  if (!path) return '';
+  if (path.startsWith('http') || path.startsWith('data:')) return path;
+  return `http://localhost:3000${path.startsWith('/') ? '' : '/'}${path}`;
+}
+
 // SEARCH ROOMS
 function searchRooms() {
   const rooms = getData("rooms");
@@ -178,9 +186,24 @@ function renderRooms(rooms) {
     return;
   }
 
-  container.innerHTML = rooms.map((room) => `
+  container.innerHTML = rooms.map((room) => {
+    let bgUrl = '';
+    if (room.images) {
+      try {
+        const parsed = JSON.parse(room.images);
+        if (parsed && parsed.length > 0) bgUrl = getImageUrl(parsed[0]);
+      } catch(e) {}
+    }
+    if (!bgUrl && room.property_image) {
+      bgUrl = getImageUrl(room.property_image);
+    }
+    
+    return `
     <div class="room-card">
-      <div class="rc-img" style="background:linear-gradient(135deg,#3B82F6,#60A5FA)">🛏</div>
+      <div class="rc-img" style="position:relative; background:linear-gradient(135deg,#3B82F6,#60A5FA); overflow:hidden;">
+        <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:40px; opacity:${bgUrl ? '0' : '1'}; transition:opacity 0.2s;">🛏</div>
+        ${bgUrl ? `<img src="${bgUrl}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'; this.previousElementSibling.style.opacity='1';">` : ''}
+      </div>
       <div class="rc-body">
         <div class="rc-tag">${room.availability_status === "Available" ? "✓ Available" : "Booked"}</div>
         <div class="rc-title">${room.room_title}</div>
@@ -196,7 +219,7 @@ function renderRooms(rooms) {
         </div>
       </div>
     </div>
-  `).join("");
+  `}).join("");
 }
 
 function openRoomDetails(roomId) {
@@ -382,6 +405,18 @@ async function addProperty() {
   }
 
   try {
+    const imgInput = document.getElementById("addPropImages");
+    let image = "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&h=400&fit=crop";
+    let image2 = null;
+
+    if (imgInput && imgInput.files.length > 0) {
+      const uploadRes = await apiUploadImages(imgInput.files);
+      if (uploadRes.success && uploadRes.urls.length > 0) {
+        image = uploadRes.urls[0];
+        if (uploadRes.urls.length > 1) image2 = uploadRes.urls[1];
+      }
+    }
+
     const propRes = await apiAddProperty({
       title: name,
       location: addr,
@@ -389,7 +424,8 @@ async function addProperty() {
       property_type: type,
       Landlord_idLandlord: user.user_id,
       Admin_idAdmin: 1,
-      image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&h=400&fit=crop"
+      image: image,
+      image2: image2
     });
 
     if (propRes.success) {
@@ -436,6 +472,16 @@ async function addRoom() {
   }
 
   try {
+    const imgInput = document.getElementById("addRoomImages");
+    let images = null;
+
+    if (imgInput && imgInput.files.length > 0) {
+      const uploadRes = await apiUploadImages(imgInput.files);
+      if (uploadRes.success && uploadRes.urls.length > 0) {
+        images = JSON.stringify(uploadRes.urls);
+      }
+    }
+
     const res = await apiAddRoom({
       type,
       price: Number(price),
@@ -443,6 +489,7 @@ async function addRoom() {
       size: Number(size),
       capacity: Number(cap),
       facilities,
+      images,
       Property_idProperty: propId,
       Admin_idAdmin: 1
     });

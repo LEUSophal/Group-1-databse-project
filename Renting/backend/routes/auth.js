@@ -49,7 +49,7 @@ router.post('/login', async (req, res) => {
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
-  const { name, email, phone, password, role } = req.body;
+  const { name, email, phone, password, role, gender } = req.body;
   try {
     // 1. Check if email already exists
     const [existingTenants] = await pool.execute('SELECT email FROM Tenant WHERE email = ?', [email]);
@@ -62,18 +62,18 @@ router.post('/register', async (req, res) => {
     let result;
     if (role === 'landlord') {
       [result] = await pool.execute(
-        'INSERT INTO Landlord (name, email, phone, password, Admin_idAdmin) VALUES (?, ?, ?, ?, 1)',
-        [name, email, phone, password]
+        'INSERT INTO Landlord (name, email, phone, password, gender, Admin_idAdmin) VALUES (?, ?, ?, ?, ?, 1)',
+        [name, email, phone, password, gender || null]
       );
     } else {
       [result] = await pool.execute(
-        'INSERT INTO Tenant (full_name, email, phone, password, Admin_idAdmin) VALUES (?, ?, ?, ?, 1)',
-        [name, email, phone, password]
+        'INSERT INTO Tenant (full_name, email, phone, password, gender, Admin_idAdmin) VALUES (?, ?, ?, ?, ?, 1)',
+        [name, email, phone, password, gender || null]
       );
     }
     res.status(201).json({
       success: true,
-      user: { id: result.insertId, name, email, phone, role }
+      user: { id: result.insertId, name, email, phone, role, gender }
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -102,11 +102,18 @@ router.get('/landlords', async (req, res) => {
 
 // PUT /api/auth/tenants/:id
 router.put('/tenants/:id', async (req, res) => {
-  const { full_name, email, phone } = req.body;
+  let { full_name, email, phone, profile_image, gender } = req.body;
+  const nullIfEmpty = v => (v === '' || v === undefined) ? null : v;
+  full_name     = nullIfEmpty(full_name);
+  email         = nullIfEmpty(email);
+  phone         = nullIfEmpty(phone);
+  profile_image = nullIfEmpty(profile_image);
+  gender        = nullIfEmpty(gender);
+
   try {
     await pool.execute(
-      'UPDATE Tenant SET full_name = COALESCE(?, full_name), email = COALESCE(?, email), phone = COALESCE(?, phone) WHERE idTenant = ?',
-      [full_name, email, phone, req.params.id]
+      'UPDATE Tenant SET full_name = COALESCE(?, full_name), email = COALESCE(?, email), phone = COALESCE(?, phone), profile_image = COALESCE(?, profile_image), gender = COALESCE(?, gender) WHERE idTenant = ?',
+      [full_name, email, phone, profile_image, gender, req.params.id]
     );
     res.json({ success: true });
   } catch (err) {
@@ -116,11 +123,18 @@ router.put('/tenants/:id', async (req, res) => {
 
 // PUT /api/auth/landlords/:id
 router.put('/landlords/:id', async (req, res) => {
-  const { name, email, phone } = req.body;
+  let { name, email, phone, profile_image, gender } = req.body;
+  const nullIfEmpty = v => (v === '' || v === undefined) ? null : v;
+  name          = nullIfEmpty(name);
+  email         = nullIfEmpty(email);
+  phone         = nullIfEmpty(phone);
+  profile_image = nullIfEmpty(profile_image);
+  gender        = nullIfEmpty(gender);
+
   try {
     await pool.execute(
-      'UPDATE Landlord SET name = COALESCE(?, name), email = COALESCE(?, email), phone = COALESCE(?, phone) WHERE idLandlord = ?',
-      [name, email, phone, req.params.id]
+      'UPDATE Landlord SET name = COALESCE(?, name), email = COALESCE(?, email), phone = COALESCE(?, phone), profile_image = COALESCE(?, profile_image), gender = COALESCE(?, gender) WHERE idLandlord = ?',
+      [name, email, phone, profile_image, gender, req.params.id]
     );
     res.json({ success: true });
   } catch (err) {

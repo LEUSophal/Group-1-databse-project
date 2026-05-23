@@ -10,6 +10,13 @@
 </head>
 <body>
 
+  <!-- PAGE LOADER -->
+  <div id="pageLoader">
+    <div class="loader-logo">🏠 RoomNest</div>
+    <div class="spinner-ring"></div>
+    <div class="loader-text">Loading your dashboard...</div>
+  </div>
+
   <div class="dashboard-wrapper">
     <!-- TOP NAVBAR -->
     <nav class="top-nav">
@@ -123,7 +130,10 @@
               </tr>
             </thead>
             <tbody id="recentBookingsList">
-              <!-- Booking rows injected here -->
+              <!-- skeleton while loading -->
+              <tr class="skeleton-row"><td><div class="skeleton-bar medium"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar badge"></div></td><td><div class="skeleton-bar short"></div></td></tr>
+              <tr class="skeleton-row"><td><div class="skeleton-bar long"></div></td><td><div class="skeleton-bar medium"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar badge"></div></td><td><div class="skeleton-bar short"></div></td></tr>
+              <tr class="skeleton-row"><td><div class="skeleton-bar medium"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar medium"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar badge"></div></td><td><div class="skeleton-bar short"></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -145,7 +155,9 @@
               </tr>
             </thead>
             <tbody id="allBookingsList">
-              <!-- All bookings injected here -->
+              <!-- skeleton while loading -->
+              <tr class="skeleton-row"><td><div class="skeleton-bar medium"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar long"></div></td><td><div class="skeleton-bar badge"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar short"></div></td></tr>
+              <tr class="skeleton-row"><td><div class="skeleton-bar long"></div></td><td><div class="skeleton-bar medium"></div></td><td><div class="skeleton-bar long"></div></td><td><div class="skeleton-bar badge"></div></td><td><div class="skeleton-bar short"></div></td><td><div class="skeleton-bar short"></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -188,12 +200,19 @@
         <h2 class="section-title">My Profile</h2>
         <div class="table-card" style="padding: 30px; max-width: 600px;">
           <!-- Simplified profile form -->
-          <p style="color: var(--text-muted); margin-bottom: 20px;">Manage your account information.</p>
-          <div style="display: flex; flex-direction: column; gap: 15px;">
-             <div>
-               <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Full Name</label>
-               <input type="text" id="inputName" style="width: 100%; background: var(--input-bg); border: 1px solid var(--border); color: var(--input-text); padding: 10px; border-radius: 8px;">
-               <span id="profile-name" style="display:none"></span>
+           <p style="color: var(--text-muted); margin-bottom: 20px;">Manage your account information.</p>
+           <div style="display: flex; flex-direction: column; gap: 15px;">
+              <div style="display: flex; align-items: center; gap: 15px;">
+                <img id="profile-img-preview" src='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cbd5e1"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>' style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); background-color: #f1f5f9;">
+                <div>
+                  <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Profile Picture</label>
+                  <input type="file" id="inputProfileImg" accept="image/*" style="font-size: 14px;">
+                </div>
+              </div>
+              <div>
+                <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Full Name</label>
+                <input type="text" id="inputName" style="width: 100%; background: var(--input-bg); border: 1px solid var(--border); color: var(--input-text); padding: 10px; border-radius: 8px;">
+                <span id="profile-name" style="display:none"></span>
              </div>
              <div>
                <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Email</label>
@@ -203,6 +222,13 @@
              <div>
                <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Phone Number</label>
                <input type="tel" id="inputPhone" style="width: 100%; background: var(--dash-bg); border: 1px solid var(--border); color: var(--text-main); padding: 10px; border-radius: 8px;">
+             <div>
+               <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">Gender</label>
+               <select id="inputGender" style="width: 100%; background: var(--dash-bg); border: 1px solid var(--border); color: var(--text-main); padding: 10px; border-radius: 8px;">
+                 <option value="Male">Male</option>
+                 <option value="Female">Female</option>
+                 <option value="Other">Other</option>
+               </select>
              </div>
              <button class="nav-item active" style="border: none; width: fit-content; padding: 10px 20px; color: var(--accent);" onclick="saveProfile()">Save Changes</button>
           </div>
@@ -221,10 +247,14 @@
   <script>
 
     async function initTenantDashboard() {
+      // Show loader immediately
+      const loader = document.getElementById('pageLoader');
+      if (loader) loader.classList.remove('hidden');
       try {
         await initData();
       } catch (e) {
-        alert("❌ Failed to connect to API server. Please make sure your Node.js server is running on port 3000.");
+        if (loader) loader.classList.add('hidden');
+        alert('❌ Failed to connect to API server. Please make sure your Node.js server is running on port 3000.');
         return;
       }
       const user = getLoggedInUser();
@@ -246,15 +276,22 @@
       if (profName) profName.textContent = user.full_name;
       if (profEmail) profEmail.textContent = user.email;
       const avatar = document.querySelector('.user-avatar');
-      if (avatar) avatar.textContent = user.full_name.split(' ').map(n=>n[0]).join('').toUpperCase();
+      if (avatar) {
+        if (user.profile_image) {
+          avatar.innerHTML = `<img src="http://localhost:3000${user.profile_image}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+        } else {
+          avatar.textContent = user.full_name.split(' ').map(n=>n[0]).join('').toUpperCase();
+        }
+      }
 
       // Populate profile inputs
-      const inName = document.getElementById('inputName');
-      const inEmail = document.getElementById('inputEmail');
-      const inPhone = document.getElementById('inputPhone');
-      if (inName) inName.value = user.full_name;
-      if (inEmail) inEmail.value = user.email;
-      if (inPhone) inPhone.value = user.phone || '';
+      document.getElementById('inputName').value = user.full_name || '';
+      document.getElementById('inputEmail').value = user.email || '';
+      document.getElementById('inputPhone').value = user.phone || '';
+      document.getElementById('inputGender').value = user.gender || 'Male';
+      if (user.profile_image) {
+        document.getElementById('profile-img-preview').src = 'http://localhost:3000' + user.profile_image;
+      }
 
       // Update Header
       const welcomeTitle = document.getElementById('welcomeTitle');
@@ -264,9 +301,6 @@
       if (welcomeTitle) welcomeTitle.textContent = `Welcome back, ${user.full_name}! 👋`;
       if (topName) topName.textContent = user.full_name;
       if (topAvatar) topAvatar.textContent = user.full_name.split(' ').map(n=>n[0]).join('').toUpperCase();
-      
-      if (inName) inName.value = user.full_name;
-      if (inEmail) inEmail.value = user.email;
 
 
       // Filter Data
@@ -290,6 +324,29 @@
       document.getElementById('stat-pending').textContent = pending;
       document.getElementById('stat-reviews').textContent = reviews.length;
 
+      // Helper: resolve room + property using raw MOCK_DATA to avoid bridging issues
+      function resolveBookingDetails(b) {
+        // b.room_id comes from getData('bookings') bridging
+        const rawRoom = (MOCK_DATA.rooms || []).find(r =>
+          String(r.idRoom) === String(b.room_id)
+        );
+        const prop = rawRoom ? getProperty(rawRoom.Property_idProperty) : null;
+        const lId  = prop
+          ? (prop.Landlord_idLandlord || prop.user_id || prop.landlord_id)
+          : null;
+        const landlord = lId ? getLandlord(lId) : null;
+        return { rawRoom, prop, landlord };
+      }
+
+      // Format dates helper
+      const formatDate = (dateStr) => {
+        if (!dateStr) return 'N/A';
+        try {
+          return new Date(dateStr).toLocaleDateString('en-US',
+            { month: 'short', day: 'numeric', year: 'numeric' });
+        } catch (e) { return dateStr; }
+      };
+
       // Render Recent Bookings
       const recentList = document.getElementById('recentBookingsList');
       const recentData = bookings.slice(0, 5);
@@ -298,30 +355,22 @@
         recentList.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">No bookings found. <a href="index.html" style="color:var(--accent)">Start browsing now</a></td></tr>';
       } else {
         recentList.innerHTML = recentData.map(b => {
-          const room = getRoom(b.room_id);
-          const prop = room ? getProperty(room.Property_idProperty || room.property_id) : null;
-          // Try to get landlord ID from multiple possible fields
-          const lId = prop ? (prop.Landlord_idLandlord || prop.user_id || prop.landlord_id || prop.idLandlord) : null;
-          const landlord = lId ? getLandlord(lId) : null;
-          
-          // Format dates
-          const formatDate = (dateStr) => {
-            if (!dateStr) return 'N/A';
-            try {
-              const d = new Date(dateStr);
-              return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            } catch (e) { return dateStr; }
-          };
-
+          const { rawRoom, prop, landlord } = resolveBookingDetails(b);
+          const propName  = prop      ? (prop.title || prop.property_name)              : 'Unknown Property';
+          const roomLabel = rawRoom   ? (rawRoom.type || rawRoom.room_type || 'Room')   : 'Room';
+          const roomPrice = rawRoom   ? (rawRoom.price || 0)                            : 0;
+          const lName     = landlord  ? (landlord.name || landlord.full_name || 'N/A') : 'N/A';
+          const lPhone    = landlord  ? (landlord.phone || 'N/A')                      : 'N/A';
+          const status    = (b.booking_status || 'pending').toLowerCase();
           return `
             <tr>
-              <td><span class="prop-link">${prop ? (prop.title || prop.property_name) : 'Unknown Property'}</span></td>
-              <td>${room ? (room.type || room.room_type) : 'Room'} — $${room ? (room.price || room.price_per_month) : 0}/mo</td>
-              <td>${landlord ? (landlord.name || landlord.full_name || landlord.landlord_name || 'Landlord') : 'N/A'}</td>
-              <td>${formatDate(b.move_in_date || b.check_in)}</td>
-              <td>${formatDate(b.move_out_date || b.check_out)}</td>
-              <td><span class="badge badge-${b.booking_status.toLowerCase()}">${b.booking_status.toUpperCase()}</span></td>
-              <td style="color:var(--accent); font-size:13px; font-weight:500;">${landlord ? (landlord.phone || 'N/A') : 'N/A'}</td>
+              <td><span class="prop-link">${propName}</span></td>
+              <td>${roomLabel} — $${roomPrice}/mo</td>
+              <td>${lName}</td>
+              <td>${formatDate(b.check_in)}</td>
+              <td>${formatDate(b.check_out)}</td>
+              <td><span class="badge badge-${status}">${status.toUpperCase()}</span></td>
+              <td style="color:var(--accent); font-size:13px; font-weight:500;">${lPhone}</td>
             </tr>
           `;
         }).join('');
@@ -329,36 +378,28 @@
 
       // Render All Bookings
       const allList = document.getElementById('allBookingsList');
-      allList.innerHTML = bookings.length === 0 
-        ? '<tr><td colspan="7" style="text-align:center; padding:40px;">No bookings found.</td></tr>'
+      allList.innerHTML = bookings.length === 0
+        ? '<tr><td colspan="6" style="text-align:center; padding:40px;">No bookings found.</td></tr>'
         : bookings.map(b => {
-          const room = getRoom(b.room_id);
-          const prop = room ? getProperty(room.Property_idProperty || room.property_id) : null;
-          const lId = prop ? (prop.Landlord_idLandlord || prop.user_id || prop.landlord_id || prop.idLandlord) : null;
-          const landlord = lId ? getLandlord(lId) : null;
-
-          const formatDate = (dateStr) => {
-            if (!dateStr) return 'N/A';
-            try {
-              const d = new Date(dateStr);
-              return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            } catch (e) { return dateStr; }
-          };
+          const { rawRoom, prop, landlord } = resolveBookingDetails(b);
+          const propName  = prop     ? (prop.title || prop.property_name)            : 'Property';
+          const propId    = prop     ? (prop.idProperty || prop.property_id || '')   : '';
+          const roomLabel = rawRoom  ? (rawRoom.type || rawRoom.room_type || 'Room') : 'Room';
+          const lName     = landlord ? (landlord.name || landlord.full_name || 'N/A'): 'N/A';
+          const lPhone    = landlord ? (landlord.phone || 'N/A')                     : 'N/A';
+          const status    = (b.booking_status || 'pending').toLowerCase();
 
           let action = '';
-          if (b.booking_status && b.booking_status.toLowerCase() === 'confirmed') {
-            const propId = prop ? (prop.idProperty || prop.property_id) : '';
-            const propName = prop ? (prop.title || prop.property_name) : 'Property';
+          if (status === 'confirmed') {
             action = `<button class="btn btn-ghost btn-sm" onclick="openReviewModal('${propId}', '${propName}')">⭐ Review</button>`;
           }
           return `
             <tr>
-              <td><span class="prop-link">${prop ? (prop.title || prop.property_name) : 'Property'}</span></td>
-              <td>${room ? (room.type || room.room_type) : 'Room'}</td>
-              <td>${landlord ? (landlord.name || landlord.full_name || landlord.landlord_name || 'Landlord') : 'N/A'}</td>
-              <td>${formatDate(b.move_in_date || b.check_in)} — ${formatDate(b.move_out_date || b.check_out)}</td>
-              <td><span class="badge badge-${b.booking_status.toLowerCase()}">${b.booking_status.toUpperCase()}</span></td>
-              <td style="color:var(--accent); font-size:13px; font-weight:500;">${landlord ? (landlord.phone || 'N/A') : 'N/A'}</td>
+              <td><span class="prop-link">${propName}</span></td>
+              <td>${roomLabel}</td>
+              <td>${formatDate(b.check_in)} — ${formatDate(b.check_out)}</td>
+              <td><span class="badge badge-${status}">${status.toUpperCase()}</span></td>
+              <td style="color:var(--accent); font-size:13px; font-weight:500;">${lPhone}</td>
               <td>${action}</td>
             </tr>
           `;
@@ -377,11 +418,14 @@
                    <h4 style="font-size:16px;">${prop ? (prop.title || prop.property_name) : 'Property'}</h4>
                    <div style="color:#fbbf24;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
                 </div>
-                <p style="color:var(--text-muted); font-size:14px; line-height:1.5;">"${r.comment}"</p>
+                <p style="color:var(--text-muted); font-size:14px; line-height:1.5;">&ldquo;${r.comment}&rdquo;</p>
               </div>
             </div>
           `;
         }).join('');
+
+      // ✅ Hide the loader smoothly now that everything is rendered
+      if (loader) loader.classList.add('hidden');
     }
 
     let currentReviewPropId = null;
@@ -409,37 +453,43 @@
     }
 
     async function saveProfile() {
-      const user = getLoggedInUser();
-      const name = document.getElementById('inputName').value.trim();
-      const email = document.getElementById('inputEmail').value.trim();
-      const phone = document.getElementById('inputPhone').value.trim();
-
-      if (!name) {
-        showToast("⚠️ Name is required.");
-        return;
-      }
+      const u = getLoggedInUser();
+      if(!u) return;
+      const nm = document.getElementById('inputName').value;
+      const ph = document.getElementById('inputPhone').value;
+      const gd = document.getElementById('inputGender').value;
+      const imgInput = document.getElementById('inputProfileImg');
+      
+      let profile_image = u.profile_image || null;
 
       try {
-        const res = await apiUpdateProfile('tenant', user.user_id, {
-          full_name: name,
-          email: email,
-          phone: phone
-        });
+        // Upload image first if selected
+        if (imgInput.files.length > 0) {
+          const uploadRes = await apiUploadImages(imgInput.files);
+          if (uploadRes.success && uploadRes.urls.length > 0) {
+            profile_image = uploadRes.urls[0];
+          } else {
+            showToast("⚠️ Image upload failed.");
+            return;
+          }
+        }
 
+        const data = { full_name: nm, email: u.email, phone: ph, profile_image, gender: gd };
+        const res = await apiUpdateProfile("tenant", u.user_id, data);
         if (res.success) {
-          // Update local session info
-          user.full_name = name;
-          user.email = email;
-          user.phone = phone;
-          localStorage.setItem('loggedInUser', JSON.stringify(user));
-          
-          showToast("✅ Profile updated and saved to database!");
-          await initTenantDashboard();
+          u.full_name = nm;
+          u.phone = ph;
+          u.gender = gd;
+          u.profile_image = profile_image;
+          localStorage.setItem('loggedInUser', JSON.stringify(u));
+          showToast("✅ Profile updated!");
+          initTenantDashboard();
         } else {
           showToast("❌ Failed to update profile in database.");
         }
       } catch (err) {
         showToast("❌ Server error while saving profile.");
+        console.error(err);
       }
     }
 

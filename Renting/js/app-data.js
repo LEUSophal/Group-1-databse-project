@@ -25,7 +25,9 @@ function getData(key) {
         availability_status: normalizedStatus === "available" ? "Available" : (normalizedStatus === "maintenance" ? "Maintenance" : "Booked"),
         description: prop.description || "",
         property_type: prop.property_type || "",
-        rating: Number(getPropertyAvgRating(r.Property_idProperty) || 0)
+        rating: Number(getPropertyAvgRating(r.Property_idProperty) || 0),
+        images: r.images || null,
+        property_image: prop.image || null
       };
     });
   }
@@ -39,7 +41,9 @@ function getData(key) {
       address: p.location,
       property_type: p.property_type || "Apartment",
       total_rooms: getPropertyRooms(p.idProperty).length,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      image: p.image || null,
+      image2: p.image2 || null
     }));
   }
 

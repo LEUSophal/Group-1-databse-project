@@ -20,11 +20,11 @@ router.get('/', async (req, res) => {
 
 // POST /api/rooms
 router.post('/', async (req, res) => {
-  const { type, price, status, size, capacity, facilities, Property_idProperty } = req.body;
+  const { type, price, status, size, capacity, facilities, images, Property_idProperty } = req.body;
   try {
     const [result] = await pool.execute(
-      'INSERT INTO Room (type, price, status, size, capacity, facilities, Property_idProperty, Admin_idAdmin) VALUES (?, ?, ?, ?, ?, ?, ?, 1)',
-      [type, price || 0, status || 'available', size || 0, capacity || 1, facilities || '', Property_idProperty]
+      'INSERT INTO Room (type, price, status, size, capacity, facilities, images, Property_idProperty, Admin_idAdmin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)',
+      [type, price || 0, status || 'available', size || 0, capacity || 1, facilities || '', images || null, Property_idProperty]
     );
     res.status(201).json({ success: true, idRoom: result.insertId });
   } catch (err) {
@@ -34,24 +34,44 @@ router.post('/', async (req, res) => {
 
 // PUT /api/rooms/:id
 router.put('/:id', async (req, res) => {
-  const { type, price, status, size, capacity, facilities } = req.body;
+  let { type, price, status, size, capacity, facilities, images } = req.body;
+  console.log(`[PUT /api/rooms/${req.params.id}] Body:`, req.body);
+
+  // Convert empty strings / undefined to null so COALESCE keeps the existing DB value
+  const nullIfEmpty = v => (v === '' || v === undefined || v === null) ? null : v;
+  type       = nullIfEmpty(type);
+  status     = nullIfEmpty(status);
+  facilities = nullIfEmpty(facilities);
+  images     = nullIfEmpty(images);
+  // Numeric fields: keep null if not provided so COALESCE falls back
+  price    = (price === '' || price === undefined || price === null) ? null : Number(price);
+  size     = (size  === '' || size  === undefined || size  === null) ? null : Number(size);
+  capacity = (capacity === '' || capacity === undefined || capacity === null) ? null : Number(capacity);
+
+  console.log(`[PUT /api/rooms/${req.params.id}] Processed:`, { type, price, status, size, capacity, facilities, images });
+
   try {
-    await pool.execute(
+    const [result] = await pool.execute(
       `UPDATE Room SET 
-        type = COALESCE(?, type), 
-        price = COALESCE(?, price), 
-        status = COALESCE(?, status),
-        size = COALESCE(?, size),
-        capacity = COALESCE(?, capacity),
-        facilities = COALESCE(?, facilities)
+        type       = COALESCE(?, type), 
+        price      = COALESCE(?, price), 
+        status     = COALESCE(?, status),
+        size       = COALESCE(?, size),
+        capacity   = COALESCE(?, capacity),
+        facilities = COALESCE(?, facilities),
+        images     = COALESCE(?, images)
        WHERE idRoom = ?`,
-      [type, price, status, size, capacity, facilities, req.params.id]
+      [type, price, status, size, capacity, facilities, images, req.params.id]
     );
-    res.json({ success: true });
+    console.log(`[PUT /api/rooms/${req.params.id}] affectedRows:`, result.affectedRows);
+    res.json({ success: true, affectedRows: result.affectedRows });
   } catch (err) {
+    console.error(`[PUT /api/rooms/${req.params.id}] ERROR:`, err.message);
     res.status(500).json({ error: err.message });
   }
 });
+
+
 
 // DELETE /api/rooms/:id
 router.delete('/:id', async (req, res) => {
