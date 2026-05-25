@@ -142,4 +142,65 @@ router.put('/landlords/:id', async (req, res) => {
   }
 });
 
+// PUT /api/auth/tenants/:id/block  — toggle is_active for tenant
+router.put('/tenants/:id/block', async (req, res) => {
+  try {
+    const [rows] = await pool.execute('SELECT is_active FROM Tenant WHERE idTenant = ?', [req.params.id]);
+    if (rows.length === 0) return res.status(404).json({ success: false, message: 'Tenant not found' });
+    const newStatus = rows[0].is_active ? 0 : 1;
+    await pool.execute('UPDATE Tenant SET is_active = ? WHERE idTenant = ?', [newStatus, req.params.id]);
+    res.json({ success: true, is_active: newStatus });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT /api/auth/landlords/:id/block  — toggle is_active for landlord
+router.put('/landlords/:id/block', async (req, res) => {
+  try {
+    const [rows] = await pool.execute('SELECT is_active FROM Landlord WHERE idLandlord = ?', [req.params.id]);
+    if (rows.length === 0) return res.status(404).json({ success: false, message: 'Landlord not found' });
+    const newStatus = rows[0].is_active ? 0 : 1;
+    await pool.execute('UPDATE Landlord SET is_active = ? WHERE idLandlord = ?', [newStatus, req.params.id]);
+    res.json({ success: true, is_active: newStatus });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/auth/tenants/:id
+router.delete('/tenants/:id', async (req, res) => {
+  try {
+    await pool.execute('DELETE FROM Booking WHERE Tenant_idTenant = ?', [req.params.id]);
+    await pool.execute('DELETE FROM Review  WHERE Tenant_idTenant = ?', [req.params.id]);
+    await pool.execute('DELETE FROM Tenant  WHERE idTenant = ?',        [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/auth/landlords/:id
+router.delete('/landlords/:id', async (req, res) => {
+  try {
+    // Cascade: delete rooms/bookings/reviews belonging to landlord's properties
+    const [props] = await pool.execute('SELECT idProperty FROM Property WHERE Landlord_idLandlord = ?', [req.params.id]);
+    for (const p of props) {
+      const [rooms] = await pool.execute('SELECT idRoom FROM Room WHERE Property_idProperty = ?', [p.idProperty]);
+      const roomIds = rooms.map(r => r.idRoom);
+      if (roomIds.length > 0) {
+        await pool.execute(`DELETE FROM Booking WHERE Room_idRoom IN (${roomIds.map(() => '?').join(',')})`, roomIds);
+      }
+      await pool.execute('DELETE FROM Review   WHERE Property_idProperty = ?', [p.idProperty]);
+      await pool.execute('DELETE FROM Room     WHERE Property_idProperty = ?', [p.idProperty]);
+    }
+    await pool.execute('DELETE FROM Property WHERE Landlord_idLandlord = ?', [req.params.id]);
+    await pool.execute('DELETE FROM Landlord WHERE idLandlord = ?',          [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
+

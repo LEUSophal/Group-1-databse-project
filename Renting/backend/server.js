@@ -8,6 +8,8 @@ const roomsRoutes = require('./routes/rooms');
 const bookingsRoutes = require('./routes/bookings');
 const reviewsRoutes = require('./routes/reviews');
 const uploadRoutes = require('./routes/upload');
+const adminLogRoutes = require('./routes/admin-log');
+const facilitiesRoutes = require('./routes/facilities');
 
 const app = express();
 const PORT = 3000;
@@ -29,6 +31,9 @@ app.use('/api/rooms', roomsRoutes);
 app.use('/api/bookings', bookingsRoutes);
 app.use('/api/reviews', reviewsRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/admin-log', adminLogRoutes);
+app.use('/api/facilities', facilitiesRoutes);
+
 
 // Start server
 app.listen(PORT, () => {

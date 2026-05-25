@@ -14,13 +14,16 @@ function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 
 // ── USER ACTIONS ──
-function openViewUser(name,role,email,status){
+function openViewUser(name,role,email,status,userId,userRole){
   document.getElementById('vu-name').textContent=name;
   document.getElementById('vu-email').textContent=email;
   document.getElementById('vu-role').textContent=role;
   document.getElementById('vu-role').className='badge '+(role==='Landlord'?'badge-green':role==='Admin'?'badge-red':'badge-blue');
   document.getElementById('vu-status').textContent=status;
   document.getElementById('vu-status').className='badge '+(status==='Active'?'badge-green':'badge-red');
+  // Store for block action
+  document.getElementById('viewUserModal').dataset.userId = userId || '';
+  document.getElementById('viewUserModal').dataset.userRole = userRole || 'tenant';
   openModal('viewUserModal');
 }
 function openEditUser(name,role,status){
@@ -34,26 +37,47 @@ function saveEditUser(){
   const reason=document.getElementById('eu-reason').value.trim();
   if(!reason){showToast('⚠️ Please provide a reason (required for admin log)');return;}
   closeModal('editUserModal');
-  logAction('UPDATE','User',reason);
+  logAction('UPDATE','User',null,reason);
   showToast('✅ User updated & action logged!');
 }
 function saveUserChanges(){
   closeModal('viewUserModal');
-  logAction('UPDATE','User','Role/status change from user profile');
+  logAction('UPDATE','User',null,'Role/status change from user profile');
   showToast('✅ User updated & action logged!');
 }
-function blockUserFromModal(){
+async function blockUserFromModal(){
+  const modal = document.getElementById('viewUserModal');
+  const userId = modal.dataset.userId;
+  const userRole = modal.dataset.userRole || 'tenant';
   closeModal('viewUserModal');
-  logAction('BLOCK','User','Blocked via admin panel');
-  showToast('🚫 User blocked & action logged!');
+  if (userId && typeof apiBlockUser === 'function') {
+    try {
+      const res = await apiBlockUser(userRole, userId);
+      if (res.success) {
+        const action = res.is_active ? 'UNBLOCK' : 'BLOCK';
+        await logAction(action, 'User', userId, `${action} via admin panel`);
+        showToast(res.is_active ? '✅ User unblocked & logged!' : '🚫 User blocked & logged!');
+        // Reload users list
+        if (typeof loadAdminUsers === 'function') loadAdminUsers();
+      } else {
+        showToast('❌ Failed to update user status');
+      }
+    } catch(e) {
+      showToast('❌ Server error');
+    }
+  } else {
+    logAction('BLOCK','User',null,'Blocked via admin panel');
+    showToast('🚫 User blocked & action logged!');
+  }
 }
 function unblockUser(btn,name){
   btn.closest('tr').querySelector('.badge-red').className='badge badge-green';
   btn.closest('tr').querySelector('.badge-red, .badge-green').textContent='Active';
   btn.replaceWith(Object.assign(document.createElement('button'),{className:'btn btn-ghost btn-sm',textContent:'Edit',onclick:()=>openEditUser(name,'Tenant','Active')}));
-  logAction('UPDATE','User','User unblocked');
+  logAction('UPDATE','User',null,'User unblocked');
   showToast('✅ User '+name+' unblocked!');
 }
+
 function addUser(){
   const n=document.getElementById('nu-name').value.trim();
   if(!n){showToast('⚠️ Name is required');return;}
@@ -124,27 +148,65 @@ function confirmClearLog(){
 function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('open');_confirmAction=null;}
 function executeConfirm(){if(_confirmAction) _confirmAction();closeConfirm();}
 
-// ── ADMIN LOG WRITER ──
-let logCounter=12;
-function logAction(action,table,reason){
+// ── ADMIN LOG WRITER (saves to DB + updates DOM) ──
+let logCounter = 12;
+async function logAction(action, table, targetId, reason) {
   logCounter++;
-  const tbody=document.getElementById('logTableBody');
-  const actionColors={DELETE:'delete',UPDATE:'update',BLOCK:'block',CREATE:'create',APPROVE:'approve',REJECT:'delete'};
-  const now=new Date();
-  const dateStr=now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' · '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-  const tr=document.createElement('tr');
-  tr.innerHTML=`<td><span class="td-muted">#L-0${logCounter}</span></td>
+  // 1. Save to database via API
+  if (typeof apiPostAdminLog === 'function') {
+    try { await apiPostAdminLog(action, table, targetId || null, reason || null); } catch(e) {}
+  }
+  // 2. Also update the DOM log table immediately
+  const tbody = document.getElementById('logTableBody');
+  if (!tbody) return;
+  const actionColors = {DELETE:'delete',UPDATE:'update',BLOCK:'block',CREATE:'create',APPROVE:'approve',REJECT:'delete',UNBLOCK:'create'};
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' · '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><span class="td-muted">#L-0${logCounter}</span></td>
     <td><span class="log-tag ${actionColors[action]||'update'}">${action}</span></td>
     <td>${table}</td>
-    <td>—</td>
-    <td>${reason}</td>
-    <td>Sokha Admin</td>
+    <td>${targetId || '—'}</td>
+    <td>${reason || '—'}</td>
+    <td>Admin</td>
     <td><span class="td-muted">${dateStr}</span></td>`;
-  tbody.insertBefore(tr,tbody.firstChild);
-  // Update sidebar badge
-  const badge=document.querySelector('.sb-item[onclick*="adminlog"] .sb-badge');
-  if(badge) badge.textContent=logCounter;
+  tbody.insertBefore(tr, tbody.firstChild);
+  const badge = document.querySelector('.sb-item[onclick*="adminlog"] .sb-badge');
+  if (badge) badge.textContent = logCounter;
 }
+
+// ── LOAD ADMIN LOG FROM DB ──
+async function loadAdminLog() {
+  if (typeof apiFetchAdminLog !== 'function') return;
+  try {
+    const logs = await apiFetchAdminLog();
+    const tbody = document.getElementById('logTableBody');
+    if (!tbody || !logs.length) return;
+    const actionColors = {DELETE:'delete',UPDATE:'update',BLOCK:'block',CREATE:'create',APPROVE:'approve',REJECT:'delete',UNBLOCK:'create'};
+    tbody.innerHTML = logs.map((log, i) => {
+      const dateStr = log.action_date
+        ? new Date(log.action_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' · '+new Date(log.action_date).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})
+        : '—';
+      return `<tr>
+        <td><span class="td-muted">#L-${String(log.log_id).padStart(3,'0')}</span></td>
+        <td><span class="log-tag ${actionColors[log.action_type]||'update'}">${log.action_type||'—'}</span></td>
+        <td>${log.target_table||'—'}</td>
+        <td>${log.target_id||'—'}</td>
+        <td>${log.description||'—'}</td>
+        <td>${log.admin_name||'Admin'}</td>
+        <td><span class="td-muted">${dateStr}</span></td>
+      </tr>`;
+    }).join('');
+    logCounter = logs.length + 12;
+    const badge = document.querySelector('.sb-item[onclick*="adminlog"] .sb-badge');
+    if (badge) badge.textContent = logs.length;
+  } catch(e) {
+    console.error('Failed to load admin log:', e);
+  }
+}
+
+// Auto-load log when the adminlog page is shown
+const _origShowPage = typeof showPage === 'function' ? showPage : null;
 
 // ── TABLE FILTER ──
 function filterTable(tableId,query){
@@ -173,3 +235,9 @@ document.addEventListener('keydown',e=>{
     document.getElementById('confirmOverlay').classList.remove('open');
   }
 });
+
+// ── INIT: load real log from DB on page load ──
+document.addEventListener('DOMContentLoaded', () => {
+  loadAdminLog();
+});
+

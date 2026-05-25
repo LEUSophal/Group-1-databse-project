@@ -110,8 +110,51 @@ async function initDatabase() {
     )
   `);
 
+  await conn.query(`
+    CREATE TABLE IF NOT EXISTS Room_Image (
+      image_id   INT AUTO_INCREMENT PRIMARY KEY,
+      room_id    INT NOT NULL,
+      image_url  VARCHAR(255) NOT NULL,
+      is_cover   TINYINT DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (room_id) REFERENCES Room(idRoom) ON DELETE CASCADE
+    )
+  `);
+
+  await conn.query(`
+    CREATE TABLE IF NOT EXISTS Facility (
+      facility_id   INT AUTO_INCREMENT PRIMARY KEY,
+      facility_name VARCHAR(100) NOT NULL,
+      description   TEXT
+    )
+  `);
+
+  await conn.query(`
+    CREATE TABLE IF NOT EXISTS Room_Facility (
+      room_id     INT NOT NULL,
+      facility_id INT NOT NULL,
+      PRIMARY KEY (room_id, facility_id),
+      FOREIGN KEY (room_id)     REFERENCES Room(idRoom)          ON DELETE CASCADE,
+      FOREIGN KEY (facility_id) REFERENCES Facility(facility_id) ON DELETE CASCADE
+    )
+  `);
+
+  await conn.query(`
+    CREATE TABLE IF NOT EXISTS Admin_Log (
+      log_id        INT AUTO_INCREMENT PRIMARY KEY,
+      Admin_idAdmin INT,
+      action_type   VARCHAR(50),
+      target_table  VARCHAR(50),
+      target_id     INT,
+      description   TEXT,
+      action_date   DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (Admin_idAdmin) REFERENCES Admin(idAdmin)
+    )
+  `);
+
   console.log('All tables created successfully!');
-  console.log('Tables: Admin, Tenant, Landlord, Property, Room, Booking, Review');
+  console.log('Tables: Admin, Tenant, Landlord, Property, Room, Booking, Review, Room_Image, Facility, Room_Facility, Admin_Log');
+
   console.log('You can now open MySQL Workbench and see the "renting_db" database.');
 
   await conn.end();

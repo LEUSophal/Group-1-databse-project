@@ -454,7 +454,7 @@ async function addRoom() {
   const price = document.getElementById("rPrice").value;
   const size = document.getElementById("rSize").value;
   const cap = document.getElementById("rCap").value;
-  const facilities = document.getElementById("rFac").value.trim();
+  const facilities = document.getElementById("rFac") ? document.getElementById("rFac").value.trim() : "";
 
   if (!propId) {
     showToast("Please select a property.");
@@ -474,11 +474,13 @@ async function addRoom() {
   try {
     const imgInput = document.getElementById("addRoomImages");
     let images = null;
+    let uploadedUrls = [];
 
     if (imgInput && imgInput.files.length > 0) {
       const uploadRes = await apiUploadImages(imgInput.files);
       if (uploadRes.success && uploadRes.urls.length > 0) {
-        images = JSON.stringify(uploadRes.urls);
+        uploadedUrls = uploadRes.urls;
+        images = JSON.stringify(uploadRes.urls); // keep TEXT field for backward compat
       }
     }
 
@@ -495,12 +497,37 @@ async function addRoom() {
     });
 
     if (res.success) {
+      const newRoomId = res.idRoom;
+
+      // ── Save images to Room_Image table ──────────────────────────────
+      if (uploadedUrls.length > 0 && newRoomId) {
+        await apiSaveRoomImages(newRoomId, uploadedUrls);
+      }
+
+      // ── Save facilities to Room_Facility table ────────────────────────
+      // Check for checkbox-based facility selection first
+      const checkedFacilities = document.querySelectorAll('input[name="roomFacility"]:checked');
+      if (checkedFacilities.length > 0 && newRoomId) {
+        const facilityIds = Array.from(checkedFacilities).map(cb => Number(cb.value));
+        await apiSaveRoomFacilities(newRoomId, facilityIds);
+      } else if (facilities && newRoomId) {
+        // Fallback: map text facilities to IDs from MOCK_DATA.facilities
+        const allFacilities = MOCK_DATA.facilities || [];
+        const facNames = facilities.split(',').map(f => f.trim().toLowerCase());
+        const matchedIds = allFacilities
+          .filter(f => facNames.some(n => f.facility_name.toLowerCase().includes(n) || n.includes(f.facility_name.toLowerCase())))
+          .map(f => f.facility_id);
+        if (matchedIds.length > 0) {
+          await apiSaveRoomFacilities(newRoomId, matchedIds);
+        }
+      }
+
       await initData();
       showToast("Room added successfully!");
       document.getElementById("rPrice").value = "";
       document.getElementById("rSize").value = "";
       document.getElementById("rCap").value = "";
-      document.getElementById("rFac").value = "";
+      if (document.getElementById("rFac")) document.getElementById("rFac").value = "";
       if (typeof closeModal === "function") closeModal("addRoomModal");
       if (typeof initLandlordDashboard === "function") initLandlordDashboard();
     } else {
@@ -510,6 +537,7 @@ async function addRoom() {
     showToast("Server error.");
   }
 }
+
 
 // ADMIN ACTIONS (Keep as is or improve later)
 function blockUser(userId) {

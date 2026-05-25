@@ -22,6 +22,20 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   const { rating, comment, Tenant_idTenant, Property_idProperty } = req.body;
   try {
+    // Gate: tenant must have a confirmed booking for a room in this property
+    const [bookings] = await pool.execute(
+      `SELECT b.idBooking FROM Booking b
+       JOIN Room r ON b.Room_idRoom = r.idRoom
+       WHERE b.Tenant_idTenant = ? AND r.Property_idProperty = ? AND b.status = 'confirmed'`,
+      [Tenant_idTenant, Property_idProperty]
+    );
+    if (bookings.length === 0) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only review a property after a confirmed stay'
+      });
+    }
+
     const [result] = await pool.execute(
       'INSERT INTO Review (rating, comment, Tenant_idTenant, Property_idProperty, Admin_idAdmin) VALUES (?, ?, ?, ?, 1)',
       [rating, comment || '', Tenant_idTenant, Property_idProperty]
@@ -31,6 +45,7 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // DELETE /api/reviews/:id
 router.delete('/:id', async (req, res) => {

@@ -7,6 +7,42 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/dashboard-dark.css">
+  <style>
+    /* ── Premium Action Chips ── */
+    .action-chips { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+    .chip {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:5px 12px; border-radius:20px; font-size:11.5px; font-weight:600;
+      border:none; cursor:pointer; transition:all 0.2s ease;
+      letter-spacing:.3px; white-space:nowrap;
+    }
+    .chip svg { width:13px; height:13px; flex-shrink:0; }
+    .chip-details {
+      background:rgba(99,102,241,0.12); color:#818cf8;
+      border:1px solid rgba(99,102,241,0.25);
+    }
+    .chip-details:hover {
+      background:rgba(99,102,241,0.22); color:#a5b4fc;
+      box-shadow:0 0 12px rgba(99,102,241,0.35); transform:translateY(-1px);
+    }
+    .chip-review {
+      background:rgba(251,191,36,0.12); color:#fbbf24;
+      border:1px solid rgba(251,191,36,0.3);
+    }
+    .chip-review:hover {
+      background:rgba(251,191,36,0.25); color:#fde68a;
+      box-shadow:0 0 12px rgba(251,191,36,0.35); transform:translateY(-1px);
+    }
+    .chip-cancel {
+      background:rgba(239,68,68,0.1); color:#f87171;
+      border:1px solid rgba(239,68,68,0.25);
+    }
+    .chip-cancel:hover {
+      background:rgba(239,68,68,0.22); color:#fca5a5;
+      box-shadow:0 0 12px rgba(239,68,68,0.3); transform:translateY(-1px);
+    }
+    .chip:active { transform:translateY(0); }
+  </style>
 </head>
 <body>
 
@@ -186,6 +222,83 @@
         </div>
       </div>
 
+      <!-- CANCEL BOOKING MODAL -->
+      <div id="cancelModal" class="modal-overlay">
+        <div class="modal" style="max-width:420px;">
+          <div style="text-align:center; margin-bottom:18px;">
+            <div style="font-size:48px; margin-bottom:10px;">⚠️</div>
+            <h2 style="margin-bottom:8px;">Cancel Booking?</h2>
+            <p style="color:var(--text-muted); font-size:14px; line-height:1.6;">Are you sure you want to cancel your booking at <strong id="cancelPropName"></strong>? This action cannot be undone and the room will be released back to available.</p>
+          </div>
+          <input type="hidden" id="cancelBookingId">
+          <div style="display:flex; gap:10px; margin-top:18px;">
+            <button class="btn btn-ghost" style="flex:1" onclick="closeModal('cancelModal')">Keep Booking</button>
+            <button class="btn" style="flex:1; background:linear-gradient(135deg,#dc2626,#b91c1c); color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:600; cursor:pointer;" onclick="confirmCancelBooking()">Yes, Cancel It</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOOKING DETAIL MODAL -->
+      <div id="bookingDetailModal" class="modal-overlay" onclick="if(event.target===this)closeModal('bookingDetailModal')">
+        <div class="modal" style="max-width:520px; padding:0; overflow:hidden;">
+          <!-- Header banner -->
+          <div id="bdm-banner" style="background:linear-gradient(135deg,#3b82f6,#6366f1); padding:28px 28px 20px; position:relative;">
+            <button onclick="closeModal('bookingDetailModal')" style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.15);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:18px;cursor:pointer;line-height:30px;">×</button>
+            <div style="font-size:11px;font-weight:600;letter-spacing:1px;color:rgba(255,255,255,0.7);margin-bottom:6px;">BOOKING DETAILS</div>
+            <div id="bdm-propname" style="font-size:20px;font-weight:700;color:#fff;margin-bottom:4px;">Property Name</div>
+            <div id="bdm-roomlabel" style="font-size:13px;color:rgba(255,255,255,0.8);">Room Type</div>
+            <div id="bdm-status-wrap" style="margin-top:12px;"></div>
+          </div>
+          <!-- Body -->
+          <div style="padding:24px 28px;">
+            <!-- Dates row -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
+              <div style="background:var(--dash-bg,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:14px;">
+                <div style="font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--text-muted);margin-bottom:4px;">📅 MOVE IN</div>
+                <div id="bdm-checkin" style="font-size:15px;font-weight:600;color:var(--text-main);">—</div>
+              </div>
+              <div style="background:var(--dash-bg,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:14px;">
+                <div style="font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--text-muted);margin-bottom:4px;">📅 MOVE OUT</div>
+                <div id="bdm-checkout" style="font-size:15px;font-weight:600;color:var(--text-main);">—</div>
+              </div>
+            </div>
+            <!-- Info rows -->
+            <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--dash-bg,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;">
+                <span style="font-size:13px;color:var(--text-muted);">🏠 Property</span>
+                <span id="bdm-prop2" style="font-size:13px;font-weight:600;color:var(--text-main);">—</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--dash-bg,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;">
+                <span style="font-size:13px;color:var(--text-muted);">🛏 Room Type</span>
+                <span id="bdm-roomtype" style="font-size:13px;font-weight:600;color:var(--text-main);">—</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--dash-bg,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;">
+                <span style="font-size:13px;color:var(--text-muted);">💰 Monthly Price</span>
+                <span id="bdm-price" style="font-size:13px;font-weight:700;color:#3b82f6;">—</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--dash-bg,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;">
+                <span style="font-size:13px;color:var(--text-muted);">👤 Landlord</span>
+                <span id="bdm-landlord" style="font-size:13px;font-weight:600;color:var(--text-main);">—</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--dash-bg,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;">
+                <span style="font-size:13px;color:var(--text-muted);">📞 Contact</span>
+                <a id="bdm-phone" href="#" style="font-size:13px;font-weight:600;color:#3b82f6;text-decoration:none;">—</a>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--dash-bg,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;">
+                <span style="font-size:13px;color:var(--text-muted);">📍 Address</span>
+                <span id="bdm-address" style="font-size:13px;font-weight:600;color:var(--text-main);text-align:right;max-width:60%;">—</span>
+              </div>
+              <div id="bdm-bookingid-row" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--dash-bg,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;">
+                <span style="font-size:13px;color:var(--text-muted);">🔖 Booking ID</span>
+                <span id="bdm-bookingid" style="font-size:13px;font-weight:600;color:var(--text-muted);">—</span>
+              </div>
+            </div>
+            <div id="bdm-actions" style="display:flex;gap:10px;"></div>
+          </div>
+        </div>
+      </div>
+
+
 
       <!-- REVIEWS SECTION -->
       <section id="page-reviews" class="page-section">
@@ -361,9 +474,12 @@
           const roomPrice = rawRoom   ? (rawRoom.price || 0)                            : 0;
           const lName     = landlord  ? (landlord.name || landlord.full_name || 'N/A') : 'N/A';
           const lPhone    = landlord  ? (landlord.phone || 'N/A')                      : 'N/A';
+          const propAddr  = prop      ? (prop.location || prop.address || 'N/A')       : 'N/A';
+          const propId    = prop      ? (prop.idProperty || prop.property_id || '')    : '';
           const status    = (b.booking_status || 'pending').toLowerCase();
+          const bdmData   = encodeURIComponent(JSON.stringify({ propName, roomLabel, roomPrice, lName, lPhone, propAddr, propId, status, bookingId: b.booking_id, checkIn: b.check_in, checkOut: b.check_out }));
           return `
-            <tr>
+            <tr style="cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(59,130,246,0.06)'" onmouseout="this.style.background=''" onclick="openBookingDetail(${bdmData})">
               <td><span class="prop-link">${propName}</span></td>
               <td>${roomLabel} — $${roomPrice}/mo</td>
               <td>${lName}</td>
@@ -385,22 +501,41 @@
           const propName  = prop     ? (prop.title || prop.property_name)            : 'Property';
           const propId    = prop     ? (prop.idProperty || prop.property_id || '')   : '';
           const roomLabel = rawRoom  ? (rawRoom.type || rawRoom.room_type || 'Room') : 'Room';
+          const roomPrice = rawRoom   ? (rawRoom.price || 0)                          : 0;
           const lName     = landlord ? (landlord.name || landlord.full_name || 'N/A'): 'N/A';
           const lPhone    = landlord ? (landlord.phone || 'N/A')                     : 'N/A';
+          const propAddr  = prop     ? (prop.location || prop.address || 'N/A')      : 'N/A';
           const status    = (b.booking_status || 'pending').toLowerCase();
+          const bdmData   = { propName, roomLabel, roomPrice, lName, lPhone, propAddr, propId, status, bookingId: b.booking_id, checkIn: b.check_in, checkOut: b.check_out };
 
-          let action = '';
+          const enc = encodeURIComponent(JSON.stringify(bdmData));
+          let action = `<div class="action-chips">
+            <button class="chip chip-details" onclick="event.stopPropagation();openBookingDetail('${enc}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Details
+            </button>`;
           if (status === 'confirmed') {
-            action = `<button class="btn btn-ghost btn-sm" onclick="openReviewModal('${propId}', '${propName}')">⭐ Review</button>`;
+            action += `
+            <button class="chip chip-review" onclick="event.stopPropagation();openReviewModal('${propId}', '${propName}')">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              Review
+            </button>`;
+          } else if (status === 'pending') {
+            action += `
+            <button class="chip chip-cancel" onclick="event.stopPropagation();openCancelModal('${b.booking_id}', '${propName}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Cancel
+            </button>`;
           }
+          action += `</div>`;
           return `
-            <tr>
+            <tr style="cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(59,130,246,0.06)'" onmouseout="this.style.background=''" onclick="openBookingDetail('${encodeURIComponent(JSON.stringify(bdmData))}')">
               <td><span class="prop-link">${propName}</span></td>
               <td>${roomLabel}</td>
               <td>${formatDate(b.check_in)} — ${formatDate(b.check_out)}</td>
               <td><span class="badge badge-${status}">${status.toUpperCase()}</span></td>
               <td style="color:var(--accent); font-size:13px; font-weight:500;">${lPhone}</td>
-              <td>${action}</td>
+              <td onclick="event.stopPropagation()">${action}</td>
             </tr>
           `;
         }).join('');
@@ -526,6 +661,95 @@
 
     function closeModal(id) {
       document.getElementById(id).classList.remove('open');
+    }
+
+    function openBookingDetail(data) {
+      // data can be passed as encoded string or plain object
+      if (typeof data === 'string') data = JSON.parse(decodeURIComponent(data));
+      const statusColors = { confirmed:'#10b981', pending:'#f59e0b', cancelled:'#ef4444' };
+      const statusColor = statusColors[data.status] || '#6b7280';
+
+      // Banner
+      document.getElementById('bdm-propname').textContent   = data.propName || '—';
+      document.getElementById('bdm-roomlabel').textContent  = data.roomLabel || '—';
+      document.getElementById('bdm-status-wrap').innerHTML  =
+        `<span style="display:inline-block;background:rgba(255,255,255,0.2);color:#fff;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.5px;">${(data.status||'').toUpperCase()}</span>`;
+
+      // Dates
+      document.getElementById('bdm-checkin').textContent    = data.checkIn  ? new Date(data.checkIn ).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+      document.getElementById('bdm-checkout').textContent   = data.checkOut ? new Date(data.checkOut).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+
+      // Info fields
+      document.getElementById('bdm-prop2').textContent      = data.propName   || '—';
+      document.getElementById('bdm-roomtype').textContent   = data.roomLabel  || '—';
+      document.getElementById('bdm-price').textContent      = data.roomPrice  ? `$${data.roomPrice}/mo` : '—';
+      document.getElementById('bdm-landlord').textContent   = data.lName      || '—';
+      document.getElementById('bdm-address').textContent    = data.propAddr   || '—';
+      document.getElementById('bdm-bookingid').textContent  = data.bookingId  ? `#${data.bookingId}` : '—';
+
+      // Phone link
+      const phoneEl = document.getElementById('bdm-phone');
+      phoneEl.textContent = data.lPhone || '—';
+      phoneEl.href = data.lPhone && data.lPhone !== 'N/A' ? `tel:${data.lPhone}` : '#';
+
+      // Banner gradient based on status
+      const gradients = { confirmed:'linear-gradient(135deg,#10b981,#059669)', pending:'linear-gradient(135deg,#f59e0b,#d97706)', cancelled:'linear-gradient(135deg,#ef4444,#b91c1c)' };
+      document.getElementById('bdm-banner').style.background = gradients[data.status] || 'linear-gradient(135deg,#3b82f6,#6366f1)';
+
+      // Action buttons
+      const actionsEl = document.getElementById('bdm-actions');
+      actionsEl.innerHTML = '';
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'btn btn-ghost'; closeBtn.style.flex = '1';
+      closeBtn.textContent = 'Close'; closeBtn.onclick = () => closeModal('bookingDetailModal');
+      actionsEl.appendChild(closeBtn);
+
+      if (data.status === 'confirmed' && data.propId) {
+        const revBtn = document.createElement('button');
+        revBtn.className = 'btn btn-primary'; revBtn.style.flex = '1';
+        revBtn.textContent = '⭐ Leave Review';
+        revBtn.onclick = () => { closeModal('bookingDetailModal'); openReviewModal(data.propId, data.propName); };
+        actionsEl.appendChild(revBtn);
+      } else if (data.status === 'pending' && data.bookingId) {
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn'; cancelBtn.style.cssText = 'flex:1;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:600;cursor:pointer;';
+        cancelBtn.textContent = '✕ Cancel Booking';
+        cancelBtn.onclick = () => { closeModal('bookingDetailModal'); openCancelModal(data.bookingId, data.propName); };
+        actionsEl.appendChild(cancelBtn);
+      }
+
+      document.getElementById('bookingDetailModal').classList.add('open');
+    }
+
+    function openCancelModal(bookingId, propName) {
+      document.getElementById('cancelBookingId').value = bookingId;
+      document.getElementById('cancelPropName').textContent = propName;
+      document.getElementById('cancelModal').classList.add('open');
+    }
+
+    async function confirmCancelBooking() {
+      const bookingId = document.getElementById('cancelBookingId').value;
+      if (!bookingId) return;
+
+      // Disable button to prevent double-click
+      const btn = document.querySelector('#cancelModal .btn:last-child');
+      if (btn) { btn.disabled = true; btn.textContent = 'Cancelling...'; }
+
+      try {
+        const res = await apiUpdateBooking(bookingId, 'cancelled');
+        if (res.success) {
+          closeModal('cancelModal');
+          showToast('✅ Booking cancelled successfully.');
+          await initData();
+          await initTenantDashboard();
+        } else {
+          showToast('❌ Failed to cancel booking. Please try again.');
+          if (btn) { btn.disabled = false; btn.textContent = 'Yes, Cancel It'; }
+        }
+      } catch (err) {
+        showToast('❌ Server error while cancelling.');
+        if (btn) { btn.disabled = false; btn.textContent = 'Yes, Cancel It'; }
+      }
     }
 
     function showPage(id, el) {

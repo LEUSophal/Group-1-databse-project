@@ -16,16 +16,17 @@ async function initData() {
       return r.json();
     }).catch(err => {
       console.error(`Fetch failed for ${url}:`, err);
-      return []; // Return empty array on failure
+      return [];
     });
 
-    const [pRes, rRes, bRes, vRes, tRes, lRes] = await Promise.all([
+    const [pRes, rRes, bRes, vRes, tRes, lRes, fRes] = await Promise.all([
       fetchJson(`${API_URL}/properties`),
       fetchJson(`${API_URL}/rooms`),
       fetchJson(`${API_URL}/bookings`),
       fetchJson(`${API_URL}/reviews`),
       fetchJson(`${API_URL}/auth/tenants`),
-      fetchJson(`${API_URL}/auth/landlords`)
+      fetchJson(`${API_URL}/auth/landlords`),
+      fetchJson(`${API_URL}/facilities`)
     ]);
 
     MOCK_DATA.properties = pRes;
@@ -34,12 +35,14 @@ async function initData() {
     MOCK_DATA.reviews = vRes;
     MOCK_DATA.tenants = tRes;
     MOCK_DATA.landlords = lRes;
-    
+    MOCK_DATA.facilities = fRes;
+
     console.log("Data loaded successfully:", MOCK_DATA);
   } catch (err) {
     console.error("Critical error in initData:", err);
   }
 }
+
 
 // ========== HELPER FUNCTIONS (Sync - reads from local cache) ==========
 function getPropertyRooms(propertyId) { return MOCK_DATA.rooms.filter(r => String(r.Property_idProperty) === String(propertyId)); }
@@ -54,8 +57,9 @@ function getPropertyMinPrice(propertyId) {
   if (rooms.length === 0) return 0;
   return Math.min(...rooms.map(r => r.price));
 }
-function getRoomFacilities(roomId) { return []; }
-function getRoomImages(roomId) { return []; }
+function getRoomFacilities(roomId) { return MOCK_DATA.facilities ? MOCK_DATA.facilities.filter(f => f.room_id === roomId) : []; }
+function getRoomImages(roomId) { return MOCK_DATA.room_images ? MOCK_DATA.room_images.filter(i => i.room_id === roomId) : []; }
+
 function getRoom(roomId) { 
   return MOCK_DATA.rooms.find(r => String(r.idRoom) === String(roomId) || String(r.room_id) === String(roomId)); 
 }
@@ -222,7 +226,80 @@ async function apiUploadImages(files) {
   }
   const res = await fetch(`${API_URL}/upload`, {
     method: 'POST',
-    body: formData // Note: Content-Type is NOT set, fetch will set it automatically with the boundary
+    body: formData
   });
   return res.json();
 }
+
+// ========== ADMIN LOG API ==========
+async function apiFetchAdminLog() {
+  const res = await fetch(`${API_URL}/admin-log`);
+  return res.json();
+}
+
+async function apiPostAdminLog(action_type, target_table, target_id, description) {
+  const user = getLoggedInUser ? getLoggedInUser() : null;
+  const res = await fetch(`${API_URL}/admin-log`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      Admin_idAdmin: user ? user.user_id : 1,
+      action_type,
+      target_table,
+      target_id: target_id || null,
+      description: description || null
+    })
+  });
+  return res.json();
+}
+
+// ========== BLOCK / UNBLOCK USER API ==========
+async function apiBlockUser(role, userId) {
+  const endpoint = role === 'landlord' ? 'landlords' : 'tenants';
+  const res = await fetch(`${API_URL}/auth/${endpoint}/${userId}/block`, { method: 'PUT' });
+  return res.json();
+}
+
+async function apiDeleteUser(role, userId) {
+  const endpoint = role === 'landlord' ? 'landlords' : 'tenants';
+  const res = await fetch(`${API_URL}/auth/${endpoint}/${userId}`, { method: 'DELETE' });
+  return res.json();
+}
+
+// ========== FACILITIES API ==========
+async function apiFetchFacilities() {
+  const res = await fetch(`${API_URL}/facilities`);
+  return res.json();
+}
+
+// ========== ROOM IMAGES API ==========
+async function apiSaveRoomImages(roomId, urls) {
+  // Save uploaded image URLs into the Room_Image table
+  const res = await fetch(`${API_URL}/rooms/${roomId}/images`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ urls })
+  });
+  return res.json();
+}
+
+async function apiDeleteRoomImage(roomId, imageId) {
+  const res = await fetch(`${API_URL}/rooms/${roomId}/images/${imageId}`, { method: 'DELETE' });
+  return res.json();
+}
+
+async function apiSetCoverImage(roomId, imageId) {
+  const res = await fetch(`${API_URL}/rooms/${roomId}/images/${imageId}/set-cover`, { method: 'PUT' });
+  return res.json();
+}
+
+// ========== ROOM FACILITIES API ==========
+async function apiSaveRoomFacilities(roomId, facility_ids) {
+  const res = await fetch(`${API_URL}/rooms/${roomId}/facilities`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ facility_ids })
+  });
+  return res.json();
+}
+
