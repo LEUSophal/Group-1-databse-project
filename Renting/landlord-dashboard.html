@@ -22,6 +22,41 @@
     .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
     .btn:hover { opacity: 0.9; transform: scale(1.02); }
     
+    /* ── Premium Action Chips ── */
+    .action-chips { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+    .chip {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:5px 12px; border-radius:20px; font-size:11.5px; font-weight:600;
+      border:none; cursor:pointer; transition:all 0.2s ease;
+      letter-spacing:.3px; white-space:nowrap;
+    }
+    .chip svg { width:13px; height:13px; flex-shrink:0; }
+    .chip-details {
+      background:rgba(99,102,241,0.12); color:#818cf8;
+      border:1px solid rgba(99,102,241,0.25);
+    }
+    .chip-details:hover {
+      background:rgba(99,102,241,0.22); color:#a5b4fc;
+      box-shadow:0 0 12px rgba(99,102,241,0.35); transform:translateY(-1px);
+    }
+    .chip-accept {
+      background:rgba(16,185,129,0.12); color:#34d399;
+      border:1px solid rgba(16,185,129,0.25);
+    }
+    .chip-accept:hover {
+      background:rgba(16,185,129,0.22); color:#6ee7b7;
+      box-shadow:0 0 12px rgba(16,185,129,0.35); transform:translateY(-1px);
+    }
+    .chip-reject, .chip-delete {
+      background:rgba(239,68,68,0.1); color:#f87171;
+      border:1px solid rgba(239,68,68,0.25);
+    }
+    .chip-reject:hover, .chip-delete:hover {
+      background:rgba(239,68,68,0.22); color:#fca5a5;
+      box-shadow:0 0 12px rgba(239,68,68,0.3); transform:translateY(-1px);
+    }
+    .chip:active { transform:translateY(0); }
+    
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -490,11 +525,84 @@
 
   <div class="toast" id="toast"></div>
 
+  <!-- BOOKING DETAIL MODAL -->
+  <div id="bookingDetailModal" class="modal-overlay" onclick="if(event.target===this)closeModal('bookingDetailModal')">
+    <div class="modal" style="max-width:520px; padding:0; overflow:hidden;">
+      <!-- Header banner -->
+      <div id="bdm-banner" style="background:linear-gradient(135deg,#3b82f6,#6366f1); padding:28px 28px 20px; position:relative;">
+        <button onclick="closeModal('bookingDetailModal')" style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.15);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:18px;cursor:pointer;line-height:30px;">×</button>
+        <div style="font-size:11px;font-weight:600;letter-spacing:1px;color:rgba(255,255,255,0.7);margin-bottom:6px;">BOOKING DETAILS</div>
+        <div id="bdm-propname" style="font-size:20px;font-weight:700;color:#fff;margin-bottom:4px;">Property Name</div>
+        <div id="bdm-roomlabel" style="font-size:13px;color:rgba(255,255,255,0.8);">Room Type</div>
+        <div id="bdm-status-wrap" style="margin-top:12px;"></div>
+      </div>
+      <!-- Body -->
+      <div style="padding:24px 28px;">
+        <!-- Dates row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
+          <div style="background:var(--dash-bg,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:14px;">
+            <div style="font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--text-muted);margin-bottom:4px;">📅 MOVE IN</div>
+            <div id="bdm-checkin" style="font-size:15px;font-weight:600;color:var(--text-main);">—</div>
+          </div>
+          <div style="background:var(--dash-bg,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:14px;">
+            <div style="font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--text-muted);margin-bottom:4px;">📅 MOVE OUT</div>
+            <div id="bdm-checkout" style="font-size:15px;font-weight:600;color:var(--text-main);">—</div>
+          </div>
+        </div>
+        <!-- Info rows -->
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--dash-bg,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;">
+            <span style="font-size:13px;color:var(--text-muted);">🏠 Property</span>
+            <span id="bdm-prop2" style="font-size:13px;font-weight:600;color:var(--text-main);">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--dash-bg,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;">
+            <span style="font-size:13px;color:var(--text-muted);">🛏 Room Type</span>
+            <span id="bdm-roomtype" style="font-size:13px;font-weight:600;color:var(--text-main);">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--dash-bg,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;">
+            <span style="font-size:13px;color:var(--text-muted);">💰 Monthly Price</span>
+            <span id="bdm-price" style="font-size:13px;font-weight:700;color:#3b82f6;">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--dash-bg,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;">
+            <span style="font-size:13px;color:var(--text-muted);">👤 Tenant</span>
+            <span id="bdm-landlord" style="font-size:13px;font-weight:600;color:var(--text-main);">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--dash-bg,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;">
+            <span style="font-size:13px;color:var(--text-muted);">📞 Contact</span>
+            <a id="bdm-phone" href="#" style="font-size:13px;font-weight:600;color:#3b82f6;text-decoration:none;">—</a>
+          </div>
+          <div id="bdm-bookingid-row" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--dash-bg,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;">
+            <span style="font-size:13px;color:var(--text-muted);">🔖 Booking ID</span>
+            <span id="bdm-bookingid" style="font-size:13px;font-weight:600;color:var(--text-muted);">—</span>
+          </div>
+        </div>
+        <div id="bdm-actions" style="display:flex;gap:10px;"></div>
+      </div>
+    </div>
+  </div>
+
+
   <!-- SCRIPTS -->
   <script src="js/data.js"></script>
   <script src="js/app-data.js"></script>
   <script src="js/main-functions.js"></script>
   <script>
+    function getSafeImageUrl(imgStr, isProperty) {
+      const fallbackEmoji = isProperty ? '🏢' : '🛏';
+      const fallbackSvg = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect width='40' height='40' fill='%23f1f5f9'/><text x='50%' y='50%' font-size='20' text-anchor='middle' dy='.3em'>${fallbackEmoji}</text></svg>`;
+      if (!imgStr) return fallbackSvg;
+      let url = '';
+      try {
+        const parsed = JSON.parse(imgStr);
+        if (parsed && parsed.length > 0) url = parsed[0];
+      } catch(e) {
+        if (typeof imgStr === 'string' && imgStr.startsWith('/')) url = imgStr;
+      }
+      if (!url && typeof imgStr === 'string' && !imgStr.startsWith('[')) url = imgStr; // For flat string paths
+      if (!url) return fallbackSvg;
+      return url.startsWith('http') || url.startsWith('data:') ? url : 'http://localhost:3000' + (url.startsWith('/') ? '' : '/') + url;
+    }
+
     async function initLandlordDashboard() {
       // Show loader immediately
       const loader = document.getElementById('pageLoader');
@@ -563,7 +671,7 @@
           <tr>
             <td>
               <div style="display:flex; align-items:center; gap:10px;">
-                <img src="${p.image ? 'http://localhost:3000' + p.image : 'assets/default-property.png'}" style="width:40px; height:40px; border-radius:6px; object-fit:cover; background:#f1f5f9;">
+                <img src="${getSafeImageUrl(p.image, true)}" onerror="this.src=getSafeImageUrl(null, true)" style="width:40px; height:40px; border-radius:6px; object-fit:cover; background:#f1f5f9;">
                 <span class="prop-link">${p.property_name}</span>
               </div>
             </td>
@@ -587,7 +695,7 @@
           <tr>
             <td>
               <div style="display:flex; align-items:center; gap:10px;">
-                <img src="${r.images ? 'http://localhost:3000' + JSON.parse(r.images)[0] : 'assets/default-room.png'}" onerror="this.src='assets/default-room.png'" style="width:40px; height:40px; border-radius:6px; object-fit:cover; background:#f1f5f9;">
+                <img src="${getSafeImageUrl(r.images, false)}" onerror="this.src=getSafeImageUrl(null, false)" style="width:40px; height:40px; border-radius:6px; object-fit:cover; background:#f1f5f9;">
                 <span class="prop-link">${r.room_title}</span>
               </div>
             </td>
@@ -608,26 +716,57 @@
       el.innerHTML = list.length === 0 ? '<tr><td colspan="6" style="text-align:center; padding:20px;">No booking requests.</td></tr>' : 
         list.slice(0, 5).map(b => {
           const room = getRoom(b.room_id);
+          const prop = room ? getProperty(room.property_id) : null;
           const tenant = (getData('tenants').find(t => String(t.idTenant) === String(b.user_id))) || {full_name: 'Tenant', phone: 'N/A'};
           
-          let actions = '';
-          if (b.booking_status === 'Pending') {
-            actions = `
-              <button class="btn btn-primary btn-sm" style="padding:4px 8px; font-size:11px;" onclick="acceptBooking('${b.booking_id}')">Accept</button>
-              <button class="btn btn-ghost btn-sm" style="padding:4px 8px; font-size:11px; color:#f87171;" onclick="rejectBooking('${b.booking_id}')">Reject</button>
-            `;
+          const status = (b.booking_status || 'pending').toLowerCase();
+          const bdmData = encodeURIComponent(JSON.stringify({
+            propName: prop ? (prop.property_name || prop.title) : 'Unknown Property',
+            roomLabel: room ? (room.type || room.room_type) : 'Room',
+            roomPrice: room ? room.price_per_month : 0,
+            lName: tenant.full_name,
+            lPhone: tenant.phone || 'N/A',
+            propAddr: prop ? prop.address : 'N/A',
+            status: status,
+            bookingId: b.booking_id,
+            checkIn: b.check_in || b.move_in_date,
+            checkOut: b.check_out || b.move_out_date,
+            role: 'landlord'
+          }));
+
+          let actions = `<div class="action-chips">
+            <button class="chip chip-details" onclick="event.stopPropagation();openBookingDetail('${bdmData}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Details
+            </button>`;
+
+          if (status === 'pending') {
+            actions += `
+              <button class="chip chip-accept" onclick="event.stopPropagation();acceptBooking('${b.booking_id}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Accept
+              </button>
+              <button class="chip chip-reject" onclick="event.stopPropagation();rejectBooking('${b.booking_id}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Reject
+              </button>`;
           } else {
-            actions = `<button class="btn btn-ghost btn-sm" style="padding:4px 8px; font-size:11px; opacity:0.6;" onclick="deleteBooking('${b.booking_id}')">Delete</button>`;
+            actions += `
+              <button class="chip chip-delete" onclick="event.stopPropagation();deleteBooking('${b.booking_id}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                Delete
+              </button>`;
           }
+          actions += `</div>`;
 
           return `
-            <tr>
+            <tr style="cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(59,130,246,0.06)'" onmouseout="this.style.background=''" onclick="openBookingDetail('${bdmData}')">
               <td>${tenant.full_name}</td>
               <td style="color:var(--accent); font-size:13px; font-weight:500;">${tenant.phone || 'N/A'}</td>
               <td>${room ? (room.type || room.room_type) : 'Room'}</td>
-              <td>${formatDate(b.check_in || b.move_in_date)} — ${formatDate(b.check_out || b.move_out_date)}</td>
-              <td><span class="badge badge-${b.booking_status.toLowerCase()}">${b.booking_status.toUpperCase()}</span></td>
-              <td><div style="display:flex; gap:5px;">${actions}</div></td>
+              <td>${formatDate(b.check_in || b.move_in_date)}</td>
+              <td><span class="badge badge-${status}">${b.booking_status.toUpperCase()}</span></td>
+              <td onclick="event.stopPropagation()">${actions}</td>
             </tr>
           `;
         }).join('');
@@ -685,6 +824,61 @@
       if (el) el.classList.add('active');
     }
 
+    function openBookingDetail(data) {
+      if (typeof data === 'string') data = JSON.parse(decodeURIComponent(data));
+      const statusColors = { confirmed:'#10b981', pending:'#f59e0b', cancelled:'#ef4444' };
+      
+      // Banner
+      document.getElementById('bdm-propname').textContent   = data.propName || '—';
+      document.getElementById('bdm-roomlabel').textContent  = data.roomLabel || '—';
+      document.getElementById('bdm-status-wrap').innerHTML  =
+        `<span style="display:inline-block;background:rgba(255,255,255,0.2);color:#fff;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.5px;">${(data.status||'').toUpperCase()}</span>`;
+
+      // Dates
+      document.getElementById('bdm-checkin').textContent    = data.checkIn  ? new Date(data.checkIn ).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+      document.getElementById('bdm-checkout').textContent   = data.checkOut ? new Date(data.checkOut).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+
+      // Info fields
+      document.getElementById('bdm-prop2').textContent      = data.propName   || '—';
+      document.getElementById('bdm-roomtype').textContent   = data.roomLabel  || '—';
+      document.getElementById('bdm-price').textContent      = data.roomPrice  ? `$${data.roomPrice}/mo` : '—';
+      document.getElementById('bdm-landlord').textContent   = data.lName      || '—'; // Tenant name
+      document.getElementById('bdm-bookingid').textContent  = data.bookingId  ? `#${data.bookingId}` : '—';
+
+      // Phone link
+      const phoneEl = document.getElementById('bdm-phone');
+      phoneEl.textContent = data.lPhone || '—';
+      phoneEl.href = data.lPhone && data.lPhone !== 'N/A' ? `tel:${data.lPhone}` : '#';
+
+      // Banner gradient based on status
+      const gradients = { confirmed:'linear-gradient(135deg,#10b981,#059669)', pending:'linear-gradient(135deg,#f59e0b,#d97706)', cancelled:'linear-gradient(135deg,#ef4444,#b91c1c)' };
+      document.getElementById('bdm-banner').style.background = gradients[data.status] || 'linear-gradient(135deg,#3b82f6,#6366f1)';
+
+      // Action buttons in modal footer
+      const actionsEl = document.getElementById('bdm-actions');
+      actionsEl.innerHTML = '';
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'btn btn-ghost'; closeBtn.style.flex = '1';
+      closeBtn.textContent = 'Close'; closeBtn.onclick = () => closeModal('bookingDetailModal');
+      actionsEl.appendChild(closeBtn);
+
+      if (data.status === 'pending' && data.bookingId) {
+        const accBtn = document.createElement('button');
+        accBtn.className = 'btn'; accBtn.style.cssText = 'flex:1;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;font-weight:600;';
+        accBtn.textContent = '✓ Accept';
+        accBtn.onclick = () => { closeModal('bookingDetailModal'); acceptBooking(data.bookingId); };
+        actionsEl.appendChild(accBtn);
+        
+        const rejBtn = document.createElement('button');
+        rejBtn.className = 'btn'; rejBtn.style.cssText = 'flex:1;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border:none;font-weight:600;';
+        rejBtn.textContent = '✕ Reject';
+        rejBtn.onclick = () => { closeModal('bookingDetailModal'); rejectBooking(data.bookingId); };
+        actionsEl.appendChild(rejBtn);
+      }
+
+      document.getElementById('bookingDetailModal').classList.add('open');
+    }
+
     function openModal(id) { document.getElementById(id).classList.add('open'); }
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
     
@@ -740,22 +934,59 @@
       el.innerHTML = list.length === 0 ? '<tr><td colspan="6" style="text-align:center; padding:20px;">No booking requests.</td></tr>' :
         list.map(b => {
           const room = getRoom(b.room_id);
+          const prop = room ? getProperty(room.property_id) : null;
           const tenant = (getData('tenants').find(t => String(t.idTenant) === String(b.user_id))) || {full_name: 'Tenant', phone: 'N/A'};
-          let actions = '';
-          if (b.booking_status === 'Pending') {
-            actions = `<button class="btn btn-primary btn-sm" style="padding:4px 8px;font-size:11px;" onclick="acceptBooking('${b.booking_id}')">Accept</button>
-              <button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;color:#f87171;" onclick="rejectBooking('${b.booking_id}')">Reject</button>`;
+          
+          const status = (b.booking_status || 'pending').toLowerCase();
+          const bdmData = encodeURIComponent(JSON.stringify({
+            propName: prop ? (prop.property_name || prop.title) : 'Unknown Property',
+            roomLabel: room ? (room.type || room.room_type) : 'Room',
+            roomPrice: room ? room.price_per_month : 0,
+            lName: tenant.full_name,
+            lPhone: tenant.phone || 'N/A',
+            propAddr: prop ? prop.address : 'N/A',
+            status: status,
+            bookingId: b.booking_id,
+            checkIn: b.check_in || b.move_in_date,
+            checkOut: b.check_out || b.move_out_date,
+            role: 'landlord'
+          }));
+
+          let actions = `<div class="action-chips">
+            <button class="chip chip-details" onclick="event.stopPropagation();openBookingDetail('${bdmData}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Details
+            </button>`;
+
+          if (status === 'pending') {
+            actions += `
+              <button class="chip chip-accept" onclick="event.stopPropagation();acceptBooking('${b.booking_id}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Accept
+              </button>
+              <button class="chip chip-reject" onclick="event.stopPropagation();rejectBooking('${b.booking_id}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Reject
+              </button>`;
           } else {
-            actions = `<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;opacity:0.6;" onclick="deleteBooking('${b.booking_id}')">Delete</button>`;
+            actions += `
+              <button class="chip chip-delete" onclick="event.stopPropagation();deleteBooking('${b.booking_id}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                Delete
+              </button>`;
           }
-          return `<tr>
-            <td>${tenant.full_name}</td>
-            <td style="color:var(--accent);font-size:13px;font-weight:500;">${tenant.phone || 'N/A'}</td>
-            <td>${room ? (room.type || room.room_type) : 'Room'}</td>
-            <td>${formatDate(b.check_in)} — ${formatDate(b.check_out)}</td>
-            <td><span class="badge badge-${b.booking_status.toLowerCase()}">${b.booking_status.toUpperCase()}</span></td>
-            <td><div style="display:flex;gap:5px;">${actions}</div></td>
-          </tr>`;
+          actions += `</div>`;
+
+          return `
+            <tr style="cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(59,130,246,0.06)'" onmouseout="this.style.background=''" onclick="openBookingDetail('${bdmData}')">
+              <td>${tenant.full_name}</td>
+              <td style="color:var(--accent);font-size:13px;font-weight:500;">${tenant.phone || 'N/A'}</td>
+              <td>${room ? (room.type || room.room_type) : 'Room'}</td>
+              <td>${formatDate(b.check_in || b.move_in_date)} — ${formatDate(b.check_out || b.move_out_date)}</td>
+              <td><span class="badge badge-${status}">${b.booking_status.toUpperCase()}</span></td>
+              <td onclick="event.stopPropagation()">${actions}</td>
+            </tr>
+          `;
         }).join('');
     }
 
