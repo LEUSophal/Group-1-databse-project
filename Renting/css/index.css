@@ -89,7 +89,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--nav-bg);bac
 .hero-visual{position:relative;}
 .hv-main{background:var(--card-bg);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);overflow:hidden;border:1px solid var(--border);}
 .hv-img{height:220px;background:linear-gradient(135deg,#1E40AF,#2563EB,#60A5FA);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
-.hv-img::after{content:'🏠';font-size:64px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.2));}
+.hv-img::after{content:'🏠';font-size:64px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.2)); z-index:1;}
+.hv-img.has-img::after { display: none; }
 .hv-img-overlay{position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='1.5' fill='white' fill-opacity='0.12'/%3E%3C/svg%3E");}
 .hv-body{padding:20px;}
 .hv-tag{display:inline-block;background:var(--green-light);color:var(--green);font-size:11px;font-weight:600;padding:3px 10px;border-radius:6px;margin-bottom:10px;}

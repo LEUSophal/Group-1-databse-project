@@ -36,6 +36,10 @@ router.post('/login', async (req, res) => {
     console.log(`Query result for ${email}:`, rows.length, 'rows found');
     if (rows.length > 0) {
       const user = rows[0];
+      // Check if account is blocked
+      if (user.is_active === 0) {
+        return res.json({ success: false, message: 'Your account has been blocked. Please contact support.' });
+      }
       user.role = role;
       res.json({ success: true, user });
     } else {
@@ -50,13 +54,23 @@ router.post('/login', async (req, res) => {
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   const { name, email, phone, password, role, gender } = req.body;
+
+  // Basic validation
+  if (!name || !email || !password) {
+    return res.status(400).json({ success: false, message: 'Name, email, and password are required.' });
+  }
+  if (password.length < 6) {
+    return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
+  }
+
   try {
-    // 1. Check if email already exists
-    const [existingTenants] = await pool.execute('SELECT email FROM Tenant WHERE email = ?', [email]);
+    // 1. Check if email already exists (across all user types)
+    const [existingTenants]   = await pool.execute('SELECT email FROM Tenant   WHERE email = ?', [email]);
     const [existingLandlords] = await pool.execute('SELECT email FROM Landlord WHERE email = ?', [email]);
-    
-    if (existingTenants.length > 0 || existingLandlords.length > 0) {
-      return res.status(400).json({ success: false, message: 'Email already registered' });
+    const [existingAdmins]    = await pool.execute('SELECT email FROM Admin    WHERE email = ?', [email]);
+
+    if (existingTenants.length > 0 || existingLandlords.length > 0 || existingAdmins.length > 0) {
+      return res.status(400).json({ success: false, message: 'Email already registered. Please use a different email or sign in.' });
     }
 
     let result;

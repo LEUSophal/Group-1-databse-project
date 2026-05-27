@@ -49,40 +49,40 @@
   <div class="hero-text">
     <div class="hero-badge">🏘️ &nbsp;Online Room Renting System</div>
     <h1>Find Your <span>Perfect Room</span> to Call Home</h1>
-    <p class="hero-sub">Search, explore, and book rooms from verified landlords. Whether you're a student, professional, or family — we have the right room for you.</p>
+    <p class="hero-sub">Find and book verified rooms across Cambodia.</p>
     <div class="hero-actions">
       <button class="btn btn-dark btn-lg" onclick="document.getElementById('rooms').scrollIntoView({behavior:'smooth'})">Browse Rooms</button>
       <button class="btn btn-ghost btn-lg" onclick="window.location.href='login.html?tab=register'">List Your Property →</button>
     </div>
     <div class="hero-stats">
-      <div><div class="stat-num" id="statRooms">—</div><div class="stat-lbl">Rooms available</div></div>
-      <div><div class="stat-num" id="statProperties">—</div><div class="stat-lbl">Properties</div></div>
-      <div><div class="stat-num" id="statTenants">—</div><div class="stat-lbl">Registered tenants</div></div>
+      <div><div class="stat-num" id="statRooms"></div><div class="stat-lbl">Rooms available</div></div>
+      <div><div class="stat-num" id="statProperties"></div><div class="stat-lbl">Properties</div></div>
+      <div><div class="stat-num" id="statTenants"></div><div class="stat-lbl">Registered tenants</div></div>
     </div>
   </div>
   <div class="hero-visual">
     <div class="hv-main">
       <div class="hv-img"><div class="hv-img-overlay"></div></div>
       <div class="hv-body">
-        <div class="hv-tag" id="heroRoomTag">✓ Available</div>
-        <div class="hv-title" id="heroRoomTitle">Loading...</div>
-        <div class="hv-addr" id="heroRoomAddr">📍 —</div>
-        <div class="hv-meta" id="heroRoomMeta"><span>🛏 —</span><span>📐 — m²</span><span>👥 —</span></div>
+        <div class="hv-tag" id="heroRoomTag"></div>
+        <div class="hv-title" id="heroRoomTitle"></div>
+        <div class="hv-addr" id="heroRoomAddr"></div>
+        <div class="hv-meta" id="heroRoomMeta"></div>
         <div class="hv-foot">
-          <div class="hv-price" id="heroRoomPrice">$— <small>/ month</small></div>
+          <div class="hv-price" id="heroRoomPrice"></div>
           <button class="hv-book" onclick="document.getElementById('rooms').scrollIntoView({behavior:'smooth'})">Browse Rooms</button>
         </div>
       </div>
     </div>
     <div class="float-card fc1">
       <div class="fc-lbl">Available rooms</div>
-      <div class="fc-val" id="fcAvailableRooms">— 🏠</div>
-      <div class="fc-sub" id="fcPropertyCount">Across — properties</div>
+      <div class="fc-val" id="fcAvailableRooms"></div>
+      <div class="fc-sub" id="fcPropertyCount"></div>
     </div>
     <div class="float-card fc2">
       <div class="fc-lbl">Average Rating</div>
-      <div class="fc-val" id="fcAvgRating">—</div>
-      <div class="fc-stars" id="fcStars">★★★★★</div>
+      <div class="fc-val" id="fcAvgRating"></div>
+      <div class="fc-stars" id="fcStars"></div>
     </div>
   </div>
 </div>
@@ -181,25 +181,21 @@
       <div class="step-n">01</div>
       <div class="step-icon">🔍</div>
       <h3>Search & Filter</h3>
-      <p>Filter by location, price range, room type, and capacity to find options that match your needs.</p>
     </div>
     <div class="step">
       <div class="step-n">02</div>
       <div class="step-icon">👁️</div>
       <h3>View Details</h3>
-      <p>Explore room photos, facilities, size, and pricing. Read reviews from previous tenants.</p>
     </div>
     <div class="step">
       <div class="step-n">03</div>
       <div class="step-icon">📅</div>
       <h3>Book Your Room</h3>
-      <p>Select your move-in and move-out dates and submit your booking request to the landlord.</p>
     </div>
     <div class="step">
       <div class="step-n">04</div>
       <div class="step-icon">🏠</div>
       <h3>Move In</h3>
-      <p>Once confirmed, move in on your chosen date and leave a review after your stay.</p>
     </div>
   </div>
 </div>
@@ -286,12 +282,9 @@
     <div class="role-card">
       <div class="role-emoji">🙋</div>
       <div class="role-name">Tenants</div>
-      <div class="role-desc">Find and book your perfect room. Access all listings, compare prices and facilities, and manage your bookings in one place.</div>
       <ul class="role-list">
-        <li>Search rooms by location & price</li>
-        <li>View room photos & facilities</li>
-        <li>Book with move-in / move-out dates</li>
-        <li>Track booking status</li>
+        <li>Search by location & price</li>
+        <li>Book with move-in dates</li>
         <li>Leave reviews after your stay</li>
       </ul>
       <button class="role-cta" onclick="window.location.href='login.html?tab=register'">Register as Tenant</button>
@@ -299,26 +292,20 @@
     <div class="role-card">
       <div class="role-emoji">🏠</div>
       <div class="role-name">Landlords</div>
-      <div class="role-desc">List your property and rooms, manage bookings from tenants, and grow your rental business effortlessly.</div>
       <ul class="role-list">
         <li>Add and manage properties</li>
-        <li>Upload room photos & assign facilities</li>
         <li>Confirm or cancel bookings</li>
         <li>Track rental income</li>
-        <li>Respond to tenant reviews</li>
       </ul>
       <button class="role-cta" onclick="window.location.href='login.html?tab=register'">Register as Landlord</button>
     </div>
     <div class="role-card">
       <div class="role-emoji">🛡️</div>
       <div class="role-name">Admins</div>
-      <div class="role-desc">Keep the platform safe and trustworthy. Manage all users, properties, bookings, and reviews with full audit logging.</div>
       <ul class="role-list">
-        <li>Manage users, properties & bookings</li>
+        <li>Manage users & properties</li>
         <li>Moderate reviews</li>
-        <li>Block or deactivate accounts</li>
-        <li>View full admin action logs</li>
-        <li>Ensure platform integrity</li>
+        <li>View full audit logs</li>
       </ul>
       <button class="role-cta" onclick="showToast('Contact your system administrator')">Admin Access</button>
     </div>
@@ -334,37 +321,14 @@
     </div>
   </div>
   <div class="reviews-grid" id="recentReviewsContainer">
-    <div class="rev-card">
-      <div class="rev-stars">★★★★★</div>
-      <p class="rev-text">"Found an amazing studio within my budget. The booking process was super smooth, and the landlord was very responsive. Highly recommend RoomNest!"</p>
-      <div class="rev-auth">
-        <div class="rev-av av-b">SR</div>
-        <div><div class="rev-name">Sophea Rith</div><div class="rev-sub">Tenant · Siem Reap</div></div>
-      </div>
-    </div>
-    <div class="rev-card">
-      <div class="rev-stars">★★★★★</div>
-      <p class="rev-text">"As a student moving to Phnom Penh, I was nervous. RoomNest made it so easy — I could filter by price and see exactly what facilities each room had."</p>
-      <div class="rev-auth">
-        <div class="rev-av av-g">DM</div>
-        <div><div class="rev-name">Dara Meas</div><div class="rev-sub">Tenant · Phnom Penh</div></div>
-      </div>
-    </div>
-    <div class="rev-card">
-      <div class="rev-stars">★★★★☆</div>
-      <p class="rev-text">"Great platform for landlords too! I listed my property and got my first booking within 3 days. The booking management dashboard is very clear."</p>
-      <div class="rev-auth">
-        <div class="rev-av av-o">KL</div>
-        <div><div class="rev-name">Kosal Ly</div><div class="rev-sub">Landlord · Battambang</div></div>
-      </div>
-    </div>
+    <!-- Dynamically rendered -->
   </div>
 </section>
 
 <!-- CTA -->
 <div class="cta-block">
   <h2>Ready to Find Your Room?</h2>
-  <p>Join thousands of tenants and landlords already using RoomNest to simplify room renting.</p>
+  <p>Start finding your perfect room today.</p>
   <div class="cta-btns">
     <button class="btn btn-dark btn-lg" onclick="window.location.href='login.html?tab=register'">Create Free Account</button>
     <button class="btn btn-ghost btn-lg" onclick="document.getElementById('rooms').scrollIntoView({behavior:'smooth'})">Browse Rooms</button>
@@ -373,31 +337,15 @@
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-grid">
-    <div class="footer-brand">
+  <div class="footer-grid" style="grid-template-columns: auto 1fr; align-items: center; gap: 40px;">
+    <div class="footer-brand" style="margin-bottom: 0;">
       <a class="logo" href="#"><div class="logo-dot"></div>RoomNest</a>
-      <p>Online Room Renting System — connecting tenants and landlords across Cambodia.</p>
     </div>
-    <div class="ft-col">
-      <h4>For Tenants</h4>
-      <a href="#">Browse Rooms</a>
-      <a href="#">Search Properties</a>
-      <a href="#" onclick="openModal('login');return false;">My Bookings</a>
-      <a href="#">Write a Review</a>
-    </div>
-    <div class="ft-col">
-      <h4>For Landlords</h4>
-      <a href="#">Add Property</a>
-      <a href="#">Manage Rooms</a>
-      <a href="#">Booking Requests</a>
-      <a href="#">Upload Images</a>
-    </div>
-    <div class="ft-col">
-      <h4>System</h4>
-      <a href="admin-panel.html">Admin Dashboard</a>
-      <a href="#">User Management</a>
-      <a href="#">Admin Log</a>
-      <a href="#">Help & Support</a>
+    <div style="display: flex; gap: 24px; justify-content: flex-end; flex-wrap: wrap;">
+      <a href="#rooms" style="color: var(--slate); text-decoration: none; font-size: 14px; font-weight: 500;">Browse Rooms</a>
+      <a href="#properties" style="color: var(--slate); text-decoration: none; font-size: 14px; font-weight: 500;">Properties</a>
+      <a href="admin-panel.html" style="color: var(--slate); text-decoration: none; font-size: 14px; font-weight: 500;">Admin</a>
+      <a href="#" style="color: var(--slate); text-decoration: none; font-size: 14px; font-weight: 500;">Support</a>
     </div>
   </div>
   <div class="footer-bottom">
@@ -629,7 +577,29 @@ function updateHeroWithRealData() {
     const metaEl = document.getElementById('heroRoomMeta');
     const priceEl = document.getElementById('heroRoomPrice');
     if (tagEl) { tagEl.textContent = isAvail ? '✓ Available' : 'Booked'; tagEl.style.color = isAvail ? '#22c55e' : '#ef4444'; }
-    if (titleEl) titleEl.textContent = prop.title ? prop.title + ' — ' + (featuredRoom.type || 'Room') : (featuredRoom.type || 'Room');
+    if (titleEl) {
+      const type = featuredRoom.type || 'Room';
+      const loc = (prop.location || '').split(',')[0].trim() || 'Room';
+      titleEl.textContent = `${type} · ${loc}`;
+    }
+    
+    // Set hero image
+    const hvImg = document.querySelector('.hv-img');
+    if (hvImg) {
+      let heroImgUrl = '';
+      if (featuredRoom.images) {
+        try {
+          const parsed = JSON.parse(featuredRoom.images);
+          if (parsed && parsed.length > 0) heroImgUrl = getImageUrl(parsed[0]);
+        } catch(e) {}
+      }
+      if (!heroImgUrl && prop.image) heroImgUrl = getImageUrl(prop.image);
+      if (heroImgUrl) {
+        hvImg.innerHTML += `<img src="${heroImgUrl}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;">`;
+        hvImg.classList.add('has-img');
+      }
+    }
+
     if (addrEl) addrEl.textContent = '📍 ' + (prop.location || 'Cambodia');
     if (metaEl) metaEl.innerHTML = '<span>🛏 ' + (featuredRoom.type || 'Room') + '</span><span>📐 ' + (featuredRoom.size || '—') + ' m²</span><span>👥 ' + (featuredRoom.capacity || 1) + ' person</span>';
     if (priceEl) priceEl.innerHTML = '$' + (featuredRoom.price || 0) + ' <small>/ month</small>';

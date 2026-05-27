@@ -5,10 +5,13 @@ function switchTab(tab) {
   document.getElementById('tabRegister').classList.toggle('active', !isLogin);
   document.getElementById('panelLogin').style.display = isLogin ? 'block' : 'none';
   document.getElementById('panelRegister').style.display = isLogin ? 'none' : 'block';
-  document.getElementById('formTitle').textContent = isLogin ? 'Welcome back' : 'Create your account';
+  document.getElementById('formTitle').textContent = isLogin ? 'Welcome Back' : 'Create Account';
   document.getElementById('formSubtitle').textContent = isLogin
-    ? 'Sign in to access your RoomNest account'
-    : 'Join tenants and landlords across Cambodia';
+    ? 'Sign in to your account'
+    : 'Join tenants & landlords in Cambodia';
+  // Clear all errors when switching tabs
+  if (typeof clearLoginErrors === 'function') clearLoginErrors();
+  if (typeof clearRegErrors   === 'function') clearRegErrors();
 }
 
 // ── ROLE SELECTION ──

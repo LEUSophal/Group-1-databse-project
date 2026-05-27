@@ -50,6 +50,7 @@ CALL safe_add_column('Landlord', 'profile_image', 'VARCHAR(255) DEFAULT NULL AFT
 -- 3. PROPERTY
 -- ========================
 CALL safe_add_column('Property', 'image2',        'VARCHAR(255) DEFAULT NULL AFTER `image`');
+CALL safe_add_column('Property', 'status',        'VARCHAR(50)  DEFAULT ''active'' AFTER `property_type`');
 
 -- ========================
 -- 4. ROOM

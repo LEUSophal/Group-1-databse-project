@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS Property (
   image               VARCHAR(255),
   image2              VARCHAR(255),
   property_type       VARCHAR(100),
+  status              VARCHAR(50) DEFAULT 'active',
   Landlord_idLandlord INT,
   Admin_idAdmin       INT,
   FOREIGN KEY (Landlord_idLandlord) REFERENCES Landlord(idLandlord),
@@ -109,7 +110,7 @@ CREATE TABLE IF NOT EXISTS Booking (
 CREATE TABLE IF NOT EXISTS Review (
   idReview            INT AUTO_INCREMENT PRIMARY KEY,
   rating              TINYINT CHECK (rating BETWEEN 1 AND 5),
-  comment             VARCHAR(255),
+  comment             TEXT,
   Tenant_idTenant     INT,
   Property_idProperty INT,
   Admin_idAdmin       INT,

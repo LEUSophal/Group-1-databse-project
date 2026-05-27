@@ -1,105 +1,211 @@
-// main-functions.js
+// ── INLINE FIELD HELPERS ──
+function fieldErr(id, msg) {
+  const input = document.getElementById(id);
+  const errEl = document.getElementById('err-' + id);
+  if (input)  input.classList.add('error');
+  if (errEl)  { errEl.textContent = msg; errEl.style.display = 'block'; }
+}
+function fieldOk(id) {
+  const input = document.getElementById(id);
+  const errEl = document.getElementById('err-' + id);
+  if (input)  input.classList.remove('error');
+  if (errEl)  { errEl.textContent = ''; errEl.style.display = 'none'; }
+}
+function clearLoginErrors() {
+  ['loginEmail','loginPassword'].forEach(fieldOk);
+  const alert = document.getElementById('loginAlert');
+  if (alert) { alert.style.display = 'none'; alert.textContent = ''; }
+}
+function clearRegErrors() {
+  ['regName','regEmail','regPassword','regConfirm'].forEach(fieldOk);
+  const alert = document.getElementById('regAlert');
+  if (alert) { alert.style.display = 'none'; alert.textContent = ''; }
+}
+function showLoginAlert(msg) {
+  const el = document.getElementById('loginAlert');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+function showRegAlert(msg) {
+  const el = document.getElementById('regAlert');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  if (loading) btn.classList.add('loading');
+  else         btn.classList.remove('loading');
+}
 
-// DATA HELPERS (already in app-data.js, but duplicated here for safety or clarity if needed)
-// function getData(key) { return JSON.parse(localStorage.getItem(key)) || []; }
-// function saveData(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+// Clear errors when user starts typing
+document.addEventListener('DOMContentLoaded', () => {
+  ['loginEmail','loginPassword'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => { fieldOk(id); clearLoginErrors(); });
+  });
+  ['regName','regEmail','regPassword','regConfirm'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => { fieldOk(id); });
+  });
+  const regAlert = document.getElementById('regAlert');
+  ['regEmail'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && regAlert) el.addEventListener('input', () => {
+      regAlert.style.display = 'none';
+    });
+  });
+});
 
 // AUTHENTICATION
 async function loginUser() {
+  clearLoginErrors();
+
   const emailInput = document.getElementById("loginEmail");
-  const passInput = document.getElementById("loginPassword");
-  const roleInput = document.getElementById("loginRole");
+  const passInput  = document.getElementById("loginPassword");
+  const roleInput  = document.getElementById("loginRole");
 
-  const email = emailInput.value.trim();
-  const password = passInput.value;
-  const role = roleInput.value;
+  const email    = emailInput ? emailInput.value.trim() : "";
+  const password = passInput  ? passInput.value         : "";
+  const role     = roleInput  ? roleInput.value         : "tenant";
 
-  if (!email || !password) {
-    if (typeof showToast === "function") showToast("Email and password are required.");
-    return;
+  let hasError = false;
+
+  if (!email) {
+    fieldErr('loginEmail', 'Email is required.');
+    hasError = true;
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    fieldErr('loginEmail', 'Enter a valid email address.');
+    hasError = true;
   }
+
+  if (!password) {
+    fieldErr('loginPassword', 'Password is required.');
+    hasError = true;
+  }
+
+  if (hasError) return;
+
+  setLoading('loginBtn', true);
 
   try {
     const res = await apiLogin(email, password, role);
+
     if (res.success) {
       const userObj = {
-        user_id: role === "landlord" ? (res.user.idLandlord || res.user.id) : (res.user.idTenant || res.user.id),
+        user_id:   role === "landlord" ? (res.user.idLandlord || res.user.id) : (res.user.idTenant || res.user.id),
         full_name: res.user.full_name || res.user.name || "User",
-        email: res.user.email,
+        email:     res.user.email,
         role,
-        phone: res.user.phone || ""
+        phone:     res.user.phone || ""
       };
       localStorage.setItem("loggedInUser", JSON.stringify(userObj));
 
       if (typeof showSuccess === "function") {
         showSuccess(role, false);
       } else {
-        if (typeof showToast === "function") showToast("Welcome back!");
+        if (typeof showToast === "function") showToast("✅ Welcome back!");
         setTimeout(() => {
-          if (role === "tenant") window.location.href = "tenant_dashboard.html";
+          if      (role === "tenant")   window.location.href = "tenant_dashboard.html";
           else if (role === "landlord") window.location.href = "landlord-dashboard.html";
-          else if (role === "admin") window.location.href = "admin-panel.html";
+          else if (role === "admin")    window.location.href = "admin-panel.html";
         }, 1000);
       }
-    } else if (typeof showToast === "function") {
-      showToast(res.error || res.message || "Login failed");
+    } else {
+      // Show the server error in the alert box
+      const msg = res.message || res.error || "Incorrect email or password.";
+      showLoginAlert("⚠️ " + msg);
+      // Also highlight the fields
+      fieldErr('loginEmail',    '');
+      fieldErr('loginPassword', '');
     }
   } catch (err) {
-    if (typeof showToast === "function") showToast("Login failed. Server error.");
+    showLoginAlert("⚠️ Cannot connect to server. Please make sure the server is running.");
+  } finally {
+    setLoading('loginBtn', false);
   }
 }
 
 async function registerUser() {
-  const nameInput = document.getElementById("regName");
-  const emailInput = document.getElementById("regEmail");
-  const passInput = document.getElementById("regPassword");
-  const confirmInput = document.getElementById("regConfirm");
-  const phoneInput = document.getElementById("regPhone");
-  const roleInput = document.getElementById("regRole");
+  clearRegErrors();
 
-  const fullName = nameInput.value.trim();
-  const email = emailInput.value.trim();
-  const password = passInput.value;
-  const confirm = confirmInput ? confirmInput.value : password;
-  const phone = phoneInput ? phoneInput.value.trim() : "";
-  const genderInput = document.getElementById("regGender");
-  const gender = genderInput ? genderInput.value : null;
+  const nameInput    = document.getElementById("regName");
+  const emailInput   = document.getElementById("regEmail");
+  const passInput    = document.getElementById("regPassword");
+  const confirmInput = document.getElementById("regConfirm");
+  const phoneInput   = document.getElementById("regPhone");
+  const genderInput  = document.getElementById("regGender");
+
+  const fullName = nameInput    ? nameInput.value.trim()    : "";
+  const email    = emailInput   ? emailInput.value.trim()   : "";
+  const password = passInput    ? passInput.value           : "";
+  const confirm  = confirmInput ? confirmInput.value        : "";
+  const phone    = phoneInput   ? phoneInput.value.trim()   : "";
+  const gender   = genderInput  ? genderInput.value         : null;
 
   let role = "tenant";
-  if (roleInput) {
-    role = roleInput.value;
-  } else if (typeof selectedRole !== "undefined" && selectedRole) {
-    role = selectedRole;
+  if (typeof selectedRole !== "undefined" && selectedRole) role = selectedRole;
+
+  let hasError = false;
+
+  if (!fullName) {
+    fieldErr('regName', 'Full name is required.');
+    hasError = true;
   }
 
-  if (!fullName || !email || !password) {
-    if (typeof showToast === "function") showToast("Please fill all required fields.");
-    return;
+  if (!email) {
+    fieldErr('regEmail', 'Email is required.');
+    hasError = true;
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    fieldErr('regEmail', 'Enter a valid email address.');
+    hasError = true;
   }
 
-  if (password !== confirm) {
-    if (typeof showToast === "function") showToast("Passwords do not match.");
-    return;
+  if (!password) {
+    fieldErr('regPassword', 'Password is required.');
+    hasError = true;
+  } else if (password.length < 6) {
+    fieldErr('regPassword', 'Password must be at least 6 characters.');
+    hasError = true;
   }
+
+  if (!confirm) {
+    fieldErr('regConfirm', 'Please confirm your password.');
+    hasError = true;
+  } else if (password && confirm !== password) {
+    fieldErr('regConfirm', 'Passwords do not match.');
+    hasError = true;
+  }
+
+  if (hasError) return;
+
+  setLoading('registerBtn', true);
 
   try {
     const res = await apiRegister(fullName, email, phone, password, role, gender);
+
     if (res.success) {
       if (typeof showSuccess === "function") {
         showSuccess(role, true);
       } else {
-        if (typeof showToast === "function") showToast("Registration successful!");
-        setTimeout(() => {
-          window.location.href = "login.html";
-        }, 1500);
+        if (typeof showToast === "function") showToast("✅ Account created! Please sign in.");
+        setTimeout(() => { window.location.href = "login.html"; }, 1500);
       }
-    } else if (typeof showToast === "function") {
-      showToast(res.error || res.message || "Registration failed");
+    } else {
+      const msg = res.message || res.error || "Registration failed.";
+      // If the error is about email already existing, highlight the email field
+      if (msg.toLowerCase().includes("email")) {
+        fieldErr('regEmail', '');
+        showRegAlert("⚠️ " + msg);
+      } else {
+        showRegAlert("⚠️ " + msg);
+      }
     }
   } catch (err) {
-    if (typeof showToast === "function") showToast("Registration failed. Server error.");
+    showRegAlert("⚠️ Cannot connect to server. Please make sure the server is running.");
+  } finally {
+    setLoading('registerBtn', false);
   }
 }
+
 
 function logoutUser() {
   localStorage.removeItem("loggedInUser");
@@ -197,25 +303,23 @@ function renderRooms(rooms) {
     if (!bgUrl && room.property_image) {
       bgUrl = getImageUrl(room.property_image);
     }
-    
+
+    const isAvailable = room.availability_status === "Available";
+    const type = normalizeRoomType(room.room_type);
+
     return `
     <div class="room-card">
       <div class="rc-img" style="position:relative; background:linear-gradient(135deg,#3B82F6,#60A5FA); overflow:hidden;">
         <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:40px; opacity:${bgUrl ? '0' : '1'}; transition:opacity 0.2s;">🛏</div>
         ${bgUrl ? `<img src="${bgUrl}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'; this.previousElementSibling.style.opacity='1';">` : ''}
+        <div style="position:absolute;top:10px;left:10px;background:${isAvailable ? 'rgba(16,185,129,0.9)' : 'rgba(239,68,68,0.9)'};color:#fff;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;">${isAvailable ? '✓ Available' : 'Booked'}</div>
       </div>
       <div class="rc-body">
-        <div class="rc-tag">${room.availability_status === "Available" ? "✓ Available" : "Booked"}</div>
-        <div class="rc-title">${room.room_title}</div>
+        <div class="rc-title">${type} · ${room.location ? room.location.split(',')[0] : 'Room'}</div>
         <div class="rc-addr">📍 ${room.location}</div>
-        <div class="rc-meta">
-          <span>🛏 ${normalizeRoomType(room.room_type)}</span>
-          <span>👥 ${room.capacity} pers.</span>
-          <span>📐 ${room.size || 0} m²</span>
-        </div>
         <div class="rc-foot">
-          <div class="rc-price">$${room.price_per_month} <small>/ month</small></div>
-          <button class="rc-book" onclick="openRoomDetails('${room.room_id}')">View Details</button>
+          <div class="rc-price">$${room.price_per_month}<small>/mo</small></div>
+          <button class="rc-book" onclick="openRoomDetails('${room.room_id}')">Details</button>
         </div>
       </div>
     </div>
