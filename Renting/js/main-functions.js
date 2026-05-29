@@ -97,6 +97,7 @@ async function loginUser() {
         role,
         phone:     res.user.phone || ""
       };
+      if (res.token) localStorage.setItem('authToken', res.token);
       localStorage.setItem("loggedInUser", JSON.stringify(userObj));
 
       if (typeof showSuccess === "function") {
@@ -209,6 +210,7 @@ async function registerUser() {
 
 function logoutUser() {
   localStorage.removeItem("loggedInUser");
+  localStorage.removeItem("authToken");
   window.location.href = "login.html";
 }
 
