@@ -9,6 +9,7 @@ const bookingsRoutes = require('./routes/bookings');
 const reviewsRoutes = require('./routes/reviews');
 const uploadRoutes = require('./routes/upload');
 const adminLogRoutes = require('./routes/admin-log');
+const { authMiddleware, adminOnly } = require('./middleware/auth');
 const facilitiesRoutes = require('./routes/facilities');
 
 const app = express();
@@ -28,10 +29,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertiesRoutes);
 app.use('/api/rooms', roomsRoutes);
-app.use('/api/bookings', bookingsRoutes);
-app.use('/api/reviews', reviewsRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/admin-log', adminLogRoutes);
+app.use('/api/bookings', authMiddleware, bookingsRoutes);
+app.use('/api/reviews', authMiddleware, reviewsRoutes);
+app.use('/api/upload', authMiddleware, uploadRoutes);
+app.use('/api/admin-log', authMiddleware, adminOnly, adminLogRoutes);
 app.use('/api/facilities', facilitiesRoutes);
 
 
