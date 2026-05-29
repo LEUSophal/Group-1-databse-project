@@ -583,6 +583,14 @@
 
 
   <!-- SCRIPTS -->
+<script>
+  (function() {
+    const user = JSON.parse(localStorage.getItem('loggedInUser') || 'null');
+    if (!user || user.role !== 'landlord') {
+      window.location.href = 'login.html';
+    }
+  })();
+</script>
   <script src="js/data.js"></script>
   <script src="js/app-data.js"></script>
   <script src="js/main-functions.js"></script>
