@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const bcrypt = require('bcrypt');
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
@@ -10,12 +11,14 @@ router.post('/login', async (req, res) => {
     if (role === 'admin') {
       // Admin login: query the Admin table
       const [rows] = await pool.execute(
-        'SELECT * FROM Admin WHERE email = ? AND password = ? ORDER BY idAdmin ASC',
-        [email, password]
+        'SELECT * FROM Admin WHERE email = ? ORDER BY idAdmin ASC',
+        [email]
       );
       console.log(`Admin query result for ${email}:`, rows.length, 'rows found');
       if (rows.length > 0) {
         const user = rows[0];
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) return res.json({ success: false, message: 'Invalid admin email or password' });
         user.role = 'admin';
         // Normalise id field so frontend can use user_id consistently
         user.idTenant = undefined;
@@ -30,12 +33,14 @@ router.post('/login', async (req, res) => {
     const table = role === 'landlord' ? 'Landlord' : 'Tenant';
     const idField = role === 'landlord' ? 'idLandlord' : 'idTenant';
     const [rows] = await pool.execute(
-      `SELECT * FROM ${table} WHERE email = ? AND password = ? ORDER BY ${idField} ASC`,
-      [email, password]
+      `SELECT * FROM ${table} WHERE email = ? ORDER BY ${idField} ASC`,
+      [email]
     );
     console.log(`Query result for ${email}:`, rows.length, 'rows found');
     if (rows.length > 0) {
       const user = rows[0];
+      const match = await bcrypt.compare(password, user.password);
+      if (!match) return res.json({ success: false, message: 'Invalid email or password' });
       // Check if account is blocked
       if (user.is_active === 0) {
         return res.json({ success: false, message: 'Your account has been blocked. Please contact support.' });
@@ -74,15 +79,17 @@ router.post('/register', async (req, res) => {
     }
 
     let result;
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     if (role === 'landlord') {
       [result] = await pool.execute(
         'INSERT INTO Landlord (name, email, phone, password, gender, Admin_idAdmin) VALUES (?, ?, ?, ?, ?, 1)',
-        [name, email, phone, password, gender || null]
+        [name, email, phone, hashedPassword, gender || null]
       );
     } else {
       [result] = await pool.execute(
         'INSERT INTO Tenant (full_name, email, phone, password, gender, Admin_idAdmin) VALUES (?, ?, ?, ?, ?, 1)',
-        [name, email, phone, password, gender || null]
+        [name, email, phone, hashedPassword, gender || null]
       );
     }
     res.status(201).json({
