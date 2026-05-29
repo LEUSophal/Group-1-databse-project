@@ -122,6 +122,19 @@ router.put('/:id', async (req, res) => {
 // DELETE /api/bookings/:id
 router.delete('/:id', async (req, res) => {
   try {
+    const [bookingRows] = await pool.execute(
+      'SELECT Room_idRoom, status FROM Booking WHERE idBooking = ?',
+      [req.params.id]
+    );
+    if (bookingRows.length > 0) {
+      const b = bookingRows[0];
+      if (b.status === 'confirmed') {
+        await pool.execute(
+          'UPDATE Room SET status = ? WHERE idRoom = ?',
+          ['available', b.Room_idRoom]
+        );
+      }
+    }
     await pool.execute('DELETE FROM Booking WHERE idBooking = ?', [req.params.id]);
     res.json({ success: true });
   } catch (err) {
