@@ -30,15 +30,15 @@ async function seedDatabase() {
 
   // Tenants
   await conn.execute(
-    "INSERT INTO Tenant (full_name, email, phone, password, Admin_idAdmin) VALUES ('Dara Vong', 'dara@mail.com', '012345678', 'tenant123', 1)"
+    `INSERT INTO Tenant (full_name, email, phone, password, Admin_idAdmin) VALUES ('Dara Vong', 'dara@mail.com', '012345678', '${hashedTenant}', 1)`
   );
   await conn.execute(
-    "INSERT INTO Tenant (full_name, email, phone, password, Admin_idAdmin) VALUES ('Srey Leak', 'sreyleak@mail.com', '098765432', 'tenant123', 1)"
+`INSERT INTO Tenant (full_name, email, phone, password, Admin_idAdmin) VALUES ('Srey Leak', 'sreyleak@mail.com', '098765432', '${hashedTenant}', 1)`
   );
 
   // Landlords
   await conn.execute(
-    "INSERT INTO Landlord (name, email, phone, password, Admin_idAdmin) VALUES ('Chea Bora', 'bora@landlord.com', '012999888', 'landlord123', 1)"
+    `INSERT INTO Landlord (name, email, phone, password, Admin_idAdmin) VALUES ('Chea Bora', 'bora@landlord.com', '012999888', '${hashedLandlord}', 1)`
   );
   await conn.execute(
     `INSERT INTO Landlord (name, email, phone, password, Admin_idAdmin) VALUES ('Sok San', 'soksan@landlord.com', '012111222', '${hashedLandlord}', 1)`
