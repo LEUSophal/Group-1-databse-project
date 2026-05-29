@@ -11,8 +11,8 @@ router.post('/login', async (req, res) => {
     if (role === 'admin') {
       // Admin login: query the Admin table
       const [rows] = await pool.execute(
-        'SELECT * FROM Admin WHERE email = ? AND password = ? ORDER BY idAdmin ASC',
-        [email, password]
+        'SELECT * FROM Admin WHERE email = ? ORDER BY idAdmin ASC',
+        [email]
       );
       console.log(`Admin query result for ${email}:`, rows.length, 'rows found');
       if (rows.length > 0) {
