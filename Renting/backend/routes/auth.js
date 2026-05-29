@@ -17,6 +17,8 @@ router.post('/login', async (req, res) => {
       console.log(`Admin query result for ${email}:`, rows.length, 'rows found');
       if (rows.length > 0) {
         const user = rows[0];
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) return res.json({ success: false, message: 'Invalid admin email or password' });
         user.role = 'admin';
         // Normalise id field so frontend can use user_id consistently
         user.idTenant = undefined;
@@ -31,12 +33,14 @@ router.post('/login', async (req, res) => {
     const table = role === 'landlord' ? 'Landlord' : 'Tenant';
     const idField = role === 'landlord' ? 'idLandlord' : 'idTenant';
     const [rows] = await pool.execute(
-      `SELECT * FROM ${table} WHERE email = ? AND password = ? ORDER BY ${idField} ASC`,
-      [email, password]
+      `SELECT * FROM ${table} WHERE email = ? ORDER BY ${idField} ASC`,
+      [email]
     );
     console.log(`Query result for ${email}:`, rows.length, 'rows found');
     if (rows.length > 0) {
       const user = rows[0];
+      const match = await bcrypt.compare(password, user.password);
+      if (!match) return res.json({ success: false, message: 'Invalid email or password' });
       // Check if account is blocked
       if (user.is_active === 0) {
         return res.json({ success: false, message: 'Your account has been blocked. Please contact support.' });
