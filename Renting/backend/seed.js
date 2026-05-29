@@ -1,4 +1,5 @@
 const mysql = require('mysql2/promise');
+const bcrypt = require('bcrypt');
 
 async function seedDatabase() {
   const conn = await mysql.createConnection({
@@ -17,10 +18,14 @@ async function seedDatabase() {
   }
 
   console.log('Seeding database...');
+  const hashedAdmin    = await bcrypt.hash('admin123',    10);
+  const hashedTenant   = await bcrypt.hash('tenant123',   10);
+  const hashedLandlord = await bcrypt.hash('landlord123', 10);
+  const hashedRith     = await bcrypt.hash('rith2024',    10);
 
   // Admin
   await conn.execute(
-    "INSERT INTO Admin (name, email, password, role) VALUES ('Admin Sokha', 'admin@rentease.kh', 'admin123', 'superadmin')"
+    `INSERT INTO Admin (name, email, password, role) VALUES ('Admin Sokha', 'admin@rentease.kh', '${hashedAdmin}', 'superadmin')`
   );
 
   // Tenants
@@ -36,7 +41,8 @@ async function seedDatabase() {
     "INSERT INTO Landlord (name, email, phone, password, Admin_idAdmin) VALUES ('Chea Bora', 'bora@landlord.com', '012999888', 'landlord123', 1)"
   );
   await conn.execute(
-    "INSERT INTO Landlord (name, email, phone, password, Admin_idAdmin) VALUES ('Sok San', 'soksan@landlord.com', '012111222', 'landlord123', 1)"
+    `INSERT INTO Landlord (name, email, phone, password, Admin_idAdmin) VALUES ('Sok San', 'soksan@landlord.com', '012111222', '${hashedLandlord}', 1)`
+
   );
 
   // Properties
