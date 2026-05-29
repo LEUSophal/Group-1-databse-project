@@ -75,15 +75,17 @@ router.post('/register', async (req, res) => {
     }
 
     let result;
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     if (role === 'landlord') {
       [result] = await pool.execute(
         'INSERT INTO Landlord (name, email, phone, password, gender, Admin_idAdmin) VALUES (?, ?, ?, ?, ?, 1)',
-        [name, email, phone, password, gender || null]
+        [name, email, phone, hashedPassword, gender || null]
       );
     } else {
       [result] = await pool.execute(
         'INSERT INTO Tenant (full_name, email, phone, password, gender, Admin_idAdmin) VALUES (?, ?, ?, ?, ?, 1)',
-        [name, email, phone, password, gender || null]
+        [name, email, phone, hashedPassword, gender || null]
       );
     }
     res.status(201).json({
