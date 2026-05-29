@@ -2,12 +2,14 @@ const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
 
 async function seedDatabase() {
-  const conn = await mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'phal2005',
-    database: 'renting_db'
-  });
+  // FIXED:
+require('dotenv').config();
+const conn = await mysql.createConnection({
+    host:     process.env.DB_HOST,
+    user:     process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME
+});
 
   // Check if already seeded
   const [admins] = await conn.execute('SELECT COUNT(*) as cnt FROM Admin');
