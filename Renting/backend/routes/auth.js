@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
 // POST /api/auth/login
@@ -23,7 +24,12 @@ router.post('/login', async (req, res) => {
         // Normalise id field so frontend can use user_id consistently
         user.idTenant = undefined;
         user.idLandlord = undefined;
-        return res.json({ success: true, user });
+        const token = jwt.sign(
+          { user_id: user.idAdmin, role: user.role },
+          process.env.JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        return res.json({ success: true, user, token });
       } else {
         return res.json({ success: false, message: 'Invalid admin email or password' });
       }
@@ -46,7 +52,12 @@ router.post('/login', async (req, res) => {
         return res.json({ success: false, message: 'Your account has been blocked. Please contact support.' });
       }
       user.role = role;
-      res.json({ success: true, user });
+      const token = jwt.sign(
+        { user_id: user.idTenant || user.idLandlord, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+      res.json({ success: true, user, token });
     } else {
       res.json({ success: false, message: 'Invalid email or password' });
     }
