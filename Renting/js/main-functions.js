@@ -215,7 +215,11 @@ function logoutUser() {
 }
 
 function getLoggedInUser() {
-  return JSON.parse(localStorage.getItem("loggedInUser"));
+  try {
+    return JSON.parse(localStorage.getItem("loggedInUser")) || null;
+  } catch(e) {
+    return null;
+  }
 }
 
 function normalizeRoomType(value) {
