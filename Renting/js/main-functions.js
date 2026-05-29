@@ -566,8 +566,8 @@ async function addRoom() {
   const cap = document.getElementById("rCap").value;
   const facilities = document.getElementById("rFac") ? document.getElementById("rFac").value.trim() : "";
 
-  if (!propId) {
-    showToast("Please select a property.");
+  if (!propId || propId.trim() === '') {
+    showToast("Please add a property first before adding a room.");
     return;
   }
 
