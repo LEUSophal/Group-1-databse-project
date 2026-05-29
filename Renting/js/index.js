@@ -18,8 +18,11 @@ function doRegister(){
   registerUser();
 }
 function openRoomDetail(){
+  document.getElementById('moveIn').value = '';
+  document.getElementById('moveOut').value = '';
+  document.getElementById('totalLine').style.display = 'none';
   document.getElementById('roomDetail').classList.add('open');
-  document.getElementById('roomDetail').scrollTop=0;
+  document.getElementById('roomDetail').scrollTop = 0;
 }
 function closeRoomDetail(){
   document.getElementById('roomDetail').classList.remove('open');

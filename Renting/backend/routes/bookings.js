@@ -28,26 +28,55 @@ router.get('/', async (req, res) => {
 // POST /api/bookings
 router.post('/', async (req, res) => {
   const { check_in, check_out, Tenant_idTenant, Room_idRoom } = req.body;
+  const conn = await require('../db').getConnection();
   try {
-    // Guard: ensure room is still available before booking
-    const [roomRows] = await pool.execute('SELECT status, price FROM Room WHERE idRoom = ?', [Room_idRoom]);
+    await conn.beginTransaction();
+
+    const [roomRows] = await conn.execute(
+      'SELECT status, price FROM Room WHERE idRoom = ? FOR UPDATE',
+      [Room_idRoom]
+    );
     if (roomRows.length === 0) {
+      await conn.rollback();
       return res.status(404).json({ success: false, message: 'Room not found' });
     }
     if (roomRows[0].status !== 'available') {
+      await conn.rollback();
       return res.status(409).json({ success: false, message: 'This room is not available for booking' });
     }
 
-    // Guard: check for date overlap with existing non-cancelled bookings
-    const [overlap] = await pool.execute(
+    const [overlap] = await conn.execute(
       `SELECT idBooking FROM Booking
        WHERE Room_idRoom = ? AND status != 'cancelled'
        AND NOT (check_out <= ? OR check_in >= ?)`,
       [Room_idRoom, check_in, check_out]
     );
     if (overlap.length > 0) {
+      await conn.rollback();
       return res.status(409).json({ success: false, message: 'Room is already booked for the selected dates' });
     }
+
+    const inDate = new Date(check_in);
+    const outDate = new Date(check_out);
+    if (isNaN(inDate) || isNaN(outDate) || outDate <= inDate) {
+      await conn.rollback();
+      return res.status(400).json({ success: false, message: 'Invalid dates: move-out must be after move-in' });
+    }
+
+    const [result] = await conn.execute(
+      'INSERT INTO Booking (check_in, check_out, status, Tenant_idTenant, Room_idRoom, Admin_idAdmin) VALUES (?, ?, ?, ?, ?, 1)',
+      [check_in, check_out, 'pending', Tenant_idTenant, Room_idRoom]
+    );
+
+    await conn.commit();
+    res.status(201).json({ success: true, idBooking: result.insertId });
+  } catch (err) {
+    await conn.rollback();
+    res.status(500).json({ error: err.message });
+  } finally {
+    conn.release();
+  }
+});
 
     // Validate dates
     const inDate  = new Date(check_in);
@@ -93,6 +122,19 @@ router.put('/:id', async (req, res) => {
 // DELETE /api/bookings/:id
 router.delete('/:id', async (req, res) => {
   try {
+    const [bookingRows] = await pool.execute(
+      'SELECT Room_idRoom, status FROM Booking WHERE idBooking = ?',
+      [req.params.id]
+    );
+    if (bookingRows.length > 0) {
+      const b = bookingRows[0];
+      if (b.status === 'confirmed') {
+        await pool.execute(
+          'UPDATE Room SET status = ? WHERE idRoom = ?',
+          ['available', b.Room_idRoom]
+        );
+      }
+    }
     await pool.execute('DELETE FROM Booking WHERE idBooking = ?', [req.params.id]);
     res.json({ success: true });
   } catch (err) {

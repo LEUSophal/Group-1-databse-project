@@ -8,10 +8,15 @@ let MOCK_DATA = {
 };
 
 // Initialization - Load all data from API
+function getAuthHeaders() {
+  const token = localStorage.getItem('authToken');
+  return token ? { 'Authorization': 'Bearer ' + token } : {};
+}
+
 async function initData() {
   try {
     console.log("Fetching data from:", API_URL);
-    const fetchJson = (url) => fetch(url).then(r => {
+    const fetchJson = (url) => fetch(url, { headers: getAuthHeaders() }).then(r => {
       if (!r.ok) throw new Error(`HTTP error! status: ${r.status} for ${url}`);
       return r.json();
     }).catch(err => {
@@ -40,6 +45,18 @@ async function initData() {
     console.log("Data loaded successfully:", MOCK_DATA);
   } catch (err) {
     console.error("Critical error in initData:", err);
+    const isDashboard = window.location.pathname.includes('dashboard') || 
+                        window.location.pathname.includes('admin');
+    if (isDashboard) {
+      const existing = document.getElementById('server-error-banner');
+      if (!existing) {
+        const banner = document.createElement('div');
+        banner.id = 'server-error-banner';
+        banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#DC2626;color:#fff;text-align:center;padding:12px;font-size:14px;font-weight:600;z-index:9999;';
+        banner.textContent = '⚠️ Cannot reach server. Please start the backend and refresh.';
+        document.body.prepend(banner);
+      }
+    }
   }
 }
 

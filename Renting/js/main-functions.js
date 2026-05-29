@@ -97,6 +97,7 @@ async function loginUser() {
         role,
         phone:     res.user.phone || ""
       };
+      if (res.token) localStorage.setItem('authToken', res.token);
       localStorage.setItem("loggedInUser", JSON.stringify(userObj));
 
       if (typeof showSuccess === "function") {
@@ -209,11 +210,16 @@ async function registerUser() {
 
 function logoutUser() {
   localStorage.removeItem("loggedInUser");
+  localStorage.removeItem("authToken");
   window.location.href = "login.html";
 }
 
 function getLoggedInUser() {
-  return JSON.parse(localStorage.getItem("loggedInUser"));
+  try {
+    return JSON.parse(localStorage.getItem("loggedInUser")) || null;
+  } catch(e) {
+    return null;
+  }
 }
 
 function normalizeRoomType(value) {
@@ -560,8 +566,8 @@ async function addRoom() {
   const cap = document.getElementById("rCap").value;
   const facilities = document.getElementById("rFac") ? document.getElementById("rFac").value.trim() : "";
 
-  if (!propId) {
-    showToast("Please select a property.");
+  if (!propId || propId.trim() === '') {
+    showToast("Please add a property first before adding a room.");
     return;
   }
 
