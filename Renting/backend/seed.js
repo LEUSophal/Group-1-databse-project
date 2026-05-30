@@ -1,12 +1,15 @@
 const mysql = require('mysql2/promise');
+const bcrypt = require('bcrypt');
 
 async function seedDatabase() {
-  const conn = await mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'phal2005',
-    database: 'renting_db'
-  });
+  // FIXED:
+require('dotenv').config();
+const conn = await mysql.createConnection({
+    host:     process.env.DB_HOST,
+    user:     process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME
+});
 
   // Check if already seeded
   const [admins] = await conn.execute('SELECT COUNT(*) as cnt FROM Admin');
@@ -17,26 +20,31 @@ async function seedDatabase() {
   }
 
   console.log('Seeding database...');
+  const hashedAdmin    = await bcrypt.hash('admin123',    10);
+  const hashedTenant   = await bcrypt.hash('tenant123',   10);
+  const hashedLandlord = await bcrypt.hash('landlord123', 10);
+  const hashedRith     = await bcrypt.hash('rith2024',    10);
 
   // Admin
   await conn.execute(
-    "INSERT INTO Admin (name, email, password, role) VALUES ('Admin Sokha', 'admin@rentease.kh', 'admin123', 'superadmin')"
+    `INSERT INTO Admin (name, email, password, role) VALUES ('Admin Sokha', 'admin@rentease.kh', '${hashedAdmin}', 'superadmin')`
   );
 
   // Tenants
   await conn.execute(
-    "INSERT INTO Tenant (full_name, email, phone, password, Admin_idAdmin) VALUES ('Dara Vong', 'dara@mail.com', '012345678', 'tenant123', 1)"
+    `INSERT INTO Tenant (full_name, email, phone, password, Admin_idAdmin) VALUES ('Dara Vong', 'dara@mail.com', '012345678', '${hashedTenant}', 1)`
   );
   await conn.execute(
-    "INSERT INTO Tenant (full_name, email, phone, password, Admin_idAdmin) VALUES ('Srey Leak', 'sreyleak@mail.com', '098765432', 'tenant123', 1)"
+`INSERT INTO Tenant (full_name, email, phone, password, Admin_idAdmin) VALUES ('Srey Leak', 'sreyleak@mail.com', '098765432', '${hashedTenant}', 1)`
   );
 
   // Landlords
   await conn.execute(
-    "INSERT INTO Landlord (name, email, phone, password, Admin_idAdmin) VALUES ('Chea Bora', 'bora@landlord.com', '012999888', 'landlord123', 1)"
+    `INSERT INTO Landlord (name, email, phone, password, Admin_idAdmin) VALUES ('Chea Bora', 'bora@landlord.com', '012999888', '${hashedLandlord}', 1)`
   );
   await conn.execute(
-    "INSERT INTO Landlord (name, email, phone, password, Admin_idAdmin) VALUES ('Sok San', 'soksan@landlord.com', '012111222', 'landlord123', 1)"
+    `INSERT INTO Landlord (name, email, phone, password, Admin_idAdmin) VALUES ('Sok San', 'soksan@landlord.com', '012111222', '${hashedLandlord}', 1)`
+
   );
 
   // Properties
@@ -68,14 +76,15 @@ async function seedDatabase() {
   }
 
   // Bookings
+  // AFTER — change 4 → 2 and 5 → 3:
   await conn.execute(
-    "INSERT INTO Booking (check_in, check_out, status, Tenant_idTenant, Room_idRoom, Admin_idAdmin) VALUES ('2026-04-01', '2026-07-01', 'confirmed', 1, 1, 1)"
+    "INSERT INTO Booking (...) VALUES ('2026-04-01', '2026-07-01', 'confirmed', 1, 1, 1)"
   );
   await conn.execute(
-    "INSERT INTO Booking (check_in, check_out, status, Tenant_idTenant, Room_idRoom, Admin_idAdmin) VALUES ('2026-05-01', '2026-08-01', 'pending', 2, 4, 1)"
+    "INSERT INTO Booking (...) VALUES ('2026-05-01', '2026-08-01', 'pending', 2, 2, 1)"
   );
   await conn.execute(
-    "INSERT INTO Booking (check_in, check_out, status, Tenant_idTenant, Room_idRoom, Admin_idAdmin) VALUES ('2026-03-15', '2026-06-15', 'confirmed', 1, 5, 1)"
+    "INSERT INTO Booking (...) VALUES ('2026-03-15', '2026-06-15', 'confirmed', 1, 3, 1)"
   );
 
   // Reviews
