@@ -165,3 +165,49 @@ CREATE TABLE IF NOT EXISTS Admin_Log (
   FOREIGN KEY (Admin_idAdmin) REFERENCES Admin(idAdmin)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+USE renting_db;
+
+-- Admin (password: admin123)
+INSERT INTO Admin (name, email, password, role) VALUES 
+('Admin Sokha', 'admin@rentease.kh', '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJ.Me/U5IXm', 'superadmin');
+
+-- Tenants (password: tenant123)
+INSERT INTO Tenant (full_name, email, phone, password, Admin_idAdmin) VALUES 
+('Dara Vong', 'dara@mail.com', '012345678', '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJ.Me/U5IXm', 1),
+('Srey Leak', 'sreyleak@mail.com', '098765432', '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJ.Me/U5IXm', 1);
+
+-- Landlords (password: admin123)
+INSERT INTO Landlord (name, email, phone, password, Admin_idAdmin) VALUES 
+('Chea Bora', 'bora@landlord.com', '012999888', '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJ.Me/U5IXm', 1),
+('Sok San', 'soksan@landlord.com', '012111222', '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJ.Me/U5IXm', 1);
+
+-- Properties
+INSERT INTO Property (title, location, description, image, property_type, Landlord_idLandlord, Admin_idAdmin) VALUES 
+('Sunrise Garden Residence', 'Toul Kork, Phnom Penh', 'Modern living in the heart of Toul Kork with rooftop garden and 24/7 security.', 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600', 'Condo', 1, 1),
+('Riverside Heights', '123 River Rd, Siem Reap', 'Modern living near the river with all amenities.', 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=600', 'Apartment Building', 1, 1),
+('The Green Quarter', '56 Garden St, Phnom Penh', 'Eco-friendly guesthouse with lush garden surroundings.', 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600', 'Guesthouse', 1, 1);
+
+-- Rooms
+INSERT INTO Room (type, price, status, size, capacity, facilities, Property_idProperty, Admin_idAdmin) VALUES 
+('Studio', 280.00, 'available', 32, 2, 'WiFi, Air Conditioning, Kitchen, Private Bathroom, Parking, Security', 1, 1),
+('Single', 150.00, 'available', 20, 1, 'WiFi, Air Conditioning, Private Bathroom', 2, 1),
+('Double', 210.00, 'available', 28, 2, 'WiFi, Air Conditioning, Kitchen, Security', 3, 1);
+
+-- Bookings
+INSERT INTO Booking (check_in, check_out, status, Tenant_idTenant, Room_idRoom, Admin_idAdmin) VALUES 
+('2026-04-01', '2026-07-01', 'confirmed', 1, 1, 1),
+('2026-05-01', '2026-08-01', 'pending', 2, 2, 1);
+
+-- Reviews
+INSERT INTO Review (rating, comment, Tenant_idTenant, Property_idProperty, Admin_idAdmin) VALUES 
+(5, 'Amazing place! Very clean and great location.', 1, 1, 1),
+(4, 'Great riverside views and quiet neighborhood.', 2, 2, 1);
+
+-- Facilities
+INSERT INTO Facility (facility_id, facility_name, description) VALUES
+(1, 'WiFi', 'High-speed wireless internet'),
+(2, 'Air Conditioning', 'Split-type air conditioner'),
+(3, 'Kitchen', 'Shared or private kitchen'),
+(4, 'Private Bathroom', 'En-suite bathroom'),
+(5, 'Parking', 'Motorbike or car parking'),
+(6, 'Security', '24/7 security guard or CCTV');
