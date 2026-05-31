@@ -27,7 +27,7 @@ const conn = await mysql.createConnection({
 
   // Admin
   await conn.execute(
-    `INSERT INTO Admin (name, email, password, role) VALUES ('Admin Sokha', 'admin@rentease.kh', '${hashedAdmin}', 'superadmin')`
+    `INSERT INTO Admin (name, email, password, role) VALUES ('Admin Sokha', 'admin@rentease.kh', '${hashedAdmin}', 'admin')`
   );
 
   // Tenants
