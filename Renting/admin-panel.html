@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RoomNest — Admin Panel</title>
+<title>RentKH — Admin Panel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/admin-panel.css">
@@ -15,7 +15,7 @@
 <aside class="sidebar">
   <div class="sb-logo">
     <div class="sb-logo-mark">RN</div>
-    <span class="sb-brand">RoomNest</span>
+    <span class="sb-brand">RentKH</span>
     <span class="sb-role-tag">Admin</span>
   </div>
   <nav class="sb-nav">
@@ -92,7 +92,7 @@
       <div class="two-col">
         <!-- Recent actions table -->
         <div>
-          <div class="sec-hdr"><h2>Recent User Registrations</h2><button class="btn btn-ghost btn-sm" onclick="showPage('users',null)">View all →</button></div>
+          <div class="sec-hdr"><h2>Newest Members</h2><button class="btn btn-ghost btn-sm" onclick="showPage('users',null)">View all →</button></div>
           <div class="table-wrap">
             <table>
               <thead><tr><th>User</th><th>Role</th><th>Registered</th><th>Status</th><th>Action</th></tr></thead>
@@ -129,7 +129,7 @@
             </table>
           </div>
 
-          <div class="sec-hdr"><h2>Properties Awaiting Approval</h2><button class="btn btn-ghost btn-sm" onclick="showPage('properties',null)">View all →</button></div>
+          <div class="sec-hdr"><h2>Pending Property Reviews</h2><button class="btn btn-ghost btn-sm" onclick="showPage('properties',null)">View all →</button></div>
           <div class="table-wrap">
             <table>
               <thead><tr><th>Property</th><th>Landlord</th><th>Type</th><th>Submitted</th><th>Actions</th></tr></thead>
@@ -479,7 +479,7 @@
         </div>
         <div class="card">
           <div class="card-title">System Settings</div>
-          <div class="form-group"><label>Site Name</label><input type="text" value="RoomNest"></div>
+          <div class="form-group"><label>Site Name</label><input type="text" value="RentKH"></div>
           <div class="form-group"><label>Support Email</label><input type="email" value="admin@roomnest.com"></div>
           <div class="form-group"><label>Max Images per Room</label><input type="number" value="8"></div>
           <div class="form-group"><label>Platform Fee (%)</label><input type="number" value="5"></div>
