@@ -91,7 +91,9 @@ async function loginUser() {
 
     if (res.success) {
       const userObj = {
-        user_id:   role === "landlord" ? (res.user.idLandlord || res.user.id) : (res.user.idTenant || res.user.id),
+        user_id: role === "landlord" ? (res.user.idLandlord || res.user.id)
+       : role === "admin"    ? res.user.idAdmin
+       : (res.user.idTenant || res.user.id),
         full_name: res.user.full_name || res.user.name || "User",
         email:     res.user.email,
         role,
