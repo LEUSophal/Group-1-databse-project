@@ -318,3 +318,47 @@ document.addEventListener('keydown', e => {
   }
 });
 
+// ──────────── SINGLE PAGE NAVIGATION ────────────
+function showPage(pageName) {
+  const hero = document.getElementById('heroSection');
+  const search = document.getElementById('searchSection');
+  const rooms = document.getElementById('rooms');
+  const how = document.getElementById('how');
+  const properties = document.getElementById('properties');
+  const roles = document.getElementById('rolesSection');
+  const reviews = document.getElementById('reviews');
+  const cta = document.getElementById('ctaSection');
+
+  function hideAll() {
+    if (hero) hero.style.display = 'none';
+    if (search) search.style.display = 'none';
+    if (rooms) rooms.style.display = 'none';
+    if (how) how.style.display = 'none';
+    if (properties) properties.style.display = 'none';
+    if (roles) roles.style.display = 'none';
+    if (reviews) reviews.style.display = 'none';
+    if (cta) cta.style.display = 'none';
+  }
+
+  hideAll();
+
+  if (pageName === 'home') {
+    if (hero) hero.style.display = '';
+    if (search) search.style.display = '';
+    if (rooms) rooms.style.display = '';
+    if (how) how.style.display = '';
+    if (properties) properties.style.display = '';
+    if (roles) roles.style.display = '';
+    if (reviews) reviews.style.display = '';
+    if (cta) cta.style.display = '';
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  } else if (pageName === 'rooms') {
+    if (search) search.style.display = '';
+    if (rooms) rooms.style.display = '';
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  } else if (pageName === 'properties') {
+    if (properties) properties.style.display = '';
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+}
+

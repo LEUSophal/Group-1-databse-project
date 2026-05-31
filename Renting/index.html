@@ -13,12 +13,12 @@
 
 <!-- NAV -->
 <nav>
-  <a class="logo" href="#"><div class="logo-dot"></div>RoomNest</a>
+  <a class="logo" href="#" onclick="showPage('home'); return false;"><div class="logo-dot"></div>RoomNest</a>
   <div class="nav-links">
-    <a href="#rooms">Browse Rooms</a>
-    <a href="#properties">Properties</a>
-    <a href="#how">How It Works</a>
-    <a href="#reviews">Reviews</a>
+    <a href="#" onclick="showPage('home'); return false;">Home</a>
+    <a href="#" onclick="showPage('rooms'); return false;">Rooms</a>
+    <a href="#" onclick="showPage('properties'); return false;">Properties</a>
+    <a href="#how" onclick="showPage('home');">How It Works</a>
   </div>
   <div class="nav-right" id="navRight">
     <button class="btn" onclick="toggleSiteTheme()" id="siteThemeToggle" style="padding:6px 10px;font-size:16px;cursor:pointer;border:1.5px solid var(--border);border-radius:8px;background:transparent;" title="Toggle Dark/Light Mode">🌓</button>
@@ -45,13 +45,13 @@
 </script>
 
 <!-- HERO -->
-<div class="hero">
+<div class="hero" id="heroSection">
   <div class="hero-text">
     <div class="hero-badge">🏘️ &nbsp;Online Room Renting System</div>
     <h1>Find Your <span>Perfect Room</span> to Call Home</h1>
     <p class="hero-sub">Find and book verified rooms across Cambodia.</p>
     <div class="hero-actions">
-      <button class="btn btn-dark btn-lg" onclick="document.getElementById('rooms').scrollIntoView({behavior:'smooth'})">Browse Rooms</button>
+      <button class="btn btn-dark btn-lg" onclick="showPage('rooms')">Browse Rooms</button>
       <button class="btn btn-ghost btn-lg" onclick="window.location.href='login.html?tab=register'">List Your Property →</button>
     </div>
     <div class="hero-stats">
@@ -70,7 +70,7 @@
         <div class="hv-meta" id="heroRoomMeta"></div>
         <div class="hv-foot">
           <div class="hv-price" id="heroRoomPrice"></div>
-          <button class="hv-book" onclick="document.getElementById('rooms').scrollIntoView({behavior:'smooth'})">Browse Rooms</button>
+          <button class="hv-book" onclick="showPage('rooms')">Browse Rooms</button>
         </div>
       </div>
     </div>
@@ -87,7 +87,7 @@
   </div>
 </div>
 
-<div class="search-wrap">
+<div class="search-wrap" id="searchSection">
 
   <div class="search-box">
 
@@ -162,7 +162,7 @@
       <div class="sec-title">Browse Rooms Near You</div>
     </div>
 
-    <a class="view-all" href="#">
+    <a class="view-all" href="#" onclick="showPage('rooms'); return false;">
       View all rooms →
     </a>
   </div>
@@ -271,7 +271,7 @@
 </div>
 
 <!-- ROLES -->
-<section style="background:var(--card-bg);border-radius:28px;margin:0 0 0 0;padding:80px 40px;">
+<section id="rolesSection" style="background:var(--card-bg);border-radius:28px;margin:0 0 0 0;padding:80px 40px;">
   <div class="sec-header" style="margin-bottom:36px;">
     <div>
       <div class="sec-eyebrow">Who It's For</div>
@@ -326,12 +326,12 @@
 </section>
 
 <!-- CTA -->
-<div class="cta-block">
+<div class="cta-block" id="ctaSection">
   <h2>Ready to Find Your Room?</h2>
   <p>Start finding your perfect room today.</p>
   <div class="cta-btns">
     <button class="btn btn-dark btn-lg" onclick="window.location.href='login.html?tab=register'">Create Free Account</button>
-    <button class="btn btn-ghost btn-lg" onclick="document.getElementById('rooms').scrollIntoView({behavior:'smooth'})">Browse Rooms</button>
+    <button class="btn btn-ghost btn-lg" onclick="showPage('rooms')">Browse Rooms</button>
   </div>
 </div>
 
@@ -342,8 +342,8 @@
       <a class="logo" href="#"><div class="logo-dot"></div>RoomNest</a>
     </div>
     <div style="display: flex; gap: 24px; justify-content: flex-end; flex-wrap: wrap;">
-      <a href="#rooms" style="color: var(--slate); text-decoration: none; font-size: 14px; font-weight: 500;">Browse Rooms</a>
-      <a href="#properties" style="color: var(--slate); text-decoration: none; font-size: 14px; font-weight: 500;">Properties</a>
+      <a href="#" onclick="showPage('rooms'); return false;" style="color: var(--slate); text-decoration: none; font-size: 14px; font-weight: 500;">Browse Rooms</a>
+      <a href="#" onclick="showPage('properties'); return false;" style="color: var(--slate); text-decoration: none; font-size: 14px; font-weight: 500;">Properties</a>
       <a href="admin-panel.html" style="color: var(--slate); text-decoration: none; font-size: 14px; font-weight: 500;">Admin</a>
       <a href="#" style="color: var(--slate); text-decoration: none; font-size: 14px; font-weight: 500;">Support</a>
     </div>

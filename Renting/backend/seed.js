@@ -78,13 +78,13 @@ const conn = await mysql.createConnection({
   // Bookings
   // AFTER — change 4 → 2 and 5 → 3:
   await conn.execute(
-    "INSERT INTO Booking (...) VALUES ('2026-04-01', '2026-07-01', 'confirmed', 1, 1, 1)"
+    "INSERT INTO Booking (check_in, check_out, status, Tenant_idTenant, Room_idRoom, Admin_idAdmin) VALUES ('2026-04-01', '2026-07-01', 'confirmed', 1, 1, 1)"
   );
   await conn.execute(
-    "INSERT INTO Booking (...) VALUES ('2026-05-01', '2026-08-01', 'pending', 2, 2, 1)"
+    "INSERT INTO Booking (check_in, check_out, status, Tenant_idTenant, Room_idRoom, Admin_idAdmin) VALUES ('2026-05-01', '2026-08-01', 'pending', 2, 2, 1)"
   );
   await conn.execute(
-    "INSERT INTO Booking (...) VALUES ('2026-03-15', '2026-06-15', 'confirmed', 1, 3, 1)"
+    "INSERT INTO Booking (check_in, check_out, status, Tenant_idTenant, Room_idRoom, Admin_idAdmin) VALUES ('2026-03-15', '2026-06-15', 'confirmed', 1, 3, 1)"
   );
 
   // Reviews
