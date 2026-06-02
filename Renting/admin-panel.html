@@ -209,13 +209,13 @@
       </div>
       <div class="filter-bar">
         <input id="usersSearch" type="text" aria-label="Search users by name or email" placeholder="🔍  Search by name or email…" oninput="filterTable('usersTable',this.value)">
-        <select onchange="showToast('Filter applied')">
+        <select id="usersRoleFilter" name="role_filter" onchange="showToast('Filter applied')">
           <option value="">All Roles</option>
           <option>Tenant</option>
           <option>Landlord</option>
           <option>Admin</option>
         </select>
-        <select onchange="showToast('Filter applied')">
+        <select id="usersStatusFilter" name="status_filter" onchange="showToast('Filter applied')">
           <option value="">All Status</option>
           <option>Active</option>
           <option>Blocked</option>
@@ -254,13 +254,13 @@
       </div>
       <div class="filter-bar">
         <input id="propsSearch" type="text" aria-label="Search properties" placeholder="🔍  Search properties…" oninput="filterTable('propsTable',this.value)">
-        <select onchange="showToast('Filter applied')">
+        <select id="propsStatusFilter" name="status_filter" onchange="showToast('Filter applied')">
           <option>All Status</option>
           <option>Active</option>
           <option>Under Review</option>
           <option>Rejected</option>
         </select>
-        <select onchange="showToast('Filter applied')">
+        <select id="propsTypeFilter" name="type_filter" onchange="showToast('Filter applied')">
           <option>All Types</option>
           <option>Apartment</option>
           <option>Guesthouse</option>
@@ -290,8 +290,8 @@
       </div>
       <div class="filter-bar">
         <input id="roomsSearch" type="text" aria-label="Search rooms" placeholder="🔍  Search rooms…" oninput="filterTable('roomsTable',this.value)">
-        <select onchange="showToast('Filter applied')"><option>All Types</option><option>Studio</option><option>Single</option><option>Double</option><option>Shared</option><option>Apartment</option></select>
-        <select onchange="showToast('Filter applied')"><option>All Status</option><option>Available</option><option>Booked</option><option>Maintenance</option></select>
+        <select id="roomsTypeFilter" name="type_filter" onchange="showToast('Filter applied')"><option>All Types</option><option>Studio</option><option>Single</option><option>Double</option><option>Shared</option><option>Apartment</option></select>
+        <select id="roomsStatusFilter" name="status_filter" onchange="showToast('Filter applied')"><option>All Status</option><option>Available</option><option>Booked</option><option>Maintenance</option></select>
       </div>
       <div class="table-wrap">
         <table id="roomsTable">
@@ -316,8 +316,8 @@
       </div>
       <div class="filter-bar">
         <input id="bookingsSearch" type="text" aria-label="Search bookings" placeholder="🔍  Search tenant, room…" oninput="filterTable('bookingsTable',this.value)">
-        <select onchange="showToast('Filter applied')"><option>All Status</option><option>Pending</option><option>Confirmed</option><option>Completed</option><option>Cancelled</option></select>
-        <select onchange="showToast('Filter applied')"><option>All Properties</option><option>Riverside Heights</option><option>The Green Quarter</option><option>Urban Loft Complex</option></select>
+        <select id="bookingsStatusFilter" name="status_filter" onchange="showToast('Filter applied')"><option>All Status</option><option>Pending</option><option>Confirmed</option><option>Completed</option><option>Cancelled</option></select>
+        <select id="bookingsPropertyFilter" name="property_filter" onchange="showToast('Filter applied')"><option>All Properties</option><option>Riverside Heights</option><option>The Green Quarter</option><option>Urban Loft Complex</option></select>
       </div>
       <div class="table-wrap">
         <table id="bookingsTable">
@@ -400,7 +400,7 @@
 
       <div class="filter-bar">
         <input id="logSearch" type="text" aria-label="Search admin logs by action, table, or admin" placeholder="🔍  Search by action, table, or admin…" oninput="filterTable('logTable',this.value)">
-        <select onchange="showToast('Filter applied')">
+        <select id="logActionFilter" name="action_filter" onchange="showToast('Filter applied')">
           <option>All Actions</option>
           <option>DELETE</option>
           <option>UPDATE</option>
@@ -409,7 +409,7 @@
           <option>APPROVE</option>
           <option>REJECT</option>
         </select>
-        <select onchange="showToast('Filter applied')">
+        <select id="logTableFilter" name="table_filter" onchange="showToast('Filter applied')">
           <option>All Tables</option>
           <option>User</option>
           <option>Property</option>
@@ -528,14 +528,14 @@
     <div class="form-group"><label for="eu-email">Email</label><input id="eu-email" autocomplete="email" type="email"></div>
     <div class="form-group"><label for="eu-phone">Phone Number</label><input id="eu-phone" autocomplete="tel" type="tel" placeholder="+855…"></div>
     <div class="form-row">
-      <div class="form-group"><label>Role</label>
+      <div class="form-group"><label for="eu-role">Role</label>
         <select id="eu-role" style="background:var(--surface2);color:var(--text);"><option>Tenant</option><option>Landlord</option><option>Admin</option></select>
       </div>
-      <div class="form-group"><label>Status</label>
+      <div class="form-group"><label for="eu-status">Status</label>
         <select id="eu-status" style="background:var(--surface2);color:var(--text);"><option>Active</option><option>Blocked</option></select>
       </div>
     </div>
-    <div class="form-group"><label>Reason for change (logged to Admin_Log)</label><textarea placeholder="e.g. Role updated per user request…" id="eu-reason"></textarea></div>
+    <div class="form-group"><label for="eu-reason">Reason for change (logged to Admin_Log)</label><textarea placeholder="e.g. Role updated per user request…" id="eu-reason"></textarea></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('editUserModal')">Cancel</button>
       <button class="btn btn-primary" onclick="saveEditUser()">Save & Log Action</button>
