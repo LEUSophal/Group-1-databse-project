@@ -51,7 +51,7 @@
     <div class="topbar-right">
       <div class="search-box">
         <span class="search-icon">🔍</span>
-        <input type="text" placeholder="Search users, properties…" oninput="globalSearch(this.value)">
+        <input id="globalSearch" type="text" aria-label="Search users and properties" placeholder="Search users, properties…" oninput="globalSearch(this.value)">
       </div>
       <button onclick="toggleTheme()" id="themeToggle" style="width:34px;height:34px;border-radius:var(--radius);background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;" title="Toggle Theme">🌓</button>
       <div class="notif-btn" onclick="showToast('🔔 3 pending property approvals')">🔔<div class="notif-dot"></div></div>
@@ -208,7 +208,7 @@
         </div>
       </div>
       <div class="filter-bar">
-        <input type="text" placeholder="🔍  Search by name or email…" oninput="filterTable('usersTable',this.value)">
+        <input id="usersSearch" type="text" aria-label="Search users by name or email" placeholder="🔍  Search by name or email…" oninput="filterTable('usersTable',this.value)">
         <select onchange="showToast('Filter applied')">
           <option value="">All Roles</option>
           <option>Tenant</option>
@@ -253,7 +253,7 @@
         <button class="btn btn-ghost btn-sm" onclick="exportData('properties')">⬇ Export</button>
       </div>
       <div class="filter-bar">
-        <input type="text" placeholder="🔍  Search properties…" oninput="filterTable('propsTable',this.value)">
+        <input id="propsSearch" type="text" aria-label="Search properties" placeholder="🔍  Search properties…" oninput="filterTable('propsTable',this.value)">
         <select onchange="showToast('Filter applied')">
           <option>All Status</option>
           <option>Active</option>
@@ -289,7 +289,7 @@
         <button class="btn btn-ghost btn-sm" onclick="exportData('rooms')">⬇ Export</button>
       </div>
       <div class="filter-bar">
-        <input type="text" placeholder="🔍  Search rooms…" oninput="filterTable('roomsTable',this.value)">
+        <input id="roomsSearch" type="text" aria-label="Search rooms" placeholder="🔍  Search rooms…" oninput="filterTable('roomsTable',this.value)">
         <select onchange="showToast('Filter applied')"><option>All Types</option><option>Studio</option><option>Single</option><option>Double</option><option>Shared</option><option>Apartment</option></select>
         <select onchange="showToast('Filter applied')"><option>All Status</option><option>Available</option><option>Booked</option><option>Maintenance</option></select>
       </div>
@@ -315,7 +315,7 @@
         <button class="btn btn-ghost btn-sm" onclick="exportData('bookings')">⬇ Export CSV</button>
       </div>
       <div class="filter-bar">
-        <input type="text" placeholder="🔍  Search tenant, room…" oninput="filterTable('bookingsTable',this.value)">
+        <input id="bookingsSearch" type="text" aria-label="Search bookings" placeholder="🔍  Search tenant, room…" oninput="filterTable('bookingsTable',this.value)">
         <select onchange="showToast('Filter applied')"><option>All Status</option><option>Pending</option><option>Confirmed</option><option>Completed</option><option>Cancelled</option></select>
         <select onchange="showToast('Filter applied')"><option>All Properties</option><option>Riverside Heights</option><option>The Green Quarter</option><option>Urban Loft Complex</option></select>
       </div>
@@ -399,7 +399,7 @@
       </div>
 
       <div class="filter-bar">
-        <input type="text" placeholder="🔍  Search by action, table, or admin…" oninput="filterTable('logTable',this.value)">
+        <input id="logSearch" type="text" aria-label="Search admin logs by action, table, or admin" placeholder="🔍  Search by action, table, or admin…" oninput="filterTable('logTable',this.value)">
         <select onchange="showToast('Filter applied')">
           <option>All Actions</option>
           <option>DELETE</option>
@@ -417,7 +417,7 @@
           <option>Booking</option>
           <option>Review</option>
         </select>
-        <input type="date" style="color:var(--text3);">
+        <input id="logDateFilter" type="date" aria-label="Filter logs by date" style="color:var(--text3);">
       </div>
 
       <div class="table-wrap">
@@ -475,12 +475,12 @@
         </div>
         <div class="card">
           <div class="card-title">System Settings</div>
-          <div class="form-group"><label>Site Name</label><input type="text" value="RentKH"></div>
-          <div class="form-group"><label>Support Email</label><input type="email" value="admin@roomnest.com"></div>
-          <div class="form-group"><label>Max Images per Room</label><input type="number" value="8"></div>
-          <div class="form-group"><label>Platform Fee (%)</label><input type="number" value="5"></div>
-          <div class="form-group"><label>Default Booking Status</label>
-            <select style="background:var(--surface2);color:var(--text);"><option>Pending</option><option>Auto-Confirm</option></select>
+          <div class="form-group"><label for="settingSiteName">Site Name</label><input id="settingSiteName" name="site_name" type="text" value="RentKH"></div>
+          <div class="form-group"><label for="settingSupportEmail">Support Email</label><input id="settingSupportEmail" name="support_email" type="email" value="admin@roomnest.com"></div>
+          <div class="form-group"><label for="settingMaxImages">Max Images per Room</label><input id="settingMaxImages" name="max_images" type="number" value="8"></div>
+          <div class="form-group"><label for="settingPlatformFee">Platform Fee (%)</label><input id="settingPlatformFee" name="platform_fee" type="number" value="5"></div>
+          <div class="form-group"><label for="settingDefaultBooking">Default Booking Status</label>
+            <select id="settingDefaultBooking" name="default_booking_status" style="background:var(--surface2);color:var(--text);"><option>Pending</option><option>Auto-Confirm</option></select>
           </div>
           <div style="display:flex;gap:8px;margin-top:4px;">
             <button class="btn btn-primary" onclick="showToast('✅ Settings saved!')">Save Settings</button>
@@ -505,8 +505,8 @@
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;">BOOKINGS</div><span style="font-size:14px;font-weight:700;">3</span></div>
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;">REVIEWS</div><span style="font-size:14px;font-weight:700;">2</span></div>
     </div>
-    <div class="form-group"><label>Change Role</label>
-      <select style="background:var(--surface2);color:var(--text);"><option>Tenant</option><option>Landlord</option><option>Admin</option></select>
+    <div class="form-group"><label for="vu-role-change">Change Role</label>
+      <select id="vu-role-change" name="change_role" style="background:var(--surface2);color:var(--text);"><option>Tenant</option><option>Landlord</option><option>Admin</option></select>
     </div>
     <div class="form-group"><label>Change Status</label>
       <select id="vu-status-change" style="background:var(--surface2);color:var(--text);"><option>Active</option><option>Blocked</option></select>
@@ -550,13 +550,13 @@
     <h2>Add User</h2>
     <p class="modal-sub">Create a new user account directly</p>
     <div class="form-group"><label>Full Name *</label><input type="text" placeholder="e.g. Sokha Lim" id="nu-name"></div>
-    <div class="form-group"><label>Email *</label><input type="email" placeholder="user@email.com"></div>
+    <div class="form-group"><label for="nu-email">Email *</label><input id="nu-email" name="email" type="email" placeholder="user@email.com"></div>
     <div class="form-row">
-      <div class="form-group"><label>Phone</label><input type="tel" placeholder="+855 12 000 000"></div>
-      <div class="form-group"><label>Password *</label><input type="password" placeholder="Min. 8 chars"></div>
+      <div class="form-group"><label for="nu-phone">Phone</label><input id="nu-phone" name="phone" type="tel" placeholder="+855 12 000 000"></div>
+      <div class="form-group"><label for="nu-password">Password *</label><input id="nu-password" name="password" type="password" placeholder="Min. 8 chars"></div>
     </div>
-    <div class="form-group"><label>Role *</label>
-      <select style="background:var(--surface2);color:var(--text);"><option>Tenant</option><option>Landlord</option><option>Admin</option></select>
+    <div class="form-group"><label for="nu-role">Role *</label>
+      <select id="nu-role" name="role" style="background:var(--surface2);color:var(--text);"><option>Tenant</option><option>Landlord</option><option>Admin</option></select>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('addUserModal')">Cancel</button>
