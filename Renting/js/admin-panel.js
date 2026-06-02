@@ -248,5 +248,65 @@ document.addEventListener('keydown',e=>{
 // ── INIT: load real log from DB on page load ──
 document.addEventListener('DOMContentLoaded', () => {
   loadAdminLog();
+  initUsersPagination();
 });
+
+/* ---------- TABLE PAGINATION FOR USERS ---------- */
+function initUsersPagination(){
+  const table = document.getElementById('usersTable');
+  if(!table) return;
+  const wrapper = table.closest('.table-wrap');
+  if(!wrapper) return;
+  // find the pagination row (the next sibling div after the table wrapper)
+  let paginationRow = wrapper.nextElementSibling;
+  if(!paginationRow) return;
+  const infoSpan = paginationRow.querySelector('span');
+  const controlsDiv = paginationRow.querySelector('div');
+  if(!infoSpan||!controlsDiv) return;
+
+  // Clear existing control buttons and rebuild consistent pagination controls
+  const rows = Array.from(table.querySelectorAll('tbody tr'));
+  const total = rows.length;
+  const pageSize = 6;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  // Build controls: Prev, 1..N, Next
+  controlsDiv.innerHTML = '';
+  const createBtn = (text, cls) => { const b=document.createElement('button'); b.className='btn '+(cls||'btn-ghost')+' btn-sm'; b.textContent=text; return b; };
+  const prevBtn = createBtn('← Prev','btn-ghost');
+  controlsDiv.appendChild(prevBtn);
+  const pageBtns = [];
+  for(let p=1;p<=totalPages;p++){
+    const b = createBtn(String(p), p===1? 'btn-primary':'btn-ghost');
+    b.dataset.page = String(p);
+    controlsDiv.appendChild(b);
+    pageBtns.push(b);
+  }
+  const nextBtn = createBtn('Next →','btn-ghost');
+  controlsDiv.appendChild(nextBtn);
+
+  let currentPage = 1;
+  function render(page){
+    if(page<1) page=1; if(page>totalPages) page=totalPages;
+    currentPage=page;
+    // hide/show rows
+    rows.forEach((r,idx)=>{ const should = idx>= (page-1)*pageSize && idx < page*pageSize; r.style.display = should? '': 'none'; });
+    // update info text
+    const showing = Math.min(pageSize, Math.max(0, total - (page-1)*pageSize));
+    infoSpan.textContent = 'Showing '+showing+' of '+total+' users';
+    // update buttons styles
+    pageBtns.forEach(b=>{ b.className = (Number(b.dataset.page)===page) ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm'; });
+    prevBtn.disabled = page===1; nextBtn.disabled = page===totalPages;
+    if(prevBtn.disabled) prevBtn.classList.add('disabled'); else prevBtn.classList.remove('disabled');
+    if(nextBtn.disabled) nextBtn.classList.add('disabled'); else nextBtn.classList.remove('disabled');
+  }
+
+  // wire events
+  prevBtn.addEventListener('click', ()=>{ if(currentPage>1) render(currentPage-1); });
+  nextBtn.addEventListener('click', ()=>{ if(currentPage<totalPages) render(currentPage+1); });
+  pageBtns.forEach(b=> b.addEventListener('click', ()=> render(Number(b.dataset.page))));
+
+  // initial render
+  render(1);
+}
+
 

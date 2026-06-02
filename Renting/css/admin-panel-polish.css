@@ -288,4 +288,11 @@ button:focus, a:focus, input:focus{outline:2px solid rgba(255,117,32,0.18);outli
   table{min-width:700px}
 }
 
+/* Ensure selects match dark theme */
+select,
+select option {
+  background: #08111c;
+  color: #ffffff;
+}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
