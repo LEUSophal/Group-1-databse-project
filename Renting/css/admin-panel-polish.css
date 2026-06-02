@@ -212,4 +212,40 @@ tr:hover td{background:linear-gradient(90deg,rgba(255,255,255,0.01),transparent)
 button:focus, a:focus, input:focus{outline:2px solid rgba(255,117,32,0.18);outline-offset:2px}
 
 /* Reduced motion */
+/* User Management — small UI improvements */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.sec-hdr > div:last-child{display:flex;gap:8px;align-items:center}
+
+.filter-bar{display:flex;gap:12px;align-items:center;justify-content:flex-start;flex-wrap:wrap;margin-bottom:16px}
+.filter-bar input, .filter-bar select{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);color:var(--text);padding:8px 12px;border-radius:10px;height:40px;min-width:140px;font-size:13px}
+.filter-bar input{min-width:260px;flex:1 1 260px}
+.filter-bar select{flex:0 0 160px}
+.filter-bar input:focus, .filter-bar select:focus{border-color:rgba(255,117,32,0.24);box-shadow:0 6px 18px rgba(255,117,32,0.06)}
+
+/* Slightly tighter table rows for compactness */
+.table-wrap tbody td{padding:10px 12px;font-size:14px}
+.table-wrap thead th{padding:10px 12px}
+
+/* Action buttons spacing & consistency */
+.table-wrap td > div[style*="display:flex"], .table-wrap td > div.action-group{display:flex;gap:8px;align-items:center}
+.table-wrap .btn{padding:6px 10px;border-radius:8px;font-size:13px}
+.table-wrap .btn-icon{width:30px;height:30px}
+
+/* Align Export/Add User with filters: ensure sec-hdr buttons stay right on wide screens */
+@media (min-width:760px){
+  .sec-hdr{align-items:center}
+  .sec-hdr > div:first-child{flex:1}
+  .sec-hdr > div:last-child{flex:0 0 auto}
+}
+
+/* Responsive: stack filters vertically on narrow screens */
+@media (max-width:760px){
+  .filter-bar{flex-direction:column;align-items:stretch}
+  .filter-bar input,.filter-bar select{width:100%;flex:none;min-width:0}
+  .sec-hdr{flex-direction:column;align-items:flex-start;gap:8px}
+  .sec-hdr > div:last-child{width:100%;display:flex;justify-content:flex-start}
+  .table-wrap{overflow:auto}
+  table{min-width:700px}
+}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
