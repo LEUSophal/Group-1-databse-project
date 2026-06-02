@@ -199,7 +199,7 @@
     <!-- ══ USERS ══ -->
     <div id="page-users" class="page">
       <div class="sec-hdr">
-        <div><h2>User Management</h2><div class="sec-hdr-sub">US-10 — Block, delete, update users and roles</div></div>
+        <div><h2>User Management</h2><div class="sec-hdr-sub">Manage platform users, roles, and permissions.</div></div>
         <div style="display:flex;gap:8px;">
           <button class="btn btn-ghost btn-sm" onclick="exportData('users')">⬇ Export</button>
           <button class="btn btn-primary btn-sm" onclick="openModal('addUserModal')">＋ Add User</button>
@@ -247,7 +247,7 @@
     <!-- ══ PROPERTIES ══ -->
     <div id="page-properties" class="page">
       <div class="sec-hdr">
-        <div><h2>Property Management</h2><div class="sec-hdr-sub">US-10 — Approve, reject, or delete properties</div></div>
+        <div><h2>Property Management</h2><div class="sec-hdr-sub">Manage listings, approvals, and property status.</div></div>
         <button class="btn btn-ghost btn-sm" onclick="exportData('properties')">⬇ Export</button>
       </div>
       <div class="filter-bar">
@@ -283,7 +283,7 @@
     <!-- ══ ROOMS ══ -->
     <div id="page-rooms" class="page">
       <div class="sec-hdr">
-        <div><h2>Room Management</h2><div class="sec-hdr-sub">US-10 — View, update status, or delete rooms</div></div>
+        <div><h2>Room Management</h2><div class="sec-hdr-sub">Manage room listings, pricing, and availability.</div></div>
         <button class="btn btn-ghost btn-sm" onclick="exportData('rooms')">⬇ Export</button>
       </div>
       <div class="filter-bar">
@@ -309,7 +309,7 @@
     <!-- ══ BOOKINGS ══ -->
     <div id="page-bookings" class="page">
       <div class="sec-hdr">
-        <div><h2>Booking Management</h2><div class="sec-hdr-sub">US-10 — View all bookings, update or cancel</div></div>
+        <div><h2>Booking Management</h2><div class="sec-hdr-sub">Manage bookings, approvals, and reservations.</div></div>
         <button class="btn btn-ghost btn-sm" onclick="exportData('bookings')">⬇ Export CSV</button>
       </div>
       <div class="filter-bar">
@@ -335,7 +335,7 @@
     <!-- ══ REVIEWS ══ -->
     <div id="page-reviews" class="page">
       <div class="sec-hdr">
-        <div><h2>Review Moderation</h2><div class="sec-hdr-sub">US-10 — Remove inappropriate reviews</div></div>
+        <div><h2>Review Moderation</h2><div class="sec-hdr-sub">Monitor and moderate user reviews across the platform.</div></div>
         <div style="display:flex;gap:8px;align-items:center;">
           <span style="font-size:12px;color:var(--text3);">Avg: <strong style="color:var(--amber);">★ 4.7</strong> · 5 reviews</span>
           <select style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text);background:var(--surface2);outline:none;" onchange="showToast('Filter applied')">
@@ -389,7 +389,7 @@
     <!-- ══ ADMIN LOG ══ -->
     <div id="page-adminlog" class="page">
       <div class="sec-hdr">
-        <div><h2>Admin Action Log</h2><div class="sec-hdr-sub">US-11 — All admin actions are recorded here (Admin_Log table)</div></div>
+        <div><h2>Admin Action Log</h2><div class="sec-hdr-sub">Track administrator activity and platform actions.</div></div>
         <div style="display:flex;gap:8px;">
           <button class="btn btn-ghost btn-sm" onclick="exportData('admin log')">⬇ Export</button>
           <button class="btn btn-danger btn-sm" onclick="confirmClearLog()">🗑 Clear Old Logs</button>
@@ -438,7 +438,7 @@
         </table>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:12px;color:var(--text3);">12 records total — all actions stored in Admin_Log table</span>
+        <span style="font-size:12px;color:var(--text3);">12 records total — administrator activity log</span>
         <div style="display:flex;gap:6px;">
           <button class="btn btn-ghost btn-sm">← Prev</button>
           <button class="btn btn-primary btn-sm">1</button>
@@ -469,7 +469,7 @@
           <div class="mini-stat"><span class="mini-stat-label">Room_Facility</span><span class="mini-stat-val">148 rows</span></div>
           <div class="mini-stat"><span class="mini-stat-label">Booking</span><span class="mini-stat-val">47 rows</span></div>
           <div class="mini-stat"><span class="mini-stat-label">Review</span><span class="mini-stat-val">5 rows</span></div>
-          <div class="mini-stat"><span class="mini-stat-label">Admin_Log</span><span class="mini-stat-val">12 rows</span></div>
+          <div class="mini-stat"><span class="mini-stat-label">Admin Log</span><span class="mini-stat-val">12 rows</span></div>
         </div>
         <div class="card">
           <div class="card-title">System Settings</div>
@@ -533,7 +533,7 @@
         <select id="eu-status" style="background:var(--surface2);color:var(--text);"><option>Active</option><option>Blocked</option></select>
       </div>
     </div>
-    <div class="form-group"><label for="eu-reason">Reason for change (logged to Admin_Log)</label><textarea placeholder="e.g. Role updated per user request…" id="eu-reason"></textarea></div>
+    <div class="form-group"><label for="eu-reason">Reason for change (logged)</label><textarea placeholder="e.g. Role updated per user request…" id="eu-reason"></textarea></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('editUserModal')">Cancel</button>
       <button class="btn btn-primary" onclick="saveEditUser()">Save & Log Action</button>
