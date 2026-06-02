@@ -67,7 +67,8 @@
         </div>
 
         <!-- LOGIN FORM -->
-        <form id="panelLogin" class="form" action="/sessions" method="post" novalidate>
+        <form id="panelLogin" class="form" action="/sessions" method="post" novalidate aria-labelledby="signin-title" aria-describedby="login-help">
+  <p id="login-help" class="visually-hidden">Use your RentKh account to sign in.</p>
           <label class="field">
             <span class="label-text">Email</span>
             <input name="email" id="loginEmail" type="email" autocomplete="email" required placeholder="you@domain.kh" />
