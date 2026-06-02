@@ -257,6 +257,25 @@ tr:hover td{background:linear-gradient(90deg,rgba(255,255,255,0.01),transparent)
 #page-reviews .filter-bar input, #page-reviews .filter-bar select{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);color:var(--text);padding:8px 12px;border-radius:10px}
 #page-reviews select, #page-reviews select option{background:#08111c;color:#fff}
 
+/* Log date filter styling — match dark dashboard theme */
+#logDateFilter{
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.04);
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 10px;
+  height:40px;
+  font-size:13px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+#logDateFilter::-webkit-calendar-picker-indicator{
+  filter: invert(1) contrast(1.2) brightness(1.1);
+  opacity:0.9;
+}
+/* Ensure date picker text remains legible in some browsers */
+input[type="date"]{color:var(--text);}
+
 /* Responsive adjustments: ensure cards stack and actions remain visible */
 @media (max-width:760px){
   .rc-header{flex-direction:column;align-items:flex-start;gap:8px}

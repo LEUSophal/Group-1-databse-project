@@ -212,9 +212,9 @@ function confirmDelete(type,name){
 function confirmClearLog(){
   document.getElementById('confirmIcon').textContent='⚠️';
   document.getElementById('confirmTitle').textContent='Clear Old Logs';
-  document.getElementById('confirmMsg').textContent='This will permanently delete admin log entries older than 90 days. Recent logs will be preserved.';
+  document.getElementById('confirmMsg').textContent='This will permanently delete admin log entries older than 30 days. This action cannot be undone.';
   document.getElementById('confirmBtn').textContent='Clear Logs';
-  _confirmAction=()=>showToast('🗑 Old logs cleared (90+ days).');
+  _confirmAction=()=>{ clearOldLogs30(); };
   document.getElementById('confirmOverlay').classList.add('open');
 }
 function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('open');_confirmAction=null;}
@@ -291,7 +291,26 @@ function filterTable(tableId,query){
 function globalSearch(q){if(q.length>2) showToast('🔍 Searching for "'+q+'"…');}
 
 // ── EXPORT ──
-function exportData(type){showToast('📥 Exporting '+type+' data as CSV…');}
+function exportData(type){
+  if(type==='admin log'){
+    const table = document.getElementById('logTable');
+    if(!table) return showToast('❌ No log table found');
+    const headers = Array.from(table.querySelectorAll('thead th')).map(th=>th.textContent.trim());
+    const rows = Array.from(table.querySelectorAll('tbody tr')).filter(r=> r.style.display !== 'none');
+    const csvRows = [headers.join(',')];
+    rows.forEach(r=>{
+      const cols = Array.from(r.querySelectorAll('td')).map(td=> '"'+td.textContent.replace(/"/g,'""').trim()+'"');
+      csvRows.push(cols.join(','));
+    });
+    const csv = csvRows.join('\n');
+    const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'admin-log.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    showToast('⬇ Exported visible logs as CSV');
+    return;
+  }
+  showToast('📥 Exporting '+type+' data as CSV…');
+}
 
 // ── TOAST ──
 function showToast(msg){
@@ -312,6 +331,7 @@ document.addEventListener('keydown',e=>{
 document.addEventListener('DOMContentLoaded', () => {
   loadAdminLog();
   initUsersPagination();
+  initAdminLogPagination();
   updateReviewCounts();
 });
 
@@ -372,5 +392,86 @@ function initUsersPagination(){
   // initial render
   render(1);
 }
+
+/* ---------- ADMIN LOG PAGINATION & EXPORT ---------- */
+function parseRowDate(row){
+  if(!row) return null;
+  const td = row.querySelector('td:last-child'); if(!td) return null;
+  let txt = td.textContent.replace('\u00B7',' ').replace('·',' ').trim();
+  // Ensure there's a time portion
+  if(!/\d{1,2}:\d{2}/.test(txt)) txt = txt + ' 00:00';
+  const d = new Date(txt);
+  return isNaN(d.getTime())? null : d;
+}
+
+function clearOldLogs30(){
+  const table = document.getElementById('logTable'); if(!table) return showToast('❌ No log table');
+  const rows = Array.from(table.querySelectorAll('tbody tr'));
+  const now = new Date(); const cutoff = new Date(now.getTime() - 30*24*60*60*1000);
+  let removed = 0;
+  rows.forEach(r=>{
+    const d = parseRowDate(r);
+    if(d && d < cutoff){ r.remove(); removed++; }
+  });
+  if(removed>0){
+    showToast('🗑 '+removed+' old log(s) removed');
+    logAction('DELETE','Admin_Log',null,'Cleared '+removed+' logs older than 30 days');
+    // update info text
+    const page = document.getElementById('page-adminlog');
+    if(page){
+      const total = table.querySelectorAll('tbody tr').length;
+      const infoSpan = page.querySelector('div[style*="justify-content:space-between"] > span');
+      if(infoSpan) infoSpan.textContent = total+' records total — all actions stored in Admin_Log table';
+    }
+  } else {
+    showToast('ℹ️ No logs older than 30 days');
+  }
+  if(typeof initAdminLogPagination === 'function') initAdminLogPagination();
+}
+
+function initAdminLogPagination(){
+  const page = document.getElementById('page-adminlog'); if(!page) return;
+  const table = document.getElementById('logTable'); if(!table) return;
+  const bottom = page.querySelector('div[style*="justify-content:space-between"]'); if(!bottom) return;
+  const infoSpan = bottom.querySelector('span');
+  const controlsDiv = bottom.querySelector('div');
+  if(!infoSpan || !controlsDiv) return;
+  const allRows = Array.from(table.querySelectorAll('tbody tr'));
+  const pageSize = 6; let currentPage = 1;
+  function refresh(){
+    const dateInput = document.getElementById('logDateFilter');
+    let dateVal = dateInput && dateInput.value ? new Date(dateInput.value) : null;
+    const visibleRows = allRows.filter(r=> r.style.display !== 'none').filter(r=>{
+      if(!dateVal) return true;
+      const d = parseRowDate(r); if(!d) return true;
+      const dOnly = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const sel = new Date(dateVal.getFullYear(), dateVal.getMonth(), dateVal.getDate());
+      return dOnly >= sel;
+    });
+    const total = visibleRows.length; const totalPages = Math.max(1, Math.ceil(total/pageSize));
+    if(currentPage>totalPages) currentPage = totalPages;
+    controlsDiv.innerHTML = '';
+    const createBtn = (txt,cls)=>{const b=document.createElement('button');b.className='btn '+(cls||'btn-ghost')+' btn-sm';b.textContent=txt;return b};
+    const prev = createBtn('← Prev','btn-ghost'); controlsDiv.appendChild(prev);
+    const pageBtns = [];
+    for(let p=1;p<=totalPages;p++){ const b=createBtn(String(p), p===currentPage? 'btn-primary':'btn-ghost'); b.dataset.page = p; controlsDiv.appendChild(b); pageBtns.push(b); }
+    const next = createBtn('Next →','btn-ghost'); controlsDiv.appendChild(next);
+    // render
+    const start = (currentPage-1)*pageSize; const end = start+pageSize;
+    allRows.forEach(r=> r.style.display = 'none');
+    visibleRows.slice(start,end).forEach(r=> r.style.display = '');
+    infoSpan.textContent = 'Showing '+ Math.min(pageSize, Math.max(0, total - (currentPage-1)*pageSize)) +' of '+ total +' logs';
+    prev.disabled = currentPage===1; next.disabled = currentPage===totalPages;
+    prev.addEventListener('click', ()=>{ if(currentPage>1){ currentPage--; refresh(); }});
+    next.addEventListener('click', ()=>{ if(currentPage<totalPages){ currentPage++; refresh(); }});
+    pageBtns.forEach(b=> b.addEventListener('click', ()=>{ currentPage = Number(b.dataset.page); refresh(); }));
+  }
+  const search = document.getElementById('logSearch'); if(search) search.addEventListener('input', ()=> setTimeout(refresh,40));
+  const actionFilter = document.getElementById('logActionFilter'); if(actionFilter) actionFilter.addEventListener('change', ()=> setTimeout(refresh,40));
+  const tableFilter = document.getElementById('logTableFilter'); if(tableFilter) tableFilter.addEventListener('change', ()=> setTimeout(refresh,40));
+  const dateFilter = document.getElementById('logDateFilter'); if(dateFilter) dateFilter.addEventListener('change', ()=> setTimeout(refresh,40));
+  refresh();
+}
+
 
 
