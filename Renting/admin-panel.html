@@ -524,9 +524,9 @@
     <button class="modal-close" onclick="closeModal('editUserModal')">✕</button>
     <h2>Edit User</h2>
     <p class="modal-sub" id="eu-sub">Editing user account</p>
-    <div class="form-group"><label>Full Name</label><input type="text" id="eu-name"></div>
-    <div class="form-group"><label>Email</label><input type="email" id="eu-email"></div>
-    <div class="form-group"><label>Phone Number</label><input type="tel" id="eu-phone" placeholder="+855…"></div>
+    <div class="form-group"><label for="eu-name">Full Name</label><input id="eu-name" autocomplete="name" type="text"></div>
+    <div class="form-group"><label for="eu-email">Email</label><input id="eu-email" autocomplete="email" type="email"></div>
+    <div class="form-group"><label for="eu-phone">Phone Number</label><input id="eu-phone" autocomplete="tel" type="tel" placeholder="+855…"></div>
     <div class="form-row">
       <div class="form-group"><label>Role</label>
         <select id="eu-role" style="background:var(--surface2);color:var(--text);"><option>Tenant</option><option>Landlord</option><option>Admin</option></select>
@@ -549,11 +549,11 @@
     <button class="modal-close" onclick="closeModal('addUserModal')">✕</button>
     <h2>Add User</h2>
     <p class="modal-sub">Create a new user account directly</p>
-    <div class="form-group"><label>Full Name *</label><input type="text" placeholder="e.g. Sokha Lim" id="nu-name"></div>
-    <div class="form-group"><label for="nu-email">Email *</label><input id="nu-email" name="email" type="email" placeholder="user@email.com"></div>
+    <div class="form-group"><label for="nu-name">Full Name *</label><input id="nu-name" name="name" autocomplete="name" type="text" placeholder="e.g. Sokha Lim"></div>
+    <div class="form-group"><label for="nu-email">Email *</label><input id="nu-email" name="email" autocomplete="email" type="email" placeholder="user@email.com"></div>
     <div class="form-row">
-      <div class="form-group"><label for="nu-phone">Phone</label><input id="nu-phone" name="phone" type="tel" placeholder="+855 12 000 000"></div>
-      <div class="form-group"><label for="nu-password">Password *</label><input id="nu-password" name="password" type="password" placeholder="Min. 8 chars"></div>
+      <div class="form-group"><label for="nu-phone">Phone</label><input id="nu-phone" name="phone" autocomplete="tel" type="tel" placeholder="+855 12 000 000"></div>
+      <div class="form-group"><label for="nu-password">Password *</label><input id="nu-password" name="password" autocomplete="new-password" type="password" placeholder="Min. 8 chars"></div>
     </div>
     <div class="form-group"><label for="nu-role">Role *</label>
       <select id="nu-role" name="role" style="background:var(--surface2);color:var(--text);"><option>Tenant</option><option>Landlord</option><option>Admin</option></select>
