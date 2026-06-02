@@ -250,15 +250,17 @@ async function apiUploadImages(files) {
 
 // ========== ADMIN LOG API ==========
 async function apiFetchAdminLog() {
-  const res = await fetch(`${API_URL}/admin-log`);
+  const res = await fetch(`${API_URL}/admin-log`, { headers: getAuthHeaders() });
+  if (!res.ok) return [];
   return res.json();
 }
 
 async function apiPostAdminLog(action_type, target_table, target_id, description) {
-  const user = getLoggedInUser ? getLoggedInUser() : null;
+  const user = typeof getLoggedInUser === 'function' ? getLoggedInUser() : null;
+  const headers = Object.assign({}, getAuthHeaders(), { 'Content-Type': 'application/json' });
   const res = await fetch(`${API_URL}/admin-log`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({
       Admin_idAdmin: user ? user.user_id : 1,
       action_type,
