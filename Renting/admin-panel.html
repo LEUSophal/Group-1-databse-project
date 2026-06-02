@@ -356,9 +356,9 @@
         </div>
         <div class="rc-text">"[Content removed for moderation — original contained inappropriate language and false accusations against the landlord.]"</div>
         <div class="rc-actions">
-          <button class="btn btn-danger btn-sm" onclick="confirmDelete('review','Flagged Review #R-44')">🗑 Delete Review</button>
-          <button class="btn btn-ghost btn-sm" onclick="dismissFlag()">Dismiss Flag</button>
-          <button class="btn btn-ghost btn-sm" onclick="showToast('📨 Warning sent to user')">Warn User</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteReview(this)">🗑 Delete Review</button>
+          <button class="btn btn-ghost btn-sm" onclick="dismissFlag(this)">Dismiss Flag</button>
+          <button class="btn btn-ghost btn-sm" onclick="warnUser(this)">Warn User</button>
         </div>
       </div>
 
@@ -366,22 +366,22 @@
         <div class="review-card">
           <div class="rc-header"><div><div class="rc-name">Sophea Rith</div><div class="rc-prop">Riverside Studio · Riverside Heights</div></div><div style="text-align:right;"><div class="rc-stars">★★★★★</div><div style="font-size:10px;color:var(--text3);margin-top:2px;">May 2, 2025</div></div></div>
           <div class="rc-text">"Amazing studio with great view. Landlord was very responsive."</div>
-          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('review','Review by Sophea')">🗑</button><button class="btn btn-amber btn-sm" onclick="showToast('🚩 Review flagged for moderation')">🚩 Flag</button></div>
+          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="deleteReview(this)">🗑</button><button class="btn btn-amber btn-sm" onclick="flagReview(this)">🚩 Flag</button></div>
         </div>
         <div class="review-card">
           <div class="rc-header"><div><div class="rc-name">Dara Meas</div><div class="rc-prop">Garden View Room · The Green Quarter</div></div><div style="text-align:right;"><div class="rc-stars">★★★★☆</div><div style="font-size:10px;color:var(--text3);margin-top:2px;">Apr 18, 2025</div></div></div>
           <div class="rc-text">"Clean and comfortable. Minor WiFi issue during peak hours."</div>
-          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('review','Review by Dara')">🗑</button><button class="btn btn-amber btn-sm" onclick="showToast('🚩 Review flagged')">🚩 Flag</button></div>
+          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="deleteReview(this)">🗑</button><button class="btn btn-amber btn-sm" onclick="flagReview(this)">🚩 Flag</button></div>
         </div>
         <div class="review-card">
           <div class="rc-header"><div><div class="rc-name">Kosal Noun</div><div class="rc-prop">Blossom Studio · The Green Quarter</div></div><div style="text-align:right;"><div class="rc-stars">★★★★★</div><div style="font-size:10px;color:var(--text3);margin-top:2px;">Mar 5, 2025</div></div></div>
           <div class="rc-text">"Loved the balcony and quiet neighborhood. Would rent again!"</div>
-          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('review','Review by Kosal')">🗑</button><button class="btn btn-amber btn-sm" onclick="showToast('🚩 Review flagged')">🚩 Flag</button></div>
+          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="deleteReview(this)">🗑</button><button class="btn btn-amber btn-sm" onclick="flagReview(this)">🚩 Flag</button></div>
         </div>
         <div class="review-card">
           <div class="rc-header"><div><div class="rc-name">Vanna Sok</div><div class="rc-prop">Sunset Double · The Green Quarter</div></div><div style="text-align:right;"><div class="rc-stars">★★★★★</div><div style="font-size:10px;color:var(--text3);margin-top:2px;">Mar 1, 2025</div></div></div>
           <div class="rc-text">"Spacious, well-lit room. The landlord goes above and beyond."</div>
-          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('review','Review by Vanna')">🗑</button><button class="btn btn-amber btn-sm" onclick="showToast('🚩 Review flagged')">🚩 Flag</button></div>
+          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="deleteReview(this)">🗑</button><button class="btn btn-amber btn-sm" onclick="flagReview(this)">🚩 Flag</button></div>
         </div>
       </div>
     </div>

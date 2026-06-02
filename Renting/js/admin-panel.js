@@ -124,13 +124,76 @@ function adminCancelBooking(statusId){
 }
 
 // ── REVIEW ACTIONS ──
-function dismissFlag(){
-  const badge = document.querySelector('.badge-red:first-child');
-  if(!badge){ showToast('⚠️ No flagged review found'); return; }
-  const card = badge.closest('.review-card');
-  if(card){ card.style.borderColor='var(--border)'; card.style.background=''; }
+function dismissFlag(elem){
+  // Supports both dismissFlag() and dismissFlag(this)
+  let card = null; let badge = null;
+  if(elem){
+    card = elem.closest('.review-card');
+    if(!card){ showToast('⚠️ No flagged review found'); return; }
+    badge = card.querySelector('.badge-red');
+  } else {
+    badge = document.querySelector('.review-card .badge-red');
+    if(!badge){ showToast('⚠️ No flagged review found'); return; }
+    card = badge.closest('.review-card');
+  }
+  if(card){
+    card.classList.remove('flagged');
+    const bd = card.querySelector('.badge-red'); if(bd) bd.remove();
+    card.style.borderColor=''; card.style.background='';
+  }
   showToast('✅ Flag dismissed.');
-  logAction('UPDATE','Review','Flagged review dismissed after inspection');
+  logAction('UPDATE','Review',null,'Flag dismissed via admin panel');
+  updateReviewCounts();
+}
+
+function updateReviewCounts(){
+  const page = document.getElementById('page-reviews');
+  if(!page) return;
+  const total = page.querySelectorAll('.review-card').length;
+  const flagged = page.querySelectorAll('.review-card.flagged').length;
+  // update section header reviews text (preserve avg if present)
+  const hdrSpan = page.querySelector('.sec-hdr span');
+  if(hdrSpan){
+    let txt = hdrSpan.textContent || '';
+    if(txt.includes('·')) txt = txt.split('·')[0].trim();
+    hdrSpan.textContent = txt + ' · ' + total + ' reviews';
+  }
+  // update sidebar review flagged badge
+  const sbBadge = document.querySelector('.sb-item[onclick*="reviews"] .sb-badge');
+  if(sbBadge) sbBadge.textContent = String(flagged);
+}
+
+function deleteReview(btn){
+  const card = btn.closest('.review-card'); if(!card) return;
+  const nameEl = card.querySelector('.rc-name'); const name = nameEl? nameEl.textContent : 'Review';
+  if(!confirm('Are you sure you want to permanently delete this review? This action is irreversible.')) return;
+  card.remove();
+  logAction('DELETE','Review',null,'Deleted review: '+name);
+  showToast('🗑 Review deleted & action logged.');
+  updateReviewCounts();
+}
+
+function flagReview(btn){
+  const card = btn.closest('.review-card'); if(!card) return;
+  if(card.classList.contains('flagged')){ showToast('⚠️ Review already flagged'); return; }
+  card.classList.add('flagged');
+  if(!card.querySelector('.badge-red')){
+    const b = document.createElement('span'); b.className='badge badge-red'; b.textContent='⚠ FLAGGED';
+    // insert at the top of the card (before header)
+    const first = card.firstElementChild; if(first) first.insertAdjacentElement('afterbegin', b); else card.prepend(b);
+  }
+  card.style.borderColor='var(--red-dim)'; card.style.background='rgba(248,81,73,.04)';
+  logAction('UPDATE','Review',null,'Flagged review via admin panel');
+  showToast('🚩 Review flagged for moderation');
+  updateReviewCounts();
+}
+
+function warnUser(btn){
+  const card = btn.closest('.review-card');
+  const nameEl = card? card.querySelector('.rc-name') : null;
+  const name = nameEl? nameEl.textContent : '';
+  showToast('📨 Warning sent to user '+(name||''));
+  logAction('UPDATE','Review',null,'Warning sent to user: '+(name||''));
 }
 
 // ── CONFIRM DELETE DIALOG ──
@@ -249,6 +312,7 @@ document.addEventListener('keydown',e=>{
 document.addEventListener('DOMContentLoaded', () => {
   loadAdminLog();
   initUsersPagination();
+  updateReviewCounts();
 });
 
 /* ---------- TABLE PAGINATION FOR USERS ---------- */
