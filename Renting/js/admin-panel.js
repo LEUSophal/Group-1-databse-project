@@ -71,9 +71,16 @@ async function blockUserFromModal(){
   }
 }
 function unblockUser(btn,name){
-  btn.closest('tr').querySelector('.badge-red').className='badge badge-green';
-  btn.closest('tr').querySelector('.badge-red, .badge-green').textContent='Active';
-  btn.replaceWith(Object.assign(document.createElement('button'),{className:'btn btn-ghost btn-sm',textContent:'Edit',onclick:()=>openEditUser(name,'Tenant','Active')}));
+  const row = btn.closest('tr');
+  if(!row) return;
+  const badge = row.querySelector('.badge-red, .badge-green, .badge');
+  if(badge){
+    badge.className = 'badge badge-green';
+    badge.textContent = 'Active';
+  }
+  const editBtn = Object.assign(document.createElement('button'),{className:'btn btn-ghost btn-sm',textContent:'Edit'});
+  editBtn.onclick = ()=>openEditUser(name,'Tenant','Active');
+  try{ btn.replaceWith(editBtn); }catch(e){}
   logAction('UPDATE','User',null,'User unblocked');
   showToast('✅ User '+name+' unblocked!');
 }
@@ -118,8 +125,10 @@ function adminCancelBooking(statusId){
 
 // ── REVIEW ACTIONS ──
 function dismissFlag(){
-  document.querySelector('.badge-red:first-child').closest('.review-card').style.borderColor='var(--border)';
-  document.querySelector('.review-card').style.background='';
+  const badge = document.querySelector('.badge-red:first-child');
+  if(!badge){ showToast('⚠️ No flagged review found'); return; }
+  const card = badge.closest('.review-card');
+  if(card){ card.style.borderColor='var(--border)'; card.style.background=''; }
   showToast('✅ Flag dismissed.');
   logAction('UPDATE','Review','Flagged review dismissed after inspection');
 }
