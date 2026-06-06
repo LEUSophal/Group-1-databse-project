@@ -6,7 +6,7 @@
 <title>RentKH — Admin Panel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/admin-panel.css">
+<link rel="stylesheet" href="css/admin-panel-polish.css">
 </head>
 
 <body>
@@ -205,7 +205,7 @@
     <!-- ══ USERS ══ -->
     <div id="page-users" class="page">
       <div class="sec-hdr">
-        <div><h2>User Management</h2><div class="sec-hdr-sub">US-10 — Block, delete, update users and roles</div></div>
+        <div><h2>User Management</h2><div class="sec-hdr-sub">Manage platform users, roles, and permissions.</div></div>
         <div style="display:flex;gap:8px;">
           <button class="btn btn-ghost btn-sm" onclick="exportData('users')">⬇ Export</button>
           <button class="btn btn-primary btn-sm" onclick="openModal('addUserModal')">＋ Add User</button>
@@ -253,7 +253,7 @@
     <!-- ══ PROPERTIES ══ -->
     <div id="page-properties" class="page">
       <div class="sec-hdr">
-        <div><h2>Property Management</h2><div class="sec-hdr-sub">US-10 — Approve, reject, or delete properties</div></div>
+        <div><h2>Property Management</h2><div class="sec-hdr-sub">Manage listings, approvals, and property status.</div></div>
         <button class="btn btn-ghost btn-sm" onclick="exportData('properties')">⬇ Export</button>
       </div>
       <div class="filter-bar">
@@ -289,7 +289,7 @@
     <!-- ══ ROOMS ══ -->
     <div id="page-rooms" class="page">
       <div class="sec-hdr">
-        <div><h2>Room Management</h2><div class="sec-hdr-sub">US-10 — View, update status, or delete rooms</div></div>
+        <div><h2>Room Management</h2><div class="sec-hdr-sub">Manage room listings, pricing, and availability.</div></div>
         <button class="btn btn-ghost btn-sm" onclick="exportData('rooms')">⬇ Export</button>
       </div>
       <div class="filter-bar">
@@ -315,7 +315,7 @@
     <!-- ══ BOOKINGS ══ -->
     <div id="page-bookings" class="page">
       <div class="sec-hdr">
-        <div><h2>Booking Management</h2><div class="sec-hdr-sub">US-10 — View all bookings, update or cancel</div></div>
+        <div><h2>Booking Management</h2><div class="sec-hdr-sub">Manage bookings, approvals, and reservations.</div></div>
         <button class="btn btn-ghost btn-sm" onclick="exportData('bookings')">⬇ Export CSV</button>
       </div>
       <div class="filter-bar">
@@ -341,7 +341,7 @@
     <!-- ══ REVIEWS ══ -->
     <div id="page-reviews" class="page">
       <div class="sec-hdr">
-        <div><h2>Review Moderation</h2><div class="sec-hdr-sub">US-10 — Remove inappropriate reviews</div></div>
+        <div><h2>Review Moderation</h2><div class="sec-hdr-sub">Monitor and moderate user reviews across the platform.</div></div>
         <div style="display:flex;gap:8px;align-items:center;">
           <span style="font-size:12px;color:var(--text3);">Avg: <strong style="color:var(--amber);">★ 4.7</strong> · 5 reviews</span>
           <select style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text);background:var(--surface2);outline:none;" onchange="showToast('Filter applied')">
@@ -354,7 +354,7 @@
       </div>
 
       <!-- Flagged review -->
-      <div class="review-card" style="border-color:var(--red-dim);background:rgba(248,81,73,.04);">
+      <div class="review-card flagged">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span class="badge badge-red">⚠ FLAGGED</span><span style="font-size:11px;color:var(--text3);">Reported by landlord for inappropriate content</span></div>
         <div class="rc-header">
           <div><div class="rc-name">Anonymous User</div><div class="rc-prop">Riverside Studio · Riverside Heights</div></div>
@@ -362,9 +362,9 @@
         </div>
         <div class="rc-text">"[Content removed for moderation — original contained inappropriate language and false accusations against the landlord.]"</div>
         <div class="rc-actions">
-          <button class="btn btn-danger btn-sm" onclick="confirmDelete('review','Flagged Review #R-44')">🗑 Delete Review</button>
-          <button class="btn btn-ghost btn-sm" onclick="dismissFlag()">Dismiss Flag</button>
-          <button class="btn btn-ghost btn-sm" onclick="showToast('📨 Warning sent to user')">Warn User</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteReview(this)">🗑 Delete Review</button>
+          <button class="btn btn-ghost btn-sm" onclick="dismissFlag(this)">Dismiss Flag</button>
+          <button class="btn btn-ghost btn-sm" onclick="warnUser(this)">Warn User</button>
         </div>
       </div>
 
@@ -372,22 +372,22 @@
         <div class="review-card">
           <div class="rc-header"><div><div class="rc-name">Sophea Rith</div><div class="rc-prop">Riverside Studio · Riverside Heights</div></div><div style="text-align:right;"><div class="rc-stars">★★★★★</div><div style="font-size:10px;color:var(--text3);margin-top:2px;">May 2, 2025</div></div></div>
           <div class="rc-text">"Amazing studio with great view. Landlord was very responsive."</div>
-          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('review','Review by Sophea')">🗑</button><button class="btn btn-amber btn-sm" onclick="showToast('🚩 Review flagged for moderation')">🚩 Flag</button></div>
+          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="deleteReview(this)">🗑</button><button class="btn btn-amber btn-sm" onclick="flagReview(this)">🚩 Flag</button></div>
         </div>
         <div class="review-card">
           <div class="rc-header"><div><div class="rc-name">Dara Meas</div><div class="rc-prop">Garden View Room · The Green Quarter</div></div><div style="text-align:right;"><div class="rc-stars">★★★★☆</div><div style="font-size:10px;color:var(--text3);margin-top:2px;">Apr 18, 2025</div></div></div>
           <div class="rc-text">"Clean and comfortable. Minor WiFi issue during peak hours."</div>
-          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('review','Review by Dara')">🗑</button><button class="btn btn-amber btn-sm" onclick="showToast('🚩 Review flagged')">🚩 Flag</button></div>
+          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="deleteReview(this)">🗑</button><button class="btn btn-amber btn-sm" onclick="flagReview(this)">🚩 Flag</button></div>
         </div>
         <div class="review-card">
           <div class="rc-header"><div><div class="rc-name">Kosal Noun</div><div class="rc-prop">Blossom Studio · The Green Quarter</div></div><div style="text-align:right;"><div class="rc-stars">★★★★★</div><div style="font-size:10px;color:var(--text3);margin-top:2px;">Mar 5, 2025</div></div></div>
           <div class="rc-text">"Loved the balcony and quiet neighborhood. Would rent again!"</div>
-          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('review','Review by Kosal')">🗑</button><button class="btn btn-amber btn-sm" onclick="showToast('🚩 Review flagged')">🚩 Flag</button></div>
+          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="deleteReview(this)">🗑</button><button class="btn btn-amber btn-sm" onclick="flagReview(this)">🚩 Flag</button></div>
         </div>
         <div class="review-card">
           <div class="rc-header"><div><div class="rc-name">Vanna Sok</div><div class="rc-prop">Sunset Double · The Green Quarter</div></div><div style="text-align:right;"><div class="rc-stars">★★★★★</div><div style="font-size:10px;color:var(--text3);margin-top:2px;">Mar 1, 2025</div></div></div>
           <div class="rc-text">"Spacious, well-lit room. The landlord goes above and beyond."</div>
-          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="confirmDelete('review','Review by Vanna')">🗑</button><button class="btn btn-amber btn-sm" onclick="showToast('🚩 Review flagged')">🚩 Flag</button></div>
+          <div class="rc-actions"><button class="btn btn-danger btn-sm btn-icon" onclick="deleteReview(this)">🗑</button><button class="btn btn-amber btn-sm" onclick="flagReview(this)">🚩 Flag</button></div>
         </div>
       </div>
     </div>
@@ -395,7 +395,7 @@
     <!-- ══ ADMIN LOG ══ -->
     <div id="page-adminlog" class="page">
       <div class="sec-hdr">
-        <div><h2>Admin Action Log</h2><div class="sec-hdr-sub">US-11 — All admin actions are recorded here (Admin_Log table)</div></div>
+        <div><h2>Admin Action Log</h2><div class="sec-hdr-sub">Track administrator activity and platform actions.</div></div>
         <div style="display:flex;gap:8px;">
           <button class="btn btn-ghost btn-sm" onclick="exportData('admin log')">⬇ Export</button>
           <button class="btn btn-danger btn-sm" onclick="confirmClearLog()">🗑 Clear Old Logs</button>
@@ -444,7 +444,7 @@
         </table>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:12px;color:var(--text3);">12 records total — all actions stored in Admin_Log table</span>
+        <span style="font-size:12px;color:var(--text3);">12 records total — administrator activity log</span>
         <div style="display:flex;gap:6px;">
           <button class="btn btn-ghost btn-sm">← Prev</button>
           <button class="btn btn-primary btn-sm">1</button>
@@ -475,7 +475,7 @@
           <div class="mini-stat"><span class="mini-stat-label">Room_Facility</span><span class="mini-stat-val">148 rows</span></div>
           <div class="mini-stat"><span class="mini-stat-label">Booking</span><span class="mini-stat-val">47 rows</span></div>
           <div class="mini-stat"><span class="mini-stat-label">Review</span><span class="mini-stat-val">5 rows</span></div>
-          <div class="mini-stat"><span class="mini-stat-label">Admin_Log</span><span class="mini-stat-val">12 rows</span></div>
+          <div class="mini-stat"><span class="mini-stat-label">Admin Log</span><span class="mini-stat-val">12 rows</span></div>
         </div>
         <div class="card">
           <div class="card-title">System Settings</div>
@@ -539,7 +539,7 @@
         <select id="eu-status" style="background:var(--surface2);color:var(--text);"><option>Active</option><option>Blocked</option></select>
       </div>
     </div>
-    <div class="form-group"><label for="eu-reason">Reason for change (logged to Admin_Log)</label><textarea placeholder="e.g. Role updated per user request…" id="eu-reason"></textarea></div>
+    <div class="form-group"><label for="eu-reason">Reason for change (logged)</label><textarea placeholder="e.g. Role updated per user request…" id="eu-reason"></textarea></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('editUserModal')">Cancel</button>
       <button class="btn btn-primary" onclick="saveEditUser()">Save & Log Action</button>
