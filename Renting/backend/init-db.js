@@ -33,6 +33,9 @@ async function initDatabase() {
       email VARCHAR(100),
       phone VARCHAR(20),
       password VARCHAR(255),
+      gender VARCHAR(10),
+      profile_image VARCHAR(255),
+      is_active TINYINT DEFAULT 1,
       Admin_idAdmin INT,
       FOREIGN KEY (Admin_idAdmin) REFERENCES Admin(idAdmin)
     )
@@ -45,6 +48,9 @@ async function initDatabase() {
       email VARCHAR(100),
       phone VARCHAR(20),
       password VARCHAR(255),
+      gender VARCHAR(10),
+      profile_image VARCHAR(255),
+      is_active TINYINT DEFAULT 1,
       Admin_idAdmin INT,
       FOREIGN KEY (Admin_idAdmin) REFERENCES Admin(idAdmin)
     )

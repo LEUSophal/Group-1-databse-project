@@ -186,11 +186,35 @@ async function registerUser() {
     const res = await apiRegister(fullName, email, phone, password, role, gender);
 
     if (res.success) {
+      // Auto-login after successful registration
+      try {
+        const loginRes = await apiLogin(email, password, role);
+        if (loginRes.success) {
+          const userObj = {
+            user_id: role === "landlord" ? (loginRes.user.idLandlord || loginRes.user.id)
+                   : (loginRes.user.idTenant || loginRes.user.id),
+            full_name: loginRes.user.full_name || loginRes.user.name || fullName,
+            email: loginRes.user.email,
+            role,
+            phone: loginRes.user.phone || phone
+          };
+          if (loginRes.token) localStorage.setItem('authToken', loginRes.token);
+          localStorage.setItem("loggedInUser", JSON.stringify(userObj));
+        }
+      } catch (e) {
+        // Ignore login error — registration already succeeded
+        // User will need to login manually
+      }
+
       if (typeof showSuccess === "function") {
         showSuccess(role, true);
       } else {
-        if (typeof showToast === "function") showToast("✅ Account created! Please sign in.");
-        setTimeout(() => { window.location.href = "login.html"; }, 1500);
+        if (typeof showToast === "function") showToast("✅ Account created!");
+        setTimeout(() => {
+          if      (role === "tenant")   window.location.href = "tenant_dashboard.html";
+          else if (role === "landlord") window.location.href = "landlord-dashboard.html";
+          else                          window.location.href = "login.html";
+        }, 1500);
       }
     } else {
       const msg = res.message || res.error || "Registration failed.";
