@@ -71,7 +71,7 @@ function showSuccess(role, isNew) {
   successPanel.style.display = 'block';
 
   const icons  = { tenant: '🎉', landlord: '🏠', admin: '🛡️' };
-  const titles = { tenant: 'Welcome to RoomNest!', landlord: 'Landlord Portal Ready!', admin: 'Admin Access Granted!' };
+  const titles = { tenant: 'Welcome to RentKH!', landlord: 'Landlord Portal Ready!', admin: 'Admin Access Granted!' };
   const msgs   = {
     tenant:   isNew ? 'Your tenant account is created. Start browsing rooms!' : 'Welcome back! Taking you to your dashboard.',
     landlord: isNew ? 'Your landlord account is set up. Start listing your properties!' : 'Welcome back! Taking you to your dashboard.',
@@ -106,11 +106,42 @@ function showToast(msg) {
 }
 
 // ── CHECK URL PARAM ──
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   if (params.get('tab') === 'register') switchTab('register');
   if (params.get('role')) {
     switchTab('register');
     selectRole(params.get('role'));
   }
+
+  if (typeof initData === 'function') {
+    await initData();
+    updateLoginStats();
+  }
 });
+
+function updateLoginStats() {
+  if (typeof MOCK_DATA === 'undefined') return;
+
+  const tenantsCount = MOCK_DATA.tenants ? MOCK_DATA.tenants.length : 0;
+  const propertiesCount = MOCK_DATA.properties ? MOCK_DATA.properties.length : 0;
+  const bookingsCount = MOCK_DATA.bookings ? MOCK_DATA.bookings.length : 0;
+  
+  let avgRatingStr = "4.9★";
+  if (MOCK_DATA.reviews && MOCK_DATA.reviews.length > 0) {
+    const sum = MOCK_DATA.reviews.reduce((acc, r) => acc + (r.rating || 5), 0);
+    avgRatingStr = (sum / MOCK_DATA.reviews.length).toFixed(1) + "★";
+  }
+
+  const elTenants = document.getElementById("hero-tenants-count");
+  if (elTenants) elTenants.textContent = tenantsCount > 0 ? tenantsCount + "+" : "0+";
+
+  const elProps = document.getElementById("hero-properties-count");
+  if (elProps) elProps.textContent = propertiesCount > 0 ? propertiesCount + "+" : "0+";
+
+  const elBookings = document.getElementById("hero-bookings-count");
+  if (elBookings) elBookings.textContent = bookingsCount + " Bookings";
+
+  const elRating = document.getElementById("hero-rating");
+  if (elRating) elRating.textContent = avgRatingStr;
+}

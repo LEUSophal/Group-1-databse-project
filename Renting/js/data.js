@@ -135,21 +135,21 @@ function getStatusBadge(status) {
 async function apiAddProperty(property) {
   const res = await fetch(`${API_URL}/properties`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: Object.assign({}, getAuthHeaders(), { 'Content-Type': 'application/json' }),
     body: JSON.stringify(property)
   });
   return res.json();
 }
 
 async function apiDeleteProperty(id) {
-  const res = await fetch(`${API_URL}/properties/${id}`, { method: 'DELETE' });
+  const res = await fetch(`${API_URL}/properties/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
   return res.json();
 }
 
 async function apiUpdateProperty(id, data) {
   const res = await fetch(`${API_URL}/properties/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: Object.assign({}, getAuthHeaders(), { 'Content-Type': 'application/json' }),
     body: JSON.stringify(data)
   });
   return res.json();
@@ -158,7 +158,7 @@ async function apiUpdateProperty(id, data) {
 async function apiAddBooking(booking) {
   const res = await fetch(`${API_URL}/bookings`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: Object.assign({}, getAuthHeaders(), { 'Content-Type': 'application/json' }),
     body: JSON.stringify(booking)
   });
   return res.json();
@@ -167,14 +167,14 @@ async function apiAddBooking(booking) {
 async function apiUpdateBooking(id, status) {
   const res = await fetch(`${API_URL}/bookings/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: Object.assign({}, getAuthHeaders(), { 'Content-Type': 'application/json' }),
     body: JSON.stringify({ status })
   });
   return res.json();
 }
 
 async function apiDeleteBooking(id) {
-  const res = await fetch(`${API_URL}/bookings/${id}`, { method: 'DELETE' });
+  const res = await fetch(`${API_URL}/bookings/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
   return res.json();
 }
 
@@ -200,7 +200,7 @@ async function apiRegister(name, email, phone, password, role, gender) {
 async function apiAddRoom(room) {
   const res = await fetch(`${API_URL}/rooms`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: Object.assign({}, getAuthHeaders(), { 'Content-Type': 'application/json' }),
     body: JSON.stringify(room)
   });
   return res.json();
@@ -209,14 +209,14 @@ async function apiAddRoom(room) {
 async function apiUpdateRoom(id, data) {
   const res = await fetch(`${API_URL}/rooms/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: Object.assign({}, getAuthHeaders(), { 'Content-Type': 'application/json' }),
     body: JSON.stringify(data)
   });
   return res.json();
 }
 
 async function apiDeleteRoom(id) {
-  const res = await fetch(`${API_URL}/rooms/${id}`, { method: 'DELETE' });
+  const res = await fetch(`${API_URL}/rooms/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
   return res.json();
 }
 
@@ -224,14 +224,14 @@ async function apiDeleteRoom(id) {
 async function apiAddReview(review) {
   const res = await fetch(`${API_URL}/reviews`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: Object.assign({}, getAuthHeaders(), { 'Content-Type': 'application/json' }),
     body: JSON.stringify(review)
   });
   return res.json();
 }
 
 async function apiDeleteReview(id) {
-  const res = await fetch(`${API_URL}/reviews/${id}`, { method: 'DELETE' });
+  const res = await fetch(`${API_URL}/reviews/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
   return res.json();
 }
 
@@ -243,6 +243,7 @@ async function apiUploadImages(files) {
   }
   const res = await fetch(`${API_URL}/upload`, {
     method: 'POST',
+    headers: getAuthHeaders(),
     body: formData
   });
   return res.json();
@@ -275,13 +276,13 @@ async function apiPostAdminLog(action_type, target_table, target_id, description
 // ========== BLOCK / UNBLOCK USER API ==========
 async function apiBlockUser(role, userId) {
   const endpoint = role === 'landlord' ? 'landlords' : 'tenants';
-  const res = await fetch(`${API_URL}/auth/${endpoint}/${userId}/block`, { method: 'PUT' });
+  const res = await fetch(`${API_URL}/auth/${endpoint}/${userId}/block`, { method: 'PUT', headers: getAuthHeaders() });
   return res.json();
 }
 
 async function apiDeleteUser(role, userId) {
   const endpoint = role === 'landlord' ? 'landlords' : 'tenants';
-  const res = await fetch(`${API_URL}/auth/${endpoint}/${userId}`, { method: 'DELETE' });
+  const res = await fetch(`${API_URL}/auth/${endpoint}/${userId}`, { method: 'DELETE', headers: getAuthHeaders() });
   return res.json();
 }
 
@@ -296,19 +297,19 @@ async function apiSaveRoomImages(roomId, urls) {
   // Save uploaded image URLs into the Room_Image table
   const res = await fetch(`${API_URL}/rooms/${roomId}/images`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: Object.assign({}, getAuthHeaders(), { 'Content-Type': 'application/json' }),
     body: JSON.stringify({ urls })
   });
   return res.json();
 }
 
 async function apiDeleteRoomImage(roomId, imageId) {
-  const res = await fetch(`${API_URL}/rooms/${roomId}/images/${imageId}`, { method: 'DELETE' });
+  const res = await fetch(`${API_URL}/rooms/${roomId}/images/${imageId}`, { method: 'DELETE', headers: getAuthHeaders() });
   return res.json();
 }
 
 async function apiSetCoverImage(roomId, imageId) {
-  const res = await fetch(`${API_URL}/rooms/${roomId}/images/${imageId}/set-cover`, { method: 'PUT' });
+  const res = await fetch(`${API_URL}/rooms/${roomId}/images/${imageId}/set-cover`, { method: 'PUT', headers: getAuthHeaders() });
   return res.json();
 }
 
@@ -316,7 +317,7 @@ async function apiSetCoverImage(roomId, imageId) {
 async function apiSaveRoomFacilities(roomId, facility_ids) {
   const res = await fetch(`${API_URL}/rooms/${roomId}/facilities`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: Object.assign({}, getAuthHeaders(), { 'Content-Type': 'application/json' }),
     body: JSON.stringify({ facility_ids })
   });
   return res.json();

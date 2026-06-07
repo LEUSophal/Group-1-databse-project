@@ -375,11 +375,12 @@ function openRoomDetails(roomId) {
   modal.querySelector(".rdp-title").textContent = room.room_title || room.title || `${roomType} Room`;
   modal.querySelector(".rdp-prop").textContent = `📍 ${room.location || "Phnom Penh"}`;
   modal.querySelector(".rdp-desc").textContent = room.description || "Modern living in the heart of the city with all essential amenities and 24/7 security.";
-  modal.querySelector(".book-price").innerHTML = `$${room.price || room.price_per_month} <small>/ month</small>`;
+  const actualPrice = room.price_per_month || room.price || 0;
+  modal.querySelector(".book-price").innerHTML = `$${actualPrice} <small>/ month</small>`;
 
   const monthlyRentEl = modal.querySelector(".book-total span:last-child");
-  if (monthlyRentEl) monthlyRentEl.textContent = `$${room.price || room.price_per_month}`;
-  document.getElementById("totalAmt").textContent = `$${room.price || room.price_per_month}`;
+  if (monthlyRentEl) monthlyRentEl.textContent = `$${actualPrice}`;
+  document.getElementById("totalAmt").textContent = `$${actualPrice}`;
 
   const availabilityBadge = modal.querySelector(".rdp-tag");
   const bookBtn = modal.querySelector(".book-now-btn");
@@ -413,8 +414,8 @@ function openRoomDetails(roomId) {
   const stats = modal.querySelectorAll(".rdp-meta-box .v");
   if (stats.length >= 4) {
     stats[0].textContent = roomType;
-    stats[1].textContent = `${room.size || 32} m²`;
-    stats[2].textContent = room.capacity || 2;
+    stats[1].textContent = `${room.size || room.room_size || '—'} m²`;
+    stats[2].textContent = room.capacity || room.max_capacity || '—';
   }
 
   const propertyId = room.Property_idProperty || room.property_id;
@@ -435,15 +436,20 @@ function openRoomDetails(roomId) {
 
   const facilitiesContainer = modal.querySelector(".rdp-facilities");
   if (facilitiesContainer) {
-    const facList = String(room.facilities || "WiFi, Air Conditioning, Kitchen, Private Bathroom, Parking, Security")
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean);
-    facilitiesContainer.innerHTML = facList.map((item) => `<span class="rdp-fac">${getFacilityIcon(item)} ${item}</span>`).join("");
+    const rawFac = room.facilities || '';
+    if (!rawFac || !rawFac.trim()) {
+      facilitiesContainer.innerHTML = '<span style="color:var(--slate);font-size:14px;">No facilities listed.</span>';
+    } else {
+      const facList = String(rawFac)
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+      facilitiesContainer.innerHTML = facList.map((item) => `<span class="rdp-fac">${item}</span>`).join("");
+    }
   }
 
   modal.dataset.currentRoomId = roomId;
-  modal.dataset.currentRoomPrice = room.price || room.price_per_month;
+  modal.dataset.currentRoomPrice = room.price_per_month || room.price || 0;
 
   const reviews = getPropertyReviews(propertyId);
   const reviewsContainer = document.getElementById("propertyReviewsContainer");
@@ -532,7 +538,7 @@ async function addProperty() {
 
   const name = document.getElementById("pName").value.trim();
   const addr = document.getElementById("pAddr").value.trim();
-  const type = document.getElementById("pType") ? document.getElementById("pType").value : "Apartment";
+  const type = (typeof getResolvedType === 'function') ? getResolvedType('pType', 'pTypeCustom') : (document.getElementById("pType") ? document.getElementById("pType").value : "Apartment");
   const desc = document.getElementById("pDesc") ? document.getElementById("pDesc").value : "";
 
   if (!name || !addr) {
@@ -586,7 +592,7 @@ async function addRoom() {
   if (!user) return;
 
   const propId = document.getElementById("pSelect").value;
-  const type = normalizeRoomType(document.getElementById("rType").value);
+  const type = normalizeRoomType((typeof getResolvedType === 'function') ? getResolvedType('rType', 'rTypeCustom') : document.getElementById("rType").value);
   const price = document.getElementById("rPrice").value;
   const size = document.getElementById("rSize").value;
   const cap = document.getElementById("rCap").value;

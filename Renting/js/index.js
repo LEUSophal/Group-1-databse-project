@@ -266,9 +266,17 @@ function openRoomFromProp(roomId) {
     const detail = document.getElementById('roomDetail');
     if (!detail) return;
 
+    const actualPrice = room.price || 0;
     const titleEl = detail.querySelector('.rdp-title');
     const propEl = detail.querySelector('.rdp-prop');
     const priceEl = detail.querySelector('.book-price');
+    if (priceEl) {
+      priceEl.innerHTML = `$${actualPrice} <small>/ month</small>`;
+    }
+    const monthlyAmtEl = document.getElementById('monthlyAmt');
+    if (monthlyAmtEl) {
+      monthlyAmtEl.textContent = `$${actualPrice}`;
+    }
     const badgeEl = detail.querySelector('.rdp-tag');
     const bookBtn = detail.querySelector('.book-now-btn');
     const isAvailable = (room.status || '').toLowerCase() === 'available';
@@ -276,6 +284,45 @@ function openRoomFromProp(roomId) {
     if (titleEl) titleEl.textContent = prop.title ? `${prop.title} — ${roomType}` : roomType;
     if (propEl) propEl.innerHTML = `🏢 ${prop.title || 'Property'} &nbsp;·&nbsp; 📍 ${prop.location || 'Unknown'}`;
     if (priceEl) priceEl.innerHTML = `$${room.price || 0} <small>/ month</small>`;
+
+    // Update monthly rent in the booking box
+    const monthlyAmtEl = document.getElementById('monthlyAmt');
+    if (monthlyAmtEl) {
+      monthlyAmtEl.textContent = `$${room.price || 0}`;
+    }
+
+    // Update stats: Room Type, Size, Capacity, Rating
+    const stats = detail.querySelectorAll('.rdp-meta-box .v');
+    if (stats.length >= 4) {
+      stats[0].textContent = roomType;
+      stats[1].textContent = `${room.size || '—'} m²`;
+      stats[2].textContent = room.capacity || '—';
+      stats[3].textContent = `${rating || '—'} ⭐`;
+    }
+
+    // Update Description
+    const descEl = document.getElementById('roomDetailDesc');
+    if (descEl) descEl.textContent = prop.description || room.description || 'No description available.';
+
+    // Update Facilities
+    const facilitiesContainer = detail.querySelector('.rdp-fac-list');
+    if (facilitiesContainer) {
+      const rawFac = room.facilities || prop.facilities;
+      if (!rawFac || !rawFac.trim()) {
+        facilitiesContainer.innerHTML = '<span style="color:var(--slate);font-size:14px;">No facilities listed.</span>';
+      } else {
+        const facList = rawFac.split(',').map(f => f.trim()).filter(Boolean);
+        facilitiesContainer.innerHTML = facList.map(item => `<span class="rdp-fac">${item}</span>`).join('');
+      }
+    }
+
+    // Update Landlord info
+    if (landlord) {
+      const ln = document.getElementById('rdpLandlordName');
+      const lp = document.getElementById('rdpLandlordPhone');
+      if (ln) ln.textContent = landlord.name || landlord.full_name || 'Unknown';
+      if (lp) lp.textContent = landlord.phone && landlord.phone !== 'N/A' ? landlord.phone : 'Unknown';
+    }
 
     // Fix Bug 1: update the status badge
     if (badgeEl) {

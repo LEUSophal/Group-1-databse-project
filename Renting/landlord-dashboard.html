@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RoomNest — Landlord Dashboard</title>
+  <title>RentKH — Landlord Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/dashboard-dark.css">
@@ -93,7 +93,7 @@
 
   <!-- PAGE LOADER -->
   <div id="pageLoader">
-    <div class="loader-logo">🏠 RoomNest</div>
+    <div class="loader-logo">🏠 RentKH</div>
     <div class="spinner-ring"></div>
     <div class="loader-text">Loading your dashboard...</div>
   </div>
@@ -103,7 +103,7 @@
     <nav class="top-nav">
       <a class="logo-wrap" href="index.html" style="margin-bottom: 0;">
         <div class="logo-icon">RN</div>
-        <span class="logo-text">RoomNest</span>
+        <span class="logo-text">RentKH</span>
       </a>
       <div class="top-nav-center">
         <a href="index.html" class="top-nav-link">Home</a>
@@ -334,7 +334,7 @@
                   <option value="Other">Other</option>
                 </select>
               </div>
-              <button class="nav-item active" style="border: none; width: fit-content; padding: 10px 20px; color: var(--accent);" onclick="saveProfile()">Save Changes</button>
+              <button type="button" class="nav-item active" style="border: none; width: fit-content; padding: 10px 20px; color: var(--accent);" onclick="saveProfile()">Save Changes</button>
            </div>
         </div>
       </section>
@@ -352,12 +352,14 @@
       </div>
       <div class="form-group">
         <label>Property Type</label>
-        <select id="pType">
+        <select id="pType" onchange="toggleCustomType('pType','pTypeCustom')">
           <option value="Apartment Building">Apartment Building</option>
           <option value="Guesthouse">Guesthouse</option>
           <option value="Condo">Condo</option>
           <option value="Villa">Villa</option>
+          <option value="__other__">Other (type your own)</option>
         </select>
+        <input type="text" id="pTypeCustom" placeholder="Enter custom property type..." style="display:none; margin-top:8px;">
       </div>
       <div class="form-group">
         <label>Address</label>
@@ -388,32 +390,34 @@
         </div>
         <div class="form-group">
           <label>Room Type</label>
-          <select id="rType">
+          <select id="rType" onchange="toggleCustomType('rType','rTypeCustom')">
             <option value="Studio">Studio</option>
             <option value="Single">Single Room</option>
             <option value="Double">Double Room</option>
             <option value="Apartment">Apartment</option>
+            <option value="__other__">Other (type your own)</option>
           </select>
+          <input type="text" id="rTypeCustom" placeholder="Enter custom room type..." style="display:none; margin-top:8px;" class="form-control">
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label>Price per Month ($)</label>
-          <input type="number" id="rPrice" placeholder="250">
+          <input type="number" id="rPrice" placeholder="e.g. 250" class="form-control">
         </div>
         <div class="form-group">
           <label>Room Size (m²)</label>
-          <input type="number" id="rSize" placeholder="32">
+          <input type="number" id="rSize" placeholder="e.g. 35" class="form-control">
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label>Capacity (Persons)</label>
-          <input type="number" id="rCap" placeholder="2">
+          <input type="number" id="rCap" placeholder="e.g. 2" class="form-control">
         </div>
         <div class="form-group">
           <label>Facilities (Comma separated)</label>
-          <input type="text" id="rFac" placeholder="WiFi, AC, Kitchen...">
+          <input type="text" id="rFac" placeholder="e.g. WiFi, Kitchen" class="form-control">
         </div>
       </div>
       <div class="form-group">
@@ -439,12 +443,14 @@
       </div>
       <div class="form-group">
         <label>Property Type</label>
-        <select id="editPropType">
+        <select id="editPropType" onchange="toggleCustomType('editPropType','editPropTypeCustom')">
           <option value="Apartment Building">Apartment Building</option>
           <option value="Guesthouse">Guesthouse</option>
           <option value="Condo">Condo</option>
           <option value="Villa">Villa</option>
+          <option value="__other__">Other (type your own)</option>
         </select>
+        <input type="text" id="editPropTypeCustom" placeholder="Enter custom property type..." style="display:none; margin-top:8px;">
       </div>
       <div class="form-group">
         <label>Address</label>
@@ -475,12 +481,14 @@
       <div class="form-row">
         <div class="form-group">
           <label>Room Type</label>
-          <select id="editRoomType">
+          <select id="editRoomType" onchange="toggleCustomType('editRoomType','editRoomTypeCustom')">
             <option value="Studio">Studio</option>
             <option value="Single">Single Room</option>
             <option value="Double">Double Room</option>
             <option value="Apartment">Apartment</option>
+            <option value="__other__">Other (type your own)</option>
           </select>
+          <input type="text" id="editRoomTypeCustom" placeholder="Enter custom room type..." style="display:none; margin-top:8px;">
         </div>
         <div class="form-group">
           <label>Status</label>
@@ -611,6 +619,47 @@
       return url.startsWith('http') || url.startsWith('data:') ? url : 'http://localhost:3000' + (url.startsWith('/') ? '' : '/') + url;
     }
 
+    // ── Custom Type Helpers ──
+    function toggleCustomType(selectId, inputId) {
+      const sel = document.getElementById(selectId);
+      const inp = document.getElementById(inputId);
+      if (!sel || !inp) return;
+      if (sel.value === '__other__') {
+        inp.style.display = 'block';
+        inp.focus();
+      } else {
+        inp.style.display = 'none';
+        inp.value = '';
+      }
+    }
+
+    function getResolvedType(selectId, inputId) {
+      const sel = document.getElementById(selectId);
+      const inp = document.getElementById(inputId);
+      if (sel && sel.value === '__other__' && inp) {
+        return inp.value.trim() || '';
+      }
+      return sel ? sel.value : '';
+    }
+
+    function setTypeWithCustom(selectId, inputId, value) {
+      const sel = document.getElementById(selectId);
+      const inp = document.getElementById(inputId);
+      if (!sel || !inp) return;
+      // Check if value matches any existing option
+      const options = Array.from(sel.options).map(o => o.value);
+      if (value && !options.includes(value) && value !== '__other__') {
+        // It's a custom type - select "Other" and fill the input
+        sel.value = '__other__';
+        inp.style.display = 'block';
+        inp.value = value;
+      } else {
+        sel.value = value || sel.options[0].value;
+        inp.style.display = 'none';
+        inp.value = '';
+      }
+    }
+
     async function initLandlordDashboard() {
       // Show loader immediately
       const loader = document.getElementById('pageLoader');
@@ -704,11 +753,11 @@
             <td>
               <div style="display:flex; align-items:center; gap:10px;">
                 <img src="${getSafeImageUrl(r.images, false)}" onerror="this.src=getSafeImageUrl(null, false)" style="width:40px; height:40px; border-radius:6px; object-fit:cover; background:#f1f5f9;">
-                <span class="prop-link">${r.room_title}</span>
+                <span class="prop-link">${r.room_title || r.type || r.room_type || 'Room'}</span>
               </div>
             </td>
-            <td>${(getProperty(r.property_id) || {}).property_name || 'Unknown'}</td>
-            <td>$${r.price_per_month}</td>
+            <td>${(() => { const p = getProperty(r.property_id || r.Property_idProperty); return p ? (p.title || p.property_name) : 'Unknown'; })()}</td>
+            <td>$${r.price_per_month || r.price}</td>
             <td><span class="badge badge-${r.availability_status === 'Available' ? 'confirmed' : r.availability_status === 'Maintenance' ? 'pending' : 'cancelled'}">${r.availability_status.toUpperCase()}</span></td>
             <td><div style="display:flex;gap:5px;">
               <button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;" onclick="openEditRoomModal('${r.room_id}')">✏️ Edit</button>
@@ -723,15 +772,16 @@
       if(!el) return;
       el.innerHTML = list.length === 0 ? '<tr><td colspan="6" style="text-align:center; padding:20px;">No booking requests.</td></tr>' : 
         list.slice(0, 5).map(b => {
-          const room = getRoom(b.room_id);
-          const prop = room ? getProperty(room.property_id) : null;
-          const tenant = (getData('tenants').find(t => String(t.idTenant) === String(b.user_id))) || {full_name: 'Tenant', phone: 'N/A'};
+          const room = getRoom(b.room_id || b.Room_idRoom);
+          const propId = room ? (room.property_id || room.Property_idProperty) : null;
+          const prop = propId ? getProperty(propId) : null;
+          const tenant = (getData('tenants').find(t => String(t.idTenant) === String(b.user_id || b.Tenant_idTenant))) || {full_name: 'Tenant', phone: 'N/A'};
           
-          const status = (b.booking_status || 'pending').toLowerCase();
+          const status = (b.booking_status || b.status || 'pending').toLowerCase();
           const bdmData = encodeURIComponent(JSON.stringify({
-            propName: prop ? (prop.property_name || prop.title) : 'Unknown Property',
-            roomLabel: room ? (room.type || room.room_type) : 'Room',
-            roomPrice: room ? room.price_per_month : 0,
+            propName: prop ? (prop.title || prop.property_name) : 'Unknown Property',
+            roomLabel: room ? (room.room_title || room.type || room.room_type) : 'Room',
+            roomPrice: room ? (room.price_per_month || room.price) : 0,
             lName: tenant.full_name,
             lPhone: tenant.phone || 'N/A',
             propAddr: prop ? prop.address : 'N/A',
@@ -941,15 +991,16 @@
       if(!el) return;
       el.innerHTML = list.length === 0 ? '<tr><td colspan="6" style="text-align:center; padding:20px;">No booking requests.</td></tr>' :
         list.map(b => {
-          const room = getRoom(b.room_id);
-          const prop = room ? getProperty(room.property_id) : null;
-          const tenant = (getData('tenants').find(t => String(t.idTenant) === String(b.user_id))) || {full_name: 'Tenant', phone: 'N/A'};
+          const room = getRoom(b.room_id || b.Room_idRoom);
+          const propId = room ? (room.property_id || room.Property_idProperty) : null;
+          const prop = propId ? getProperty(propId) : null;
+          const tenant = (getData('tenants').find(t => String(t.idTenant) === String(b.user_id || b.Tenant_idTenant))) || {full_name: 'Tenant', phone: 'N/A'};
           
-          const status = (b.booking_status || 'pending').toLowerCase();
+          const status = (b.booking_status || b.status || 'pending').toLowerCase();
           const bdmData = encodeURIComponent(JSON.stringify({
-            propName: prop ? (prop.property_name || prop.title) : 'Unknown Property',
-            roomLabel: room ? (room.type || room.room_type) : 'Room',
-            roomPrice: room ? room.price_per_month : 0,
+            propName: prop ? (prop.title || prop.property_name) : 'Unknown Property',
+            roomLabel: room ? (room.room_title || room.type || room.room_type) : 'Room',
+            roomPrice: room ? (room.price_per_month || room.price) : 0,
             lName: tenant.full_name,
             lPhone: tenant.phone || 'N/A',
             propAddr: prop ? prop.address : 'N/A',
@@ -1020,7 +1071,7 @@
 
       // Pre-fill with current values so the user sees them
       document.getElementById('editPropName').value         = p.property_name  || '';
-      document.getElementById('editPropType').value         = p.property_type  || 'Apartment Building';
+      setTypeWithCustom('editPropType', 'editPropTypeCustom', p.property_type || 'Apartment Building');
       document.getElementById('editPropAddr').value         = p.address        || '';
       document.getElementById('editPropDesc').value         = p.description    || '';
 
@@ -1036,7 +1087,7 @@
       const id = document.getElementById('editPropId').value;
       const title         = document.getElementById('editPropName').value.trim();
       const location      = document.getElementById('editPropAddr').value.trim();
-      const property_type = document.getElementById('editPropType').value;
+      const property_type = getResolvedType('editPropType', 'editPropTypeCustom');
       const description   = document.getElementById('editPropDesc').value.trim();
       const imgInput      = document.getElementById('editPropImages');
 
@@ -1101,7 +1152,7 @@
 
       document.getElementById('editRoomId').value           = r.room_id;
       document.getElementById('editRoomSub').textContent    = 'Editing: ' + r.room_title;
-      document.getElementById('editRoomType').value         = r.room_type || 'Studio';
+      setTypeWithCustom('editRoomType', 'editRoomTypeCustom', r.room_type || 'Studio');
       document.getElementById('editRoomStatus').value       = currentStatus;
       document.getElementById('editRoomPrice').value        = r.price_per_month || '';
       document.getElementById('editRoomSize').value         = r.size            || '';
@@ -1109,17 +1160,17 @@
       document.getElementById('editRoomFac').value          = r.facilities      || '';
 
       // Show placeholders as hints
-      document.getElementById('editRoomPrice').placeholder  = r.price_per_month ? '$' + r.price_per_month : '250';
-      document.getElementById('editRoomSize').placeholder   = r.size            ? r.size + ' m²'          : '32';
-      document.getElementById('editRoomCap').placeholder    = r.capacity        ? r.capacity + ' person'  : '2';
-      document.getElementById('editRoomFac').placeholder    = r.facilities      || 'WiFi, AC, Kitchen...';
+      document.getElementById('editRoomPrice').placeholder  = r.price_per_month ? r.price_per_month : '250';
+      document.getElementById('editRoomSize').placeholder   = r.size            ? r.size                  : '35';
+      document.getElementById('editRoomCap').placeholder    = r.capacity        ? r.capacity              : '2';
+      document.getElementById('editRoomFac').placeholder    = r.facilities      || 'WiFi, Kitchen...';
 
       openModal('editRoomModal');
     }
 
     async function saveEditRoom() {
       const id        = document.getElementById('editRoomId').value;
-      const type      = document.getElementById('editRoomType').value;
+      const type      = getResolvedType('editRoomType', 'editRoomTypeCustom');
       const status    = document.getElementById('editRoomStatus').value;
       const price     = document.getElementById('editRoomPrice').value.trim();
       const size      = document.getElementById('editRoomSize').value.trim();

@@ -426,35 +426,32 @@
           </div>
         </div>
         <div class="rdp-meta-grid">
-          <div class="rdp-meta-box"><div class="v">Studio</div><div class="k">Room Type</div></div>
-          <div class="rdp-meta-box"><div class="v">32 m²</div><div class="k">Room Size</div></div>
-          <div class="rdp-meta-box"><div class="v">2</div><div class="k">Capacity</div></div>
-          <div class="rdp-meta-box"><div class="v">4.8 ⭐</div><div class="k">Rating</div></div>
+          <div class="rdp-meta-box"><div class="v">—</div><div class="k">Room Type</div></div>
+          <div class="rdp-meta-box"><div class="v">—</div><div class="k">Room Size</div></div>
+          <div class="rdp-meta-box"><div class="v">—</div><div class="k">Capacity</div></div>
+          <div class="rdp-meta-box"><div class="v">—</div><div class="k">Rating</div></div>
         </div>
         <div class="rdp-section-title">Description</div>
-        <p class="rdp-desc">Modern living in the heart of Toul Kork with rooftop garden and 24/7 security.</p>
+        <p class="rdp-desc" id="roomDetailDesc">No description available.</p>
         <div class="rdp-section-title">Facilities</div>
         <div class="rdp-facilities">
-          <span class="rdp-fac">📶 WiFi</span>
-          <span class="rdp-fac">❄️ Air Conditioning</span>
-          <span class="rdp-fac">🍳 Kitchen</span>
-          <span class="rdp-fac">🚿 Private Bathroom</span>
-          <span class="rdp-fac">🅿️ Parking</span>
-          <span class="rdp-fac">🔒 Security</span>
+          <div class="rdp-fac-list">
+            <!-- Facilities dynamically populated here -->
+          </div>
         </div>
         <div class="rdp-section-title">Property Reviews</div>
         <div id="propertyReviewsContainer"></div>
       </div>
       <div class="book-box">
-        <div class="book-price">$280 <small>/ month</small></div>
-        <div class="book-rating"><span>★★★★★</span> 5.0 · 12 reviews</div>
+        <div class="book-price">$0 <small>/ month</small></div>
+        <div class="book-rating"><span>★★★★★</span> 5.0 · 0 reviews</div>
         <div class="date-inputs">
           <div><label>Move-in Date</label><input type="date" id="moveIn" onchange="calcTotal()"></div>
           <div><label>Move-out Date</label><input type="date" id="moveOut" onchange="calcTotal()"></div>
         </div>
-        <div class="book-total"><span>Monthly rent</span><span>$280</span></div>
+        <div class="book-total"><span>Monthly rent</span><span id="monthlyAmt">$0</span></div>
         <div class="book-total" id="totalLine" style="display:none"><span>Duration</span><span id="durText">—</span></div>
-        <div class="book-total final"><span>Total</span><span id="totalAmt">$280</span></div>
+        <div class="book-total final"><span>Total</span><span id="totalAmt">$0</span></div>
         <button class="book-now-btn" onclick="doBooking()">Book This Room</button>
       </div>
     </div>
