@@ -43,6 +43,7 @@ function calcTotal(){
     }
   }
 }
+
 function doBooking(){
   bookRoom();
 }
