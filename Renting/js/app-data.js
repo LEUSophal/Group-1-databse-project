@@ -8,13 +8,14 @@ function getData(key) {
 
   if (key === "rooms") {
     return MOCK_DATA.rooms.map((r) => {
-      const prop = getProperty(r.Property_idProperty) || {};
+      const propId = r.Property_idProperty || r.property_id;
+      const prop = getProperty(propId) || {};
       const roomType = r.type || r.room_type || "Room";
       const normalizedStatus = String(r.status || "available").toLowerCase();
 
       return {
-        room_id: String(r.idRoom),
-        property_id: String(r.Property_idProperty),
+        room_id: String(r.idRoom || r.room_id),
+        property_id: String(r.Property_idProperty || r.property_id),
         room_title: prop.title ? `${prop.title} - ${roomType}` : `${roomType} Room`,
         location: prop.location || "Unknown",
         room_type: roomType,
@@ -25,7 +26,7 @@ function getData(key) {
         availability_status: normalizedStatus === "available" ? "Available" : (normalizedStatus === "maintenance" ? "Maintenance" : "Booked"),
         description: prop.description || "",
         property_type: prop.property_type || "",
-        rating: Number(getPropertyAvgRating(r.Property_idProperty) || 0),
+        rating: Number(getPropertyAvgRating(r.Property_idProperty || r.property_id) || 0),
         images: r.images || null,
         property_image: prop.image || null
       };

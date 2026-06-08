@@ -62,8 +62,8 @@ async function initData() {
 
 
 // ========== HELPER FUNCTIONS (Sync - reads from local cache) ==========
-function getPropertyRooms(propertyId) { return MOCK_DATA.rooms.filter(r => String(r.Property_idProperty) === String(propertyId)); }
-function getPropertyReviews(propertyId) { return MOCK_DATA.reviews.filter(r => String(r.Property_idProperty) === String(propertyId)); }
+function getPropertyRooms(propertyId) { return MOCK_DATA.rooms.filter(r => String(r.Property_idProperty || r.property_id) === String(propertyId)); }
+function getPropertyReviews(propertyId) { return MOCK_DATA.reviews.filter(r => String(r.Property_idProperty || r.property_id) === String(propertyId)); }
 function getPropertyAvgRating(propertyId) {
   const reviews = getPropertyReviews(propertyId);
   if (reviews.length === 0) return 0;
