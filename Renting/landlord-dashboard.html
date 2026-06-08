@@ -972,6 +972,7 @@
         const res = await apiUpdateProfile("landlord", u.user_id, data);
         if (res.success) {
           u.name = nm;
+          u.full_name = nm;
           u.phone = ph;
           u.gender = gd;
           u.profile_image = profile_image;

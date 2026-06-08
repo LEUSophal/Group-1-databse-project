@@ -238,122 +238,8 @@ function openRoomFromProp(roomId) {
   const room = getRoom(roomId);
   if (!room) return;
 
-  const propId = room.Property_idProperty;
-  const prop = getProperty(propId) || {};
-  const landlord = getLandlord(prop.Landlord_idLandlord) || {};
-  const rating = getPropertyAvgRating(propId);
-  const roomType = room.type || room.room_type || 'Room';
-
-  // Use the existing openRoomDetailDynamic if it exists, otherwise populate manually
-  if (typeof openRoomDetailDynamic === 'function') {
-    openRoomDetailDynamic({
-      room_id: String(roomId),
-      property_id: String(propId),
-      room_title: prop.title ? `${prop.title} - ${roomType}` : `${roomType} Room`,
-      location: prop.location || 'Unknown',
-      room_type: roomType,
-      price_per_month: Number(room.price) || 0,
-      capacity: Number(room.capacity) || 1,
-      size: Number(room.size) || 0,
-      facilities: room.facilities || '',
-      availability_status: (room.status || '').toLowerCase() === 'available' ? 'Available' : 'Booked',
-      description: prop.description || '',
-      property_type: prop.property_type || '',
-      rating: Number(rating || 0)
-    });
-  } else {
-    // Fallback: populate existing room detail fields
-    const detail = document.getElementById('roomDetail');
-    if (!detail) return;
-
-    const actualPrice = room.price || 0;
-    const titleEl = detail.querySelector('.rdp-title');
-    const propEl = detail.querySelector('.rdp-prop');
-    const priceEl = detail.querySelector('.book-price');
-    if (priceEl) {
-      priceEl.innerHTML = `$${actualPrice} <small>/ month</small>`;
-    }
-    const monthlyAmtEl = document.getElementById('monthlyAmt');
-    if (monthlyAmtEl) {
-      monthlyAmtEl.textContent = `$${actualPrice}`;
-    }
-    const badgeEl = detail.querySelector('.rdp-tag');
-    const bookBtn = detail.querySelector('.book-now-btn');
-    const isAvailable = (room.status || '').toLowerCase() === 'available';
-    
-    if (titleEl) titleEl.textContent = prop.title ? `${prop.title} — ${roomType}` : roomType;
-    if (propEl) propEl.innerHTML = `🏢 ${prop.title || 'Property'} &nbsp;·&nbsp; 📍 ${prop.location || 'Unknown'}`;
-    if (priceEl) priceEl.innerHTML = `$${room.price || 0} <small>/ month</small>`;
-
-    // Update monthly rent in the booking box
-    const monthlyAmtEl = document.getElementById('monthlyAmt');
-    if (monthlyAmtEl) {
-      monthlyAmtEl.textContent = `$${room.price || 0}`;
-    }
-
-    // Update stats: Room Type, Size, Capacity, Rating
-    const stats = detail.querySelectorAll('.rdp-meta-box .v');
-    if (stats.length >= 4) {
-      stats[0].textContent = roomType;
-      stats[1].textContent = `${room.size || '—'} m²`;
-      stats[2].textContent = room.capacity || '—';
-      stats[3].textContent = `${rating || '—'} ⭐`;
-    }
-
-    // Update Description
-    const descEl = document.getElementById('roomDetailDesc');
-    if (descEl) descEl.textContent = prop.description || room.description || 'No description available.';
-
-    // Update Facilities
-    const facilitiesContainer = detail.querySelector('.rdp-fac-list');
-    if (facilitiesContainer) {
-      const rawFac = room.facilities || prop.facilities;
-      if (!rawFac || !rawFac.trim()) {
-        facilitiesContainer.innerHTML = '<span style="color:var(--slate);font-size:14px;">No facilities listed.</span>';
-      } else {
-        const facList = rawFac.split(',').map(f => f.trim()).filter(Boolean);
-        facilitiesContainer.innerHTML = facList.map(item => `<span class="rdp-fac">${item}</span>`).join('');
-      }
-    }
-
-    // Update Landlord info
-    if (landlord) {
-      const ln = document.getElementById('rdpLandlordName');
-      const lp = document.getElementById('rdpLandlordPhone');
-      if (ln) ln.textContent = landlord.name || landlord.full_name || 'Unknown';
-      if (lp) lp.textContent = landlord.phone && landlord.phone !== 'N/A' ? landlord.phone : 'Unknown';
-    }
-
-    // Fix Bug 1: update the status badge
-    if (badgeEl) {
-      badgeEl.textContent = isAvailable ? '✓ Available' : '✕ Booked';
-      badgeEl.classList.toggle('status-available', isAvailable);
-      badgeEl.classList.toggle('status-booked', !isAvailable);
-    }
-
-    // Fix Bug 3: disable/red the book button
-    if (bookBtn) {
-      if (isAvailable) {
-        bookBtn.disabled = false;
-        bookBtn.textContent = 'Book This Room';
-        bookBtn.style.background = '';
-        bookBtn.style.cursor = '';
-        bookBtn.style.opacity = '';
-        bookBtn.onclick = function() { doBooking(); };
-      } else {
-        bookBtn.disabled = true;
-        bookBtn.textContent = 'Room Not Available';
-        bookBtn.style.background = 'linear-gradient(135deg, #dc2626, #b91c1c)';
-        bookBtn.style.cursor = 'not-allowed';
-        bookBtn.style.opacity = '0.85';
-        bookBtn.onclick = null;
-      }
-    }
-
-    detail.dataset.currentRoomPrice = room.price || 0;
-    detail.dataset.currentRoomId = roomId;
-    
-    openRoomDetail();
+  if (typeof openRoomDetails === 'function') {
+    openRoomDetails(roomId);
   }
 }
 
@@ -409,3 +295,17 @@ function showPage(pageName) {
   }
 }
 
+// Handle deep linking for single-page navigation
+function handleHashNavigation() {
+  const hash = window.location.hash.substring(1);
+  if (hash === 'rooms') {
+    showPage('rooms');
+  } else if (hash === 'properties') {
+    showPage('properties');
+  } else if (hash === 'home' || hash === '') {
+    showPage('home');
+  }
+}
+
+window.addEventListener('DOMContentLoaded', handleHashNavigation);
+window.addEventListener('hashchange', handleHashNavigation);

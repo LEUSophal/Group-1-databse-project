@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RoomNest — Find Your Perfect Room</title>
+<title>RentKH — Find Your Perfect Room</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/index.css">
@@ -13,11 +13,11 @@
 
 <!-- NAV -->
 <nav>
-  <a class="logo" href="#" onclick="showPage('home'); return false;"><div class="logo-dot"></div>RoomNest</a>
+  <a class="logo" href="#" onclick="showPage('home'); return false;"><div class="logo-dot"></div>RentKH</a>
   <div class="nav-links">
-    <a href="#" onclick="showPage('home'); return false;">Home</a>
-    <a href="#" onclick="showPage('rooms'); return false;">Rooms</a>
-    <a href="#" onclick="showPage('properties'); return false;">Properties</a>
+    <a href="#home">Home</a>
+    <a href="#rooms">Rooms</a>
+    <a href="#properties">Properties</a>
     <a href="#how" onclick="showPage('home');">How It Works</a>
   </div>
   <div class="nav-right" id="navRight">
@@ -339,17 +339,17 @@
 <footer>
   <div class="footer-grid" style="grid-template-columns: auto 1fr; align-items: center; gap: 40px;">
     <div class="footer-brand" style="margin-bottom: 0;">
-      <a class="logo" href="#"><div class="logo-dot"></div>RoomNest</a>
+      <a class="logo" href="#"><div class="logo-dot"></div>RentKH</a>
     </div>
     <div style="display: flex; gap: 24px; justify-content: flex-end; flex-wrap: wrap;">
-      <a href="#" onclick="showPage('rooms'); return false;" style="color: var(--slate); text-decoration: none; font-size: 14px; font-weight: 500;">Browse Rooms</a>
-      <a href="#" onclick="showPage('properties'); return false;" style="color: var(--slate); text-decoration: none; font-size: 14px; font-weight: 500;">Properties</a>
+      <a href="#rooms" style="color: var(--slate); text-decoration: none; font-size: 14px; font-weight: 500;">Browse Rooms</a>
+      <a href="#properties" style="color: var(--slate); text-decoration: none; font-size: 14px; font-weight: 500;">Properties</a>
       <a href="admin-panel.html" style="color: var(--slate); text-decoration: none; font-size: 14px; font-weight: 500;">Admin</a>
       <a href="#" style="color: var(--slate); text-decoration: none; font-size: 14px; font-weight: 500;">Support</a>
     </div>
   </div>
   <div class="footer-bottom">
-    <p>© 2025 RoomNest — Online Room Renting System</p>
+    <p>© 2025 RentKH — Online Room Renting System</p>
     <div class="ft-badge">v1.0 · Academic Project</div>
   </div>
 </footer>
@@ -566,7 +566,7 @@ function updateHeroWithRealData() {
   // --- Hero Card: show first available room ---
   const featuredRoom = availableRooms.length > 0 ? availableRooms[0] : rooms[0];
   if (featuredRoom) {
-    const prop = getProperty(featuredRoom.Property_idProperty) || {};
+    const prop = getProperty(featuredRoom.Property_idProperty || featuredRoom.property_id) || {};
     const isAvail = (featuredRoom.status || '').toLowerCase() === 'available';
     const tagEl = document.getElementById('heroRoomTag');
     const titleEl = document.getElementById('heroRoomTitle');

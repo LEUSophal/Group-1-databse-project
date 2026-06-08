@@ -381,6 +381,14 @@ function openRoomDetails(roomId) {
   const monthlyRentEl = modal.querySelector(".book-total span:last-child");
   if (monthlyRentEl) monthlyRentEl.textContent = `$${actualPrice}`;
   document.getElementById("totalAmt").textContent = `$${actualPrice}`;
+  
+  // Clear any previously entered booking dates
+  const moveInEl = document.getElementById("moveIn");
+  const moveOutEl = document.getElementById("moveOut");
+  const totalLineEl = document.getElementById("totalLine");
+  if (moveInEl) moveInEl.value = '';
+  if (moveOutEl) moveOutEl.value = '';
+  if (totalLineEl) totalLineEl.style.display = 'none';
 
   const availabilityBadge = modal.querySelector(".rdp-tag");
   const bookBtn = modal.querySelector(".book-now-btn");

@@ -444,7 +444,7 @@
         const rawRoom = (MOCK_DATA.rooms || []).find(r =>
           String(r.idRoom) === String(b.room_id)
         );
-        const prop = rawRoom ? getProperty(rawRoom.Property_idProperty) : null;
+        const prop = rawRoom ? getProperty(rawRoom.Property_idProperty || rawRoom.property_id) : null;
         const lId  = prop
           ? (prop.Landlord_idLandlord || prop.user_id || prop.landlord_id)
           : null;
