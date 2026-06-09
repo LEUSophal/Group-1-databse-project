@@ -309,7 +309,6 @@ footer{background:var(--footer-bg);color:#fff;padding:60px 40px 28px;}
 
 /* Room detail refinements for landlord-added room data */
 .rdp-body{max-width:1180px;margin:0 auto;padding:48px 40px 64px;}
-.rdp-gallery{display:none;}
 .rdp-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,0.9fr);gap:36px;align-items:start;}
 .landlord-card{border-radius:18px;flex-wrap:wrap;}
 .rdp-meta-box{padding:18px 16px;border-radius:16px;box-shadow:0 8px 20px rgba(15,23,42,.04);}

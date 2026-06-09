@@ -509,6 +509,16 @@
 
 </div>
 
+<!-- PHOTO MODAL -->
+<div id="photoModal" class="overlay" style="z-index: 1000;" onclick="if(event.target===this) this.classList.remove('open')">
+  <div class="modal" style="max-width: 800px; padding: 0; background: transparent; box-shadow: none;">
+    <button class="modal-close" style="top: -40px; right: 0; color: white; font-size: 30px; background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="document.getElementById('photoModal').classList.remove('open')">✕</button>
+    <div id="photoModalContent" style="display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 10px;">
+      <!-- Photos injected here -->
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 

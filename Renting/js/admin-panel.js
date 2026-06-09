@@ -330,6 +330,7 @@ document.addEventListener('keydown',e=>{
 // ── INIT: load real log from DB on page load ──
 document.addEventListener('DOMContentLoaded', () => {
   loadAdminLog();
+  loadDashboardStats(); // Load all dynamic data
   initUsersPagination();
   initAdminLogPagination();
   updateReviewCounts();
@@ -471,6 +472,236 @@ function initAdminLogPagination(){
   const tableFilter = document.getElementById('logTableFilter'); if(tableFilter) tableFilter.addEventListener('change', ()=> setTimeout(refresh,40));
   const dateFilter = document.getElementById('logDateFilter'); if(dateFilter) dateFilter.addEventListener('change', ()=> setTimeout(refresh,40));
   refresh();
+}
+
+// ── DYNAMIC DATA LOADING (NEW) ──
+async function loadDashboardStats() {
+  try {
+    const [pRes, rRes, bRes, vRes, tRes, lRes] = await Promise.all([
+      fetch(`${API_URL}/properties`).then(r => r.json()),
+      fetch(`${API_URL}/rooms`).then(r => r.json()),
+      fetch(`${API_URL}/bookings`).then(r => r.json()),
+      fetch(`${API_URL}/reviews`).then(r => r.json()),
+      fetch(`${API_URL}/auth/tenants`).then(r => r.json()),
+      fetch(`${API_URL}/auth/landlords`).then(r => r.json())
+    ]);
+
+    // Populate Stats
+    if(document.getElementById('statTotalUsers')) document.getElementById('statTotalUsers').textContent = (tRes.length || 0) + (lRes.length || 0);
+    if(document.getElementById('statTotalProperties')) document.getElementById('statTotalProperties').textContent = pRes.length || 0;
+    if(document.getElementById('statTotalBookings')) document.getElementById('statTotalBookings').textContent = bRes.length || 0;
+    if(document.getElementById('statFlaggedReviews')) document.getElementById('statFlaggedReviews').textContent = vRes.length || 0;
+
+    loadAdminUsers(tRes, lRes);
+    loadAdminProperties(pRes, lRes);
+    loadAdminRooms(rRes, pRes);
+    loadAdminBookings(bRes, tRes, rRes);
+    loadAdminReviews(vRes, tRes, pRes);
+  } catch(e) {
+    console.error('Error loading dashboard stats:', e);
+  }
+}
+
+function loadAdminUsers(tenants, landlords) {
+  const allUsers = [];
+  (tenants || []).forEach(t => allUsers.push({...t, appRole: 'tenant', name: t.full_name || t.name, userId: t.idTenant}));
+  (landlords || []).forEach(l => allUsers.push({...l, appRole: 'landlord', name: l.name, userId: l.idLandlord}));
+  
+  allUsers.sort((a, b) => a.userId - b.userId); // Simple sort
+
+  const tbody = document.getElementById('usersTable').querySelector('tbody');
+  const dashBody = document.getElementById('dashboardUsersBody');
+  let html = '';
+  let dashHtml = '';
+
+  allUsers.forEach((u, idx) => {
+    const isBlocked = u.is_active === 0;
+    const badgeClass = u.appRole === 'landlord' ? 'badge-green' : 'badge-blue';
+    const statusBadge = isBlocked ? '<span class="badge badge-red">Blocked</span>' : '<span class="badge badge-green">Active</span>';
+    const btnAction = isBlocked ? `<button class="btn btn-amber btn-sm" onclick="unblockUserDynamic('${u.appRole}', ${u.userId})">Unblock</button>` : `<button class="btn btn-danger btn-sm" onclick="blockUserDynamic('${u.appRole}', ${u.userId})">Block</button>`;
+    
+    const row = `<tr>
+      <td><span class="td-muted">${String(idx+1).padStart(3, '0')}</span></td>
+      <td><div style="display:flex;align-items:center;"><div class="td-avatar" style="background:var(--surface2);color:var(--text);">${u.name.substring(0,2).toUpperCase()}</div><div><div class="td-bold">${u.name}</div><div class="td-muted">${u.email}</div></div></div></td>
+      <td><span class="td-muted">${u.phone || 'N/A'}</span></td>
+      <td><span class="badge ${badgeClass}">${u.appRole}</span></td>
+      <td><span class="td-muted">N/A</span></td>
+      <td id="status-${u.appRole}-${u.userId}">${statusBadge}</td>
+      <td><div style="display:flex;gap:4px;">
+        <div id="btn-${u.appRole}-${u.userId}">${btnAction}</div>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="deleteUserDynamic('${u.appRole}', ${u.userId}, '${u.name}')">🗑</button>
+      </div></td>
+    </tr>`;
+    html += row;
+    if(idx < 5) dashHtml += row; // First 5 for dashboard
+  });
+
+  if(tbody) tbody.innerHTML = html;
+  if(dashBody) dashBody.innerHTML = dashHtml;
+  
+  initUsersPagination(); // Re-init pagination
+}
+
+async function blockUserDynamic(role, id) {
+  try {
+    await apiBlockUser(role, id);
+    loadDashboardStats(); // Refresh
+    logAction('BLOCK', 'User', id, 'Blocked by admin');
+    showToast('🚫 User blocked');
+  } catch(e) {}
+}
+
+async function unblockUserDynamic(role, id) {
+  try {
+    await apiBlockUser(role, id); // Toggles it back
+    loadDashboardStats(); // Refresh
+    logAction('UNBLOCK', 'User', id, 'Unblocked by admin');
+    showToast('✅ User unblocked');
+  } catch(e) {}
+}
+
+async function deleteUserDynamic(role, id, name) {
+  if(confirm(`Permanently delete user ${name}? This removes all their properties/bookings.`)) {
+    try {
+      await apiDeleteUser(role, id);
+      loadDashboardStats();
+      logAction('DELETE', 'User', id, `Deleted user ${name}`);
+      showToast('🗑 User deleted');
+    } catch(e) {}
+  }
+}
+
+function loadAdminProperties(properties, landlords) {
+  const tbody = document.getElementById('propsTable').querySelector('tbody');
+  const dashBody = document.getElementById('dashboardPropertiesBody');
+  let html = '';
+  let dashHtml = '';
+
+  (properties || []).forEach((p, idx) => {
+    const landlord = (landlords || []).find(l => l.idLandlord === p.Landlord_idLandlord) || {name: 'Unknown'};
+    const row = `<tr>
+      <td><span class="td-muted">P-${p.idProperty}</span></td>
+      <td><div class="td-bold">${p.title}</div><div class="td-muted">${p.location}</div></td>
+      <td>${landlord.name}</td>
+      <td>${p.property_type}</td>
+      <td>-</td>
+      <td>${p.location}</td>
+      <td><span class="badge badge-green">Active</span></td>
+      <td><button class="btn btn-danger btn-sm btn-icon" onclick="deletePropertyDynamic(${p.idProperty}, '${p.title}')">🗑 Delete</button></td>
+    </tr>`;
+    html += row;
+    if(idx < 5) dashHtml += `<tr><td><div class="td-bold">${p.title}</div><div class="td-muted">${p.location}</div></td><td>${landlord.name}</td><td>${p.property_type}</td><td><span class="td-muted">Active</span></td><td><button class="btn btn-danger btn-sm" onclick="deletePropertyDynamic(${p.idProperty}, '${p.title}')">🗑 Delete</button></td></tr>`;
+  });
+
+  if(tbody) tbody.innerHTML = html;
+  if(dashBody) dashBody.innerHTML = dashHtml;
+}
+
+async function deletePropertyDynamic(id, title) {
+  if(confirm(`Delete property: ${title}?`)) {
+    try {
+      await apiDeleteProperty(id);
+      loadDashboardStats();
+      logAction('DELETE', 'Property', id, `Deleted property ${title}`);
+      showToast('🗑 Property deleted');
+    } catch(e) {}
+  }
+}
+
+function loadAdminRooms(rooms, properties) {
+  const tbody = document.getElementById('roomsTable').querySelector('tbody');
+  if(!tbody) return;
+  let html = '';
+  (rooms || []).forEach(r => {
+    const prop = (properties || []).find(p => p.idProperty === r.Property_idProperty) || {title: 'Unknown'};
+    html += `<tr>
+      <td><span class="td-muted">R-${r.idRoom}</span></td>
+      <td class="td-bold">${r.type} Room</td>
+      <td><span class="td-muted">${prop.title}</span></td>
+      <td>${r.type}</td>
+      <td>$${r.price}</td>
+      <td>${r.size || 0} m²</td>
+      <td><span class="badge badge-green">${r.status || 'available'}</span></td>
+      <td><button class="btn btn-danger btn-sm btn-icon" onclick="deleteRoomDynamic(${r.idRoom})">🗑 Delete</button></td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+async function deleteRoomDynamic(id) {
+  if(confirm('Delete this room?')) {
+    try {
+      await apiDeleteRoom(id);
+      loadDashboardStats();
+      logAction('DELETE', 'Room', id, 'Deleted room');
+      showToast('🗑 Room deleted');
+    } catch(e) {}
+  }
+}
+
+function loadAdminBookings(bookings, tenants, rooms) {
+  const tbody = document.getElementById('bookingsTable').querySelector('tbody');
+  if(!tbody) return;
+  let html = '';
+  (bookings || []).forEach(b => {
+    const tenant = (tenants || []).find(t => t.idTenant === b.Tenant_idTenant) || {full_name: 'Unknown', email: ''};
+    const room = (rooms || []).find(r => r.idRoom === b.Room_idRoom) || {type: 'Unknown'};
+    html += `<tr>
+      <td><span class="td-muted">#B-${b.idBooking}</span></td>
+      <td><div class="td-bold">${tenant.full_name}</div><div class="td-muted">${tenant.email}</div></td>
+      <td>${room.type} Room</td>
+      <td>${new Date(b.check_in).toLocaleDateString()}</td>
+      <td>${new Date(b.check_out).toLocaleDateString()}</td>
+      <td class="td-bold">-</td>
+      <td><span class="badge badge-amber">${b.status}</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="cancelBookingDynamic(${b.idBooking})">Cancel</button></td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+async function cancelBookingDynamic(id) {
+  if(confirm('Cancel this booking?')) {
+    try {
+      await apiUpdateBooking(id, 'cancelled');
+      loadDashboardStats();
+      logAction('UPDATE', 'Booking', id, 'Cancelled booking');
+      showToast('❌ Booking cancelled');
+    } catch(e) {}
+  }
+}
+
+function loadAdminReviews(reviews, tenants, properties) {
+  const container = document.getElementById('adminReviewsContainer');
+  if(!container) return;
+  let html = '';
+  (reviews || []).forEach(r => {
+    const tenant = (tenants || []).find(t => t.idTenant === r.Tenant_idTenant) || {full_name: 'Unknown'};
+    const prop = (properties || []).find(p => p.idProperty === r.Property_idProperty) || {title: 'Unknown'};
+    html += `<div class="review-card">
+      <div class="rc-header">
+        <div><div class="rc-name">${tenant.full_name}</div><div class="rc-prop">${prop.title}</div></div>
+        <div style="text-align:right;"><div class="rc-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div></div>
+      </div>
+      <div class="rc-text">"${r.comment}"</div>
+      <div class="rc-actions">
+        <button class="btn btn-danger btn-sm" onclick="deleteReviewDynamic(${r.idReview})">🗑 Delete</button>
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+  updateReviewCounts();
+}
+
+async function deleteReviewDynamic(id) {
+  if(confirm('Delete this review?')) {
+    try {
+      await apiDeleteReview(id);
+      loadDashboardStats();
+      logAction('DELETE', 'Review', id, 'Deleted review');
+      showToast('🗑 Review deleted');
+    } catch(e) {}
+  }
 }
 
 
