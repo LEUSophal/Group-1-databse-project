@@ -442,6 +442,40 @@ function openRoomDetails(roomId) {
     if (lp) lp.textContent = landlord.phone && landlord.phone !== "N/A" ? landlord.phone : "012999888";
   }
 
+  // Gallery Photos logic
+  const rdpGallery = modal.querySelector(".rdp-gallery");
+  if (rdpGallery) {
+    let images = [];
+    if (room.images) {
+      try {
+        const parsed = JSON.parse(room.images);
+        if (parsed && parsed.length > 0) {
+          images = parsed.map(img => getImageUrl(img));
+        }
+      } catch (e) {}
+    }
+    if (images.length === 0 && prop && prop.image) {
+      images.push(getImageUrl(prop.image));
+    }
+    
+    if (images.length > 0) {
+      rdpGallery.innerHTML = `<img src="${images[0]}" style="width:100%; height:100%; object-fit:contain; background: rgba(0,0,0,0.05); border-radius:20px; cursor:pointer;" onerror="this.style.display='none';">`;
+      // Overlay
+      rdpGallery.innerHTML += `<div style="position:absolute; background:rgba(0,0,0,0.5); color:white; padding:8px 16px; border-radius:20px; font-size:14px; font-weight:600; cursor:pointer; pointer-events:none;">View ${images.length} Photo${images.length > 1 ? 's' : ''} 🔍</div>`;
+      rdpGallery.style.position = 'relative';
+      rdpGallery.onclick = function() {
+        const modalContent = document.getElementById('photoModalContent');
+        if (modalContent) {
+          modalContent.innerHTML = images.map(src => `<img src="${src}" style="max-height:80vh; max-width:100%; object-fit:contain; border-radius:10px; scroll-snap-align: center; flex: 0 0 auto;">`).join('');
+          document.getElementById('photoModal').classList.add('open');
+        }
+      };
+    } else {
+      rdpGallery.innerHTML = `<div style="text-align:center; color:rgba(255,255,255,0.7); font-size:16px;">🛏<br>No photos available</div>`;
+      rdpGallery.onclick = null;
+    }
+  }
+
   const facilitiesContainer = modal.querySelector(".rdp-facilities");
   if (facilitiesContainer) {
     const rawFac = room.facilities || '';
